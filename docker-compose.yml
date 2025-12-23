@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # MongoDB Service
+  mongodb:
+    image: mongo:latest
+    container_name: edu_agent_database
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db # Persists data
+
+  # Node.js Application Service
+  node-app:
+    build: . # Uses the Dockerfile in the current directory
+    container_name: edu_agent_container
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - mongodb # Ensures MongoDB starts first
+    environment:
+      # Pass the connection string to the Node.js app
+      DATABASE_URL: mongodb://mongodb:27017/edu_agent
+      PORT: 3000
+    # Optional: for development, restart automatically
+    restart: always
+
+volumes:
+  mongo_data: # Define the volume for data persistence

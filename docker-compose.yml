@@ -14,16 +14,16 @@ services:
   node-app:
     build: . # Uses the Dockerfile in the current directory
     container_name: edu_agent_container
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run dev
     ports:
       - "3000:3000"
     env_file:
       - .env
     depends_on:
       - mongodb # Ensures MongoDB starts first
-    environment:
-      # Pass the connection string to the Node.js app
-      DATABASE_URL: mongodb://mongodb:27017/edu_agent
-      PORT: 3000
     # Optional: for development, restart automatically
     restart: always
 

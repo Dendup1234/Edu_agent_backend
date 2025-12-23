@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000;
 await connectDB();
 
 app.get('/', (request, response) => {
-	response.send('Hello world');
+	response.send('Hello world form the nodemon');
 })
 
 app.listen(PORT, () => {

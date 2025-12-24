@@ -12,65 +12,113 @@ const RESEND_COOLDOWN_SEC = 60; // wait 60 sec between resends
 const MAX_RESENDS = 5;        // max 5 resends per OTP window
 
 //SEND and resend OTP
-export const sendOrResendOtp = async (req, res) => {
+export const sendOtp = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "name, email, password are required" });
+      return res
+        .status(400)
+        .json({ message: "name, email, password are required" });
     }
 
     const normalizedEmail = email.toLowerCase().trim();
 
     // If already registered, stop
     const existingUser = await User.findOne({ email: normalizedEmail });
-    if (existingUser) return res.status(409).json({ message: "Email already registered" });
+    if (existingUser)
+      return res.status(409).json({ message: "Email already registered" });
 
+    // If already pending, treat as resend (force them to use resend endpoint)
     const pending = await PendingSignup.findOne({ email: normalizedEmail });
-
-    // resend rules if pending exists
     if (pending) {
-      const secondsSinceLast = (Date.now() - pending.lastSentAt.getTime()) / 1000;
-
-      if (secondsSinceLast < RESEND_COOLDOWN_SEC) {
-        return res.status(429).json({
-          message: `Please wait ${Math.ceil(RESEND_COOLDOWN_SEC - secondsSinceLast)} seconds before resending OTP.`,
-        });
-      }
-
-      if (pending.resendCount >= MAX_RESENDS) {
-        return res.status(429).json({ message: "Too many OTP requests. Please try again later." });
-      }
+      return res.status(409).json({
+        message: "OTP already sent. Please use resend OTP endpoint.",
+      });
     }
 
-    // generate OTP + hash
     const otp = crypto.randomInt(1000, 9999).toString();
     const otpHash = await bcrypt.hash(otp, 10);
-
-    // hash password once and store temporarily
     const passwordHash = await bcrypt.hash(password, 12);
 
-    // upsert pending signup
-    await PendingSignup.findOneAndUpdate(
-      { email: normalizedEmail },
-      {
-        email: normalizedEmail,
-        name,
-        passwordHash,
-        otpHash,
-        expiresAt: new Date(Date.now() + OTP_EXP_MIN * 60 * 1000),
-        lastSentAt: new Date(),
-        resendCount: pending ? pending.resendCount + 1 : 0,
-        verified: false,
-      },
-      { upsert: true, new: true }
-    );
+    await PendingSignup.create({
+      email: normalizedEmail,
+      name,
+      passwordHash,
+      otpHash,
+      expiresAt: new Date(Date.now() + OTP_EXP_MIN * 60 * 1000),
+      lastSentAt: new Date(),
+      resendCount: 0,
+      verified: false,
+    });
 
     await sendOtpEmail(normalizedEmail, otp);
 
-    return res.json({ message: pending ? "OTP resent to email" : "OTP sent to email" });
+    return res.json({ message: "OTP sent to email" });
   } catch (err) {
-    console.error("SEND/RESEND OTP ERROR:", err);
+    console.error("SEND OTP ERROR:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+//resend otp
+export const resendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "email is required" });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // If already registered, stop
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser)
+      return res.status(409).json({ message: "Email already registered" });
+
+    const pending = await PendingSignup.findOne({ email: normalizedEmail });
+    if (!pending) {
+      return res.status(404).json({
+        message: "No pending signup found. Please sign up again.",
+      });
+    }
+
+    // resend rules
+    const secondsSinceLast =
+      (Date.now() - pending.lastSentAt.getTime()) / 1000;
+
+    if (secondsSinceLast < RESEND_COOLDOWN_SEC) {
+      return res.status(429).json({
+        message: `Please wait ${Math.ceil(
+          RESEND_COOLDOWN_SEC - secondsSinceLast
+        )} seconds before resending OTP.`,
+      });
+    }
+
+    if (pending.resendCount >= MAX_RESENDS) {
+      return res.status(429).json({
+        message: "Too many OTP requests. Please try again later.",
+      });
+    }
+
+    const otp = crypto.randomInt(1000, 9999).toString();
+    const otpHash = await bcrypt.hash(otp, 10);
+
+    // update pending signup (keep name/passwordHash from existing)
+    pending.otpHash = otpHash;
+    pending.expiresAt = new Date(Date.now() + OTP_EXP_MIN * 60 * 1000);
+    pending.lastSentAt = new Date();
+    pending.resendCount = pending.resendCount + 1;
+    pending.verified = false;
+
+    await pending.save();
+
+    await sendOtpEmail(normalizedEmail, otp);
+
+    return res.json({ message: "OTP resent to email" });
+  } catch (err) {
+    console.error("RESEND OTP ERROR:", err);
     return res.status(500).json({ message: "Internal server error" });
   }
 };

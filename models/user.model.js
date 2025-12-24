@@ -1,40 +1,40 @@
 import mongoose from "mongoose";
 
-export const userSchema = new mongoose.Schema(
-	{
-		name: {
-			type: String,
-			required: true,
-			trim: true,
-			minlength: 2,
-			maxlength: 60,
-		},
-		email: {
-			type: String,
-			required: true,
-			unique: true,
-			lowercase: true,
-			trim: true,
-			match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
-		},
-		password: {
-			type: String,
-			required: true,
-			minlength: 6,
-			select: false, // by default, don't return password in queries
-		},
-		isVerified: {
-			type: Boolean,
-			default: false,
-		},
-		verificationCode: String
-	},
-	{ timestamps: true },
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 60,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      select: false,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationCode: String,
+  },
+  { timestamps: true }
 );
 
-mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
 
-export const gUserSchema = new mongoose.Schema(
+const gUserSchema = new mongoose.Schema(
   {
     googleId: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
@@ -43,4 +43,6 @@ export const gUserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-mongoose.model("gUser", gUserSchema);
+const gUser = mongoose.model("GUser", gUserSchema);
+
+export { User, gUser };

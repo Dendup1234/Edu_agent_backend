@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
 import fetch from "node-fetch";
-import gUser from "../models/user.model"
+import gUser from "../models/user.model.js"
 
 const GOOGLE_OAUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";

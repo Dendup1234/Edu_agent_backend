@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
 import fetch from "node-fetch";
-import gUser from "../models/user.model.js"
+import { gUser } from "../models/user.model.js";
 
 const GOOGLE_OAUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -63,10 +63,10 @@ export const handleGoogleCallback = async (req, res) => {
     const payload = ticket.getPayload();
     if (!payload) throw new Error("Invalid token payload");
 
-    let user = await gUser.findOne({ googleId: payload.sub });
+    let user = await GUser.findOne({ googleId: payload.sub });
 
     if (!user) {
-      user = await gUser.create({
+      user = await GUser.create({
         googleId: payload.sub,
         email: payload.email,
         name: payload.name,

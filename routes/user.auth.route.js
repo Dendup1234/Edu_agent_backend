@@ -1,12 +1,12 @@
 import express from "express";
-import { login, register } from "../controllers/user.auth.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
-import { redirectToGoogle, handleGoogleCallback } from "../controllers/googleAuthController.js";
-
+import { redirectToGoogle, handleGoogleCallback } from "../controllers/oAuth.js";
+import { sendOrResendOtp, verifyOtp, login } from "../controllers/auth.controller.js"
 const router = express.Router();
 
+router.post("/send-otp", sendOrResendOtp);
+router.post("/verify-otp", verifyOtp);
 router.post("/login", login);
-router.post("/register", register);
 router.get("/profile", protect, (req, res) => {
 	res.json({
 		message: "Protected route",
@@ -15,7 +15,7 @@ router.get("/profile", protect, (req, res) => {
 });
 
 router.get("/", redirectToGoogle);
-router.get("/callback", handleGoogleCallback);
+router.get("/google/callback", handleGoogleCallback);
 
 export default router;
 

@@ -18,10 +18,6 @@ const PORT = process.env.PORT || 3000;
 // connect DB before server  starts
 await connectDB();
 
-app.get('/', (request, response) => {
-	response.send('Hello world form the nodemon');
-})
-
 app.listen(PORT, () => {
 	console.log(`Server is running on PORT ${PORT}`);
 });

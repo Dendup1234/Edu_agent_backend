@@ -37,36 +37,28 @@ export const handleGoogleCallback = async (req, res) => {
   stateStore.delete(state);
 
   try {
-    const tokenRes = await fetch(GOOGLE_TOKEN_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        code,
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: process.env.GOOGLE_CALLBACK_URL,
-        grant_type: "authorization_code",
-      }),
+
+    const { tokens } = await client.getToken({
+      code,
+      codeVerifier,
     });
 
-    if (!tokenRes.ok) throw new Error("Token exchange failed");
+    if (!tokens.id_token) {
+      throw new Error("Missing ID token");
+    }
 
-    const { id_token } = await tokenRes.json();
-
-    if (!id_token) throw new Error("Missing ID token");
-
-    const ticket = await client.verifyIdToken({
-      idToken: id_token,
-      audience: process.env.GOOGLE_CLIENT_ID,
+     const ticket = await client.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: process.env.GOOGLE_CLIENT_ID
     });
 
     const payload = ticket.getPayload();
     if (!payload) throw new Error("Invalid token payload");
 
-    let user = await GUser.findOne({ googleId: payload.sub });
+    let user = await gUser.findOne({ googleId: payload.sub });
 
     if (!user) {
-      user = await GUser.create({
+      user = await gUser.create({
         googleId: payload.sub,
         email: payload.email,
         name: payload.name,

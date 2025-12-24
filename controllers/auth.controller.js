@@ -87,7 +87,7 @@ export const verifyOtp = async (req, res) => {
 		}
 
 		// 3) find OTP record
-		const record = await Otp.findOne({ email: normalizedEmail, type: register });
+		const record = await Otp.findOne({ email: normalizedEmail, type: "register" });
 		if (!record) {
 			return res.status(400).json({ message: "OTP not found. Please request a new OTP." });
 		}

@@ -48,12 +48,14 @@ export const sendOrResendOtp = async (req, res) => {
 			{
 				email: normalizedEmail,
 				otpHash,
+				type: "register",
 				expiresAt: new Date(Date.now() + OTP_EXP_MIN * 60 * 1000),
 				lastSentAt: new Date(),
 				resendCount: existing ? existing.resendCount + 1 : 0,
 			},
 			{ upsert: true, new: true }
-		);
+			);
+
 
 		await sendOtpEmail(normalizedEmail, otp);
 

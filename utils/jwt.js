@@ -1,18 +1,19 @@
-import { SignJWT, jwtVerify } from 'jose';
+import jwt from "jsonwebtoken";
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+export const signToken = (payload) => {
+	if (!process.env.JWT_SECRET) {
+		throw new Error("JWT_SECRET is not defined");
+	}
 
-//Signing the token
-export const signToken = async (payload) => {
-	return await new SignJWT(payload)
-		.setProtectedHeader({ alg: 'HS256' })
-		.setIssuedAt()
-		.sign(secret);
+	return jwt.sign(payload, process.env.JWT_SECRET, {
+		expiresIn: "15m",
+	});
 };
 
-// Verifying the token
-export const verifyToken = async (token) => {
-	const { payload } = await jwtVerify(token, secret);
-	return payload;
-};
+export const verifyToken = (token) => {
+	if (!process.env.JWT_SECRET) {
+		throw new Error("JWT_SECRET is not defined");
+	}
 
+	return jwt.verify(token, process.env.JWT_SECRET);
+};

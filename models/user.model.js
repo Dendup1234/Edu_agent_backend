@@ -23,6 +23,11 @@ const userSchema = new mongoose.Schema(
 			minlength: 6,
 			select: false, // by default, don't return password in queries
 		},
+		isVerified: {
+			type: Boolean,
+			default: false,
+		},
+		verificationCode: String
 	},
 	{ timestamps: true },
 );

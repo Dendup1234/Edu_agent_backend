@@ -1,6 +1,5 @@
 import express from "express";
 import { protect } from "../middlewares/auth.middleware.js";
-import { redirectToGoogle, handleGoogleCallback } from "../controllers/oAuth.js";
 import { sendOrResendOtp, verifyOtp, login, sendPasswordResetOtp, verifyPasswordResetOtp, setNewPassword } from "../controllers/auth.controller.js"
 const router = express.Router();
 
@@ -16,9 +15,6 @@ router.get("/profile", protect, (req, res) => {
 router.post("/password-reset/send-otp", sendPasswordResetOtp);   
 router.post("/password-reset/verify-otp", verifyPasswordResetOtp);
 router.post("/password-reset/set-new", setNewPassword);         
-
-router.get("/", redirectToGoogle);
-router.get("/google/callback", handleGoogleCallback);
 
 export default router;
 

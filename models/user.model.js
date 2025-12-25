@@ -43,6 +43,6 @@ const gUserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const gUser = mongoose.model("GUser", gUserSchema);
+const gUser = mongoose.model("gUser", gUserSchema);
 
 export { User, gUser };

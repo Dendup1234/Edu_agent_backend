@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js'
 import userRoute from "./routes/user.auth.route.js";
 import cors from 'cors';
-import {gUser} from "./models/user.model.js";
+import User from "./models/user.model.js";
 import { OAuth2Client } from "google-auth-library";
 import crypto from 'crypto';
 
@@ -84,10 +84,10 @@ app.get("/google/callback", async (req, res) => {
     const payload = ticket.getPayload();
     if (!payload) throw new Error("Invalid token payload");
 
-    let user = await gUser.findOne({ googleId: payload.sub });
+    let user = await User.findOne({ googleId: payload.sub });
 
     if (!user) {
-      user = await gUser.create({
+      user = await User.create({
         googleId: payload.sub,
         email: payload.email,
         name: payload.name
@@ -103,10 +103,6 @@ app.get("/google/callback", async (req, res) => {
 
 // connect DB before server  starts
 await connectDB();
-
-app.get('/', (request, response) => {
-	response.send('Hello world form the nodemon');
-})
 
 app.listen(PORT, () => {
 	console.log(`Server running on http://localhost:${PORT}`);

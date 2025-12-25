@@ -17,32 +17,25 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
     },
+
     password: {
       type: String,
-      required: true,
-      minlength: 6,
-      select: false,
+      minlength: 8
     },
+
     isVerified: {
       type: Boolean,
       default: false,
     },
     verificationCode: String,
+
+    googleId: {
+      type: String
+    },
   },
   { timestamps: true }
 );
 
 const User = mongoose.model("User", userSchema);
 
-const gUserSchema = new mongoose.Schema(
-  {
-    googleId: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
-    name: String,
-  },
-  { timestamps: true }
-);
-
-const gUser = mongoose.model("gUser", gUserSchema);
-
-export { User, gUser };
+export default User;

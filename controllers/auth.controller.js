@@ -33,7 +33,7 @@ export const sendOtp = async (req, res) => {
     const pending = await PendingSignup.findOne({ email: normalizedEmail });
     if (pending) {
       return res.status(409).json({
-        message: "OTP already sent. Please use resend OTP endpoint.",
+        message: "OTP already sent please wait 5 min to token to expire",
       });
     }
 
@@ -46,7 +46,7 @@ export const sendOtp = async (req, res) => {
       name,
       passwordHash,
       otpHash,
-      expiresAt: new Date(Date.now() + OTP_EXP_MIN * 60 * 1000),
+      expiresAt: new Date(Date.now() + OTP_EXP_MIN * 60 * 1000), // pandingsignup otp get expired at 5 mins
       lastSentAt: new Date(),
       resendCount: 0,
       verified: false,

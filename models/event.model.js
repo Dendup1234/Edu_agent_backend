@@ -1,57 +1,188 @@
 import mongoose from "mongoose";
-const EventSchema = new mongoose.Schema(
+
+//Event schema
+const eventSchema = new mongoose.Schema(
   {
     // Basic info
-    title: { type: String, required: true, trim: true, index: true },
-    subtitle: { type: String, trim: true }, 
-    bannerImageUrl: { type: String, trim: true },
-    description: { type: String, trim: true }, // "About" section (optional)
+    title: { type: String, required: true},
+    subtitle: { type: String }, 
+    bannerImageUrl: { type: String },
+    description: { type: String },
 
     // Type & pricing
     eventType: { type: String, enum: ["free", "paid"], default: "free", index: true },
 
-    // Capacity / tickets
-    totalSeats: { type: Number, min: 0 }, // e.g. 15
-    totalTickets: { type: Number, min: 0 }, // if different from seats
-    registeredCount: { type: Number, default: 0, min: 0 }, // cached for quick UI display
-
+    // Capacity
+    totalSeats: { 
+        type: Number, 
+        min: 0 
+    },
+    totalTickets: { 
+        type: Number, 
+        min: 0 
+    },
+    registeredCount: { 
+        type: Number,
+        default: 0, 
+        min: 0 },
     // Date & time
-    startAt: { type: Date, required: true, index: true },
-    endAt: { type: Date, required: true },
-    timezone: { type: String, default: "Asia/Thimphu", trim: true }, // BST
+    startAt: { 
+        type: Date, 
+        required: true, 
+        index: true 
+    },
+    endAt: { 
+        type: Date, 
+        required: true 
+    },
+    timezone: { 
+        type: String, 
+        default: "Asia/Thimphu" 
+    },
 
     // Registration window
     registration:[{
-        feeAmount: { type: Number, min: 0, default: 0 }, // e.g. 100
-        currency: { type: String, default: "USD", trim: true }, // or "BTN"
-        registrationDeadline: { type: Date, index: true },
-        isRegistrationOpen: { type: Boolean, default: true, index: true },
+        feeAmount: { 
+            type: Number, 
+            min: 0, 
+            default: 0 
+        },
+        currency: { 
+            type: String, 
+            default: "USD" 
+        },
+        registrationDeadline: { 
+            type: Date, 
+            index: true 
+        },
+        isRegistrationOpen: { 
+            type: Boolean, 
+            default: true, 
+            index: true },
 
     }      
     ],
-    // Location (supports onsite + online)
+    // Location 
     location: {
-      mode: { type: String, enum: ["onsite", "online", "hybrid"], default: "onsite", index: true },
-      venueName: { type: String, trim: true }, 
-      addressLine: { type: String, trim: true },
-      meetingUrl: { type: String, trim: true },
-      mapUrl: { type: String, trim: true },
+      mode: { 
+        type: String, 
+        enum: ["onsite", "online", "hybrid"], 
+        default: "onsite", 
+        index: true 
     },
-
-    // Sections shown in your UI
-    about: { type: String, trim: true }, // About
-    whoShouldAttend: { type: String, trim: true }, // Who should attend
+      venueName: { 
+        type: String 
+    }, 
+      addressLine: { 
+        type: String 
+    },
+      meetingUrl: { 
+        type: String 
+    },
+      mapUrl: { 
+        type: String 
+    },
+    },
+    about: { 
+        type: String 
+    }, 
+    whoShouldAttend: { 
+        type: String 
+    }, 
 
     // Agenda as a list (bullet points)
     agendaItems: [
       {
-        title: { type: String, required: true, trim: true }, // "Visa Documentation Guidance"
-        startAt: { type: Date }, 
-        endAt: { type: Date }, 
-        speaker: { type: String, trim: true }, 
-        notes: { type: String, trim: true }, 
+        title: { 
+            type: String, 
+            required: true 
+        },
+        startAt: { 
+            type: Date 
+        }, 
+        endAt: {
+             type: Date 
+            }, 
+        speaker: { 
+            type: String 
+        }, 
+        notes: { 
+            type: String 
+        }, 
       },
     ],
   },
   { timestamps: true }
 );
+
+///Exporting the event model
+export const Event = mongoose.model("Event",eventSchema);
+
+// Event registration module
+const eventRegistrationSchema = mongoose.Schema({
+    eventId: { 
+        type: Types.ObjectId, 
+        ref: "Event", 
+        required: true },
+    studentId: { 
+        type: Types.ObjectId, 
+        ref: "StudentProfile", 
+        required: true},
+
+    status: {
+      type: String,
+      enum: ["registered", "cancelled", "attended", "no_show"],
+      default: "registered",
+    },
+
+    // Payment (only for paid events)
+    payment: {
+      required: { 
+        type: Boolean, 
+        default: false },
+      amount: { 
+        type: Number, 
+        min: 0 },
+      currency: { 
+        type: String
+    },
+      status: { 
+        type: String, 
+        enum: ["unpaid", "pending", "paid", "failed", "refunded"], 
+        default: "unpaid" 
+    },
+      provider: { 
+        type: String
+    },
+      reference: { 
+        type: String
+    }, 
+      paidAt: { 
+        type: Date 
+    },
+    },
+
+    registeredAt: {
+         type: Date, 
+         default: Date.now 
+    },
+    cancelledAt: { 
+        type: Date 
+    },
+    attendedAt: { 
+        type: Date 
+    },
+
+    //Stores ticket/seat info if you allocate seats
+    ticketCode: { 
+        type: String
+     },
+    seatNumber: {
+         type: String 
+     },
+},
+{timestamp: true}
+);
+
+//Exporting the event registered
+export const EventRegistered = mongoose.model('EventRegistered',eventRegistrationSchema);

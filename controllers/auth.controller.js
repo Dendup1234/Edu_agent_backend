@@ -1,10 +1,10 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import User from "../models/user.model.js";
-import Otp from "../models/otp.model.js";
 import { sendOtpEmail } from "../utils/sendEmail.js";
 import { signToken, verifyToken } from "../utils/jwt.js"
 import PendingSignup from "../models/pendingSignup.model.js"
+import pendingSignupModel from "../models/pendingSignup.model.js";
 
 // Variables for the resend otp
 const OTP_EXP_MIN = 5;        // expires in 5 mins
@@ -220,7 +220,7 @@ export const sendPasswordResetOtp = async (req, res) => {
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) return res.status(200).json({ message: "If email exists, OTP sent" }); // prevent enumeration
 
-    const existing = await Otp.findOne({ email: normalizedEmail, type: "reset" });
+    const existing = await pendingSignupModel.findOne({ email: normalizedEmail, type: "reset" });
 
     // resend rules
     if (existing) {
@@ -240,7 +240,7 @@ export const sendPasswordResetOtp = async (req, res) => {
     const otp = crypto.randomInt(1000, 9999).toString();
     const otpHash = await bcrypt.hash(otp, 10);
 
-    await Otp.findOneAndUpdate(
+    await pendingSignupModel.findOneAndUpdate(
       { email: normalizedEmail, type: "reset" },
       {
         email: normalizedEmail,
@@ -270,7 +270,7 @@ export const verifyPasswordResetOtp = async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    const record = await Otp.findOne({ email: normalizedEmail, type: "reset" });
+    const record = await pendingSignupModel.findOne({ email: normalizedEmail, type: "reset" });
     if (!record) return res.status(400).json({ message: "OTP not found or expired" });
 
     if (record.expiresAt.getTime() < Date.now()) {

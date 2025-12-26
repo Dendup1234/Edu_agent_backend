@@ -7,14 +7,10 @@ const studentSchema = new mongoose.Schema({
         required: true,
         unique: true,
         lowercase: true,
-        trim: true,
         match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
     },
     phone: {
-        type:String,
-        trim: true, 
-        index: true, 
-        sparse: true 
+        type:String,  
     },
     password:{
         type: String,
@@ -42,23 +38,20 @@ const studentProfile = new mongoose.Schema({
         ref: "Student",
         required: true,
         unique: true, 
-        index: true
     },
     dob: { 
         type: Date 
     },
     nationality: { 
-        type: String, trim: true 
+        type: String 
     },
     education:[
         {
             qualification:{
-                type:String,
-                trim: true
+                type:String
             },
             institude:{
-                type: String,
-                trim: true
+                type: String
             },
             year:{
                 type: Number

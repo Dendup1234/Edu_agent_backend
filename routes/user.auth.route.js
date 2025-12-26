@@ -18,8 +18,5 @@ router.post("/password-reset/send-otp", sendPasswordResetOtp);
 router.post("/password-reset/verify-otp", verifyPasswordResetOtp);
 router.post("/password-reset/set-new", setNewPassword);         
 
-router.get("/", redirectToGoogle);
-router.get("/google/callback", handleGoogleCallback);
-
 export default router;
 

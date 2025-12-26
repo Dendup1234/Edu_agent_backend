@@ -17,20 +17,17 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
     },
+
     password: {
       type: String,
-      required: true,
-      minlength: 6,
-      select: false,
+      minlength: 8
     },
+
     isVerified: {
       type: Boolean,
       default: false,
     },
     verificationCode: String,
-  },
-  { timestamps: true }
-);
 
 const User = mongoose.model("User", userSchema);
 
@@ -43,6 +40,6 @@ const gUserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const gUser = mongoose.model("GUser", gUserSchema);
+const User = mongoose.model("User", userSchema);
 
-export { User, gUser };
+export default User;

@@ -101,7 +101,6 @@ app.get("/google/callback", async (req, res) => {
   }
 });
 
-// connect DB before server  starts
 await connectDB();
 
 app.listen(PORT, () => {

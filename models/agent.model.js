@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const {Schema,Types}  = mongoose;
 
-const agentSchema = new mongoose.Schema(
+const agentSchema = new Schema(
   {
     name: { 
         type: String, 
@@ -11,7 +11,6 @@ const agentSchema = new mongoose.Schema(
     email: { 
         type: String, 
         required: true, 
-        unique: true 
     },
 
     password: { 

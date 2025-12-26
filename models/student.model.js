@@ -5,10 +5,6 @@ const StudentSchema = new Schema(
   {
     email: {
       type: String,
-      required: true,
-      lowercase: true,
-      trim: true,
-      match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
     },
 
     phone: {
@@ -35,7 +31,7 @@ const StudentSchema = new Schema(
 
     dob: { type: Date },
     nationality: { type: String, trim: true },
-    
+
     education: [
         {
           qualification: { type: String, trim: true },

@@ -11,10 +11,6 @@ const mentorSchema = mongoose.Schema({
     },
      email:{
         type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
-        match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
     },
     password:{
         type: String,
@@ -92,7 +88,6 @@ const mentorConnectionSchema = new mongoose.Schema({
 export const MentorConnection = mongoose.model('MentorConnection',mentorConnectionSchema)
 
 //Mentor Appointment Schema
-
 const appointmentSchema = mongoose.Schema({
     mentorId: {
         type: Schema.Types.ObjectId,

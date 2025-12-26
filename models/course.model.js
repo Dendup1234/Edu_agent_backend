@@ -1,4 +1,4 @@
-import mongoose, { Types } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const CourseSchema = new mongoose.Schema(
   {
@@ -6,7 +6,7 @@ const CourseSchema = new mongoose.Schema(
 
     //Course provided by the university
     university: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "University",
       required: true
     },
@@ -56,8 +56,8 @@ export default mongoose.model("Course", CourseSchema);
 //Course Registered Schema
 const courseRegistrationSchema = new mongoose.Schema({
     studentid:{
-        type: Types.ObjectId(),
-        ref: "StudentProfile",
+        type: Schema.Types.ObjectId,
+        ref: "Student",
         required: true
     },
     courseid:{

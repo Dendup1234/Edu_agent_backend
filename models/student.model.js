@@ -1,66 +1,52 @@
 import mongoose from "mongoose";
+const { Schema } = mongoose;
 
-//Creating the student schema for the auth
-const studentSchema = new mongoose.Schema({
-    email:{
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
-        match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
+const StudentSchema = new Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+      match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
     },
+
     phone: {
-        type:String,  
+      type: String,
+      trim: true,
     },
-    password:{
-        type: String,
-        required: true,
-        minlength: 6,
-        select: false,
-    },
-    isActive:{
-        type: Boolean,
-        default: true
-    },
-},
-{timestamps:true}
-);
 
-studentSchema.index({ email: 1 }, { unique: true, partialFilterExpression: { email: { $type: "string" } } });
-studentSchema.index({ phone: 1 }, { unique: true, partialFilterExpression: { phone: { $type: "string" } } });
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      select: false,
+    },
 
-export const Student = mongoose.model("Student",studentSchema);
+    name: {
+      type: String,
+      trim: true,
+    },
 
-//For the student profile
-const studentProfile = new mongoose.Schema({
-    userid:{
-        type: Types.ObjectId,
-        ref: "Student",
-        required: true,
-        unique: true, 
+    isActive: {
+      type: Boolean,
+      default: true,
     },
-    dob: { 
-        type: Date 
-    },
-    nationality: { 
-        type: String 
-    },
-    education:[
+
+    dob: { type: Date },
+    nationality: { type: String, trim: true },
+    
+    education: [
         {
-            qualification:{
-                type:String
-            },
-            institude:{
-                type: String
-            },
-            year:{
-                type: Number
-            },
-        }
-    ]
-},
-{timestamp: true}
+          qualification: { type: String, trim: true },
+          institute: { type: String, trim: true },
+          year: { type: Number },
+        },
+      ],
+    lastActiveAt: { type: Date, index: true },
+  },
+  { timestamps: true }
 );
 
-export const StudentProfile = mongoose.model("StudentProfile",studentProfile);
 
+export const Student = mongoose.model("Student", StudentSchema);

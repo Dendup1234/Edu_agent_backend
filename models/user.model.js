@@ -29,9 +29,13 @@ const userSchema = new mongoose.Schema(
     },
     verificationCode: String,
 
-    googleId: {
-      type: String
-    },
+const User = mongoose.model("User", userSchema);
+
+const gUserSchema = new mongoose.Schema(
+  {
+    googleId: { type: String, required: true, unique: true,sparse: true, },
+    email: { type: String, required: true, unique: true },
+    name: String,
   },
   { timestamps: true }
 );

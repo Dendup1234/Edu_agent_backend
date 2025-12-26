@@ -1,9 +1,11 @@
 import express from "express";
 import { protect } from "../middlewares/auth.middleware.js";
-import { sendOrResendOtp, verifyOtp, login, sendPasswordResetOtp, verifyPasswordResetOtp, setNewPassword } from "../controllers/auth.controller.js"
+import { redirectToGoogle, handleGoogleCallback } from "../controllers/oAuth.js";
+import { sendOtp,resendOtp, verifyOtp, login, sendPasswordResetOtp, verifyPasswordResetOtp, setNewPassword } from "../controllers/auth.controller.js"
 const router = express.Router();
 
-router.post("/send-otp", sendOrResendOtp);
+router.post("/send-otp", sendOtp);
+router.post("/resend-otp", resendOtp);
 router.post("/verify-otp", verifyOtp);
 router.post("/login", login);
 router.get("/profile", protect, (req, res) => {

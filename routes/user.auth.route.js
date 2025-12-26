@@ -1,6 +1,5 @@
 import express from "express";
 import { protect } from "../middlewares/auth.middleware.js";
-import { redirectToGoogle, handleGoogleCallback } from "../controllers/oAuth.js";
 import { sendOtp,resendOtp, verifyOtp, login, sendPasswordResetOtp, verifyPasswordResetOtp, setNewPassword } from "../controllers/auth.controller.js"
 const router = express.Router();
 

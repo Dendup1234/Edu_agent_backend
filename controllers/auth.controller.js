@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { User } from "../models/user.model.js";
+import User from "../models/user.model.js";
 import Otp from "../models/otp.model.js";
 import { sendOtpEmail } from "../utils/sendEmail.js";
 import { signToken, verifyToken } from "../utils/jwt.js"

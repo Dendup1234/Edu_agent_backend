@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 //Event schema
 const eventSchema = new mongoose.Schema(
@@ -121,12 +121,12 @@ export const Event = mongoose.model("Event",eventSchema);
 // Event registration module
 const eventRegistrationSchema = mongoose.Schema({
     eventId: { 
-        type: Types.ObjectId, 
+        type: Schema.Types.ObjectId, 
         ref: "Event", 
         required: true },
     studentId: { 
-        type: Types.ObjectId, 
-        ref: "StudentProfile", 
+        type: Schema.Types.ObjectId, 
+        ref: "Student", 
         required: true},
 
     status: {

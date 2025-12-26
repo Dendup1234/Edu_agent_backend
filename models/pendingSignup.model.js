@@ -12,6 +12,7 @@ const pendingSignupSchema = new mongoose.Schema(
     expiresAt: { type: Date, required: true },
     resendCount: { type: Number, default: 0 },
     lastSentAt: { type: Date, default: Date.now },
+    type: { type: String, enum: ["register", "reset"], required: true },
 
     // optional: anti-abuse tracking
     verified: { type: Boolean, default: false }

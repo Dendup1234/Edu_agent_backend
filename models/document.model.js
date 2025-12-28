@@ -37,10 +37,11 @@ const DocumentSchema = new mongoose.Schema(
     reviewStatus: {
       verified: { type: Boolean, default: false },
       verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Agent" },
-      verifiedAt: Date 
+      verifiedAt: Date,
     },
-    isResubmitted: { type: Boolean, default: false }
-
+    isResubmitted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
+
+export const Document = mongoose.model("Document", documentSchema);

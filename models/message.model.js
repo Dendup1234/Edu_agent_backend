@@ -4,7 +4,7 @@ const messageSchema = new mongoose.Schema({
     User: {
       type: String,
       required: true,
-      enum: ["Student", "Mentor", "Admin"],
+      enum: ["Student", "Mentor","Agent"],
       index: true,
     },
   sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

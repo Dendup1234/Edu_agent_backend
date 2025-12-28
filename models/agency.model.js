@@ -67,4 +67,4 @@ const agencySchema = new Schema(
   { timestamps: true}
 );
 
-export const Agency = mongoose.model('Agency',agencySchema);
+export const Agency = mongoose.model('Agency', agencySchema);

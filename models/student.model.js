@@ -33,16 +33,15 @@ const StudentSchema = new Schema(
     nationality: { type: String, trim: true },
 
     education: [
-        {
-          qualification: { type: String, trim: true },
-          institute: { type: String, trim: true },
-          year: { type: Number },
-        },
-      ],
+      {
+        qualification: { type: String, trim: true },
+        institute: { type: String, trim: true },
+        year: { type: Number },
+      },
+    ],
     lastActiveAt: { type: Date, index: true },
   },
   { timestamps: true }
 );
-
 
 export const Student = mongoose.model("Student", StudentSchema);

@@ -1,45 +1,56 @@
 import mongoose from "mongoose";
-const { Schema } = mongoose;
 
 const StudentSchema = new Schema(
   {
     email: {
-      type: String,
+      type: String
     },
 
     phone: {
       type: String,
-      trim: true,
+      trim: true
     },
 
     password: {
       type: String,
-      required: true,
-      minlength: 6,
-      select: false,
+      select: false
+    },
+
+    emailVerified: {
+      type: Boolean,
+      default: false
+    },
+
+    googleId: {
+      type: String
     },
 
     name: {
       type: String,
-      trim: true,
+      trim: true
     },
 
     isActive: {
       type: Boolean,
-      default: true,
+      default: true
     },
 
-    dob: { type: Date },
-    nationality: { type: String, trim: true },
+    dob: { 
+      type: Date 
+    },
 
+    nationality: { 
+      type: String, 
+      trim: true 
+    },
+    
     education: [
         {
           qualification: { type: String, trim: true },
           institute: { type: String, trim: true },
           year: { type: Number },
         },
-      ],
-    lastActiveAt: { type: Date, index: true },
+      ]
   },
   { timestamps: true }
 );

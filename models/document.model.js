@@ -1,17 +1,15 @@
 import mongoose from "mongoose";
 
-const { Schema, Types } = mongoose;
-
-const documentSchema = new Schema(
+const DocumentSchema = new mongoose.Schema(
   {
     uploadedBy: {
-      type: Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
-      required: true,
+      required: true
     },
     agency: {
-      type: Types.ObjectId,
-      ref: "Agency",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Agency"
     },
     documentType: {
       type: String,
@@ -19,22 +17,22 @@ const documentSchema = new Schema(
     },
     name: {
       type: String,
-      required: true,
+      required: true
     },
     fileUrl: {
       type: String,
-      required: true,
+      required: true
     },
     fileSize: {
-      type: Number,
+      type: Number 
     },
     fileType: {
-      type: String,
+      type: String
     },
     status: {
       type: String,
       enum: ["pending", "approved", "rejected", "needs_revision"],
-      default: "pending",
+      default: "pending"
     },
     reviewStatus: {
       verified: { type: Boolean, default: false },

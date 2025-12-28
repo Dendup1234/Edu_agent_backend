@@ -35,18 +35,16 @@ const agentSchema = new Schema(
       default: "no-role",
     },
 
-    assignedStudents: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Student",
-      },
-    ],
+    isActive: {
+      type: Boolean,
+      default: true
+    },
 
     status: {
       type: String,
-      enum: ["active", "inactive", "on_leave", "terminated"],
-      default: "active",
-    },
+      enum: ["active", "inactive", "on_leave"],
+      default: "active"
+    }
   },
   { timestamps: true }
 );

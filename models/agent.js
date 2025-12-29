@@ -18,6 +18,10 @@ const agentSchema = new Schema(
       required: true,
     },
 
+    googleId: {
+      type: String
+    },
+
     isVerified: {
       type: Boolean,
       default: false,

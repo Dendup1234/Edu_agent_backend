@@ -17,17 +17,11 @@ const adminSchema = new Schema(
     password: {
       type: String,
       required: true,
+      role: {
     },
-    role: {
       type: String,
       enum: ["superadmin"],
       default: "superadmin",
-    },
-    //Writing a permission such as read and write or only read access by the admin
-    permissions: {
-      type: [String],
-      // blank for superadmin where there is no permission retriction
-      default: [],
     },
   },
 

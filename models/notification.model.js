@@ -5,16 +5,13 @@ const notificationSchema = new Schema({
 	// User type for the notification
 	userType: {
 		type: String,
-		required: true,
 		enum: ["Student", "Mentor", "Agent"],
-		index: true,
 	},
 
 	receiverId: {
 		type: Types.ObjectId,
-		required: true,
 		refPath: "userType",
-		index: true,
+
 	},
 	triggeredById: {
 		type: Types.ObjectId,
@@ -24,7 +21,6 @@ const notificationSchema = new Schema({
 	type: {
 		type: String,
 		required: true,
-		index: true,
 	},
 	title: {
 		type: String,
@@ -37,7 +33,6 @@ const notificationSchema = new Schema({
 	isRead: {
 		type: Boolean,
 		default: false,
-		index: true,
 	},
 },
 	{

@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import mongoose,{Types} from "mongoose";
+
 
 const StudentSchema = new Schema(
   {
@@ -49,8 +50,16 @@ const StudentSchema = new Schema(
           qualification: { type: String, trim: true },
           institute: { type: String, trim: true },
           year: { type: Number },
+          startedAt: {type: Date},
+          endedAt:{type: Date}
         },
-      ]
+      ],
+    // Student can attend multiple event
+    tickets:[{
+      type: Types.ObjectId,
+      ref: 'Ticket'
+    }
+    ]
   },
   { timestamps: true }
 );

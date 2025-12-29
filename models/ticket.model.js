@@ -5,9 +5,30 @@ const ticketSchema = new Schema({
     type: Types.ObjectId,
     ref: "Event",
   },
+  // Ticket information
+  ticketInfo: {
+    ticketNumber: {
+      type: Number,
+    },
+    ticketType:{
+        type:String,
+        enum:['standard','permium']
+    },
+    row: {
+      type: String,
+    },
+    column: {
+      type: String,
+    },
+    //Information about the ticket
+    qrCode: {
+      type: String,
+    },
+  },
   purchasedDate: {
     type: Date,
   },
+  // Paid based on the ticket type
   paidAmount:{
     totalpaid:{
         type: String
@@ -21,21 +42,7 @@ const ticketSchema = new Schema({
     type: String,
     enum: ["pending", "confirmed", "cancelled"],
   },
-  // Ticket information
-  ticketInfo: {
-    ticketNumber: {
-      type: Number,
-    },
-    row: {
-      type: String,
-    },
-    column: {
-      type: String,
-    },
-    qrCode: {
-      type: String,
-    },
-  },
+  
 });
 
 export default Ticket = mongoose.model("Ticket", ticketSchema);

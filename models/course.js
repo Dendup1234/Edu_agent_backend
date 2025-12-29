@@ -36,9 +36,6 @@ const CourseSchema = new mongoose.Schema(
 		entryRequirements: {
 			type: [String]
 		},
-		documentRequirements: {
-			type: [String]
-		},
 		status: {
 			type: String,
 			enum: ["open", "closed"],
@@ -56,27 +53,3 @@ const CourseSchema = new mongoose.Schema(
 
 export default mongoose.model("Course", CourseSchema);
 
-//Course Registered Schema
-const courseRegistrationSchema = new mongoose.Schema({
-	studentid: {
-		type: Schema.Types.ObjectId,
-		ref: "Student",
-		required: true
-	},
-	courseid: {
-		type: Types.ObjectId(),
-		ref: "Course",
-		required: true
-	},
-	status: {
-		type: String,
-		enum: ["saved", "registered", "cancelled", "completed"]
-	},
-	registeredAt: {
-		type: Date,
-		default: Date.now()
-	},
-});
-
-//Exporting the model schema
-export const CourseRegistered = mongoose.model("CourseRegistered", courseRegistrationSchema);

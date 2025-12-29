@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 
-const { Schema, Types } = mongoose;
-
 const adminSchema = new Schema(
   {
     name: {

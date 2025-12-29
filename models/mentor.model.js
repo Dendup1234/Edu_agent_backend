@@ -1,4 +1,4 @@
-import mongoose, { Schema,Types } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 
 const mentorSchema = mongoose.Schema(
   {
@@ -8,10 +8,18 @@ const mentorSchema = mongoose.Schema(
     phone: {
       type: Number,
     },
-	mentees:[{
-		type: Types.ObjectId,
-		ref: 'Student'
-	}],
+    mentees: [
+      {
+        student:{
+			type: Types.ObjectId,
+			ref: 'Student'
+		},
+		status:{
+			type: String,
+			enum:['pending','confirmed','rejected:']
+		}
+      },
+    ],
     email: {
       type: String,
       required: true,
@@ -38,7 +46,7 @@ const mentorSchema = mongoose.Schema(
     availability: {
       type: [String],
     },
-	//Adding the review of the mentor
+    //Adding the review of the mentor
     review: [
       {
         rating: {
@@ -46,9 +54,9 @@ const mentorSchema = mongoose.Schema(
           min: 0,
           max: 5,
         },
-		testimonials:{
-			type: String,
-		}
+        testimonials: {
+          type: String,
+        },
       },
     ],
     joinDate: {
@@ -68,43 +76,3 @@ const mentorSchema = mongoose.Schema(
 
 // exporting the mentor auth model
 export const Mentor = mongoose.model("Mentor", mentorSchema);
-
-//Mentor Appointment Schema
-const appointmentSchema = mongoose.Schema({
-  mentorId: {
-    type: Schema.Types.ObjectId,
-    ref: "Mentor",
-    required: true,
-  },
-  studentId: {
-    type: Schema.Types.ObjectId,
-    ref: "Student",
-    required: true,
-  },
-  time: {
-    type: Date,
-  },
-  date: {
-    type: Date,
-  },
-  meeting: [
-    {
-      mode: {
-        type: String,
-        enum: ["Online", "In-person"],
-      },
-      meeting_url: {
-        type: String,
-      },
-    },
-  ],
-  status: {
-    type: String,
-    enum: ["Scheduled", "Tentative"],
-  },
-  purpose: {
-    type: String,
-  },
-});
-
-export const Appointment = mongoose.model("Appointment", appointmentSchema);

@@ -5,6 +5,10 @@ const ticketSchema = new Schema({
     type: Types.ObjectId,
     ref: "Event",
   },
+  Studentid:{
+    type: Types.ObjectId,
+    ref: 'Student',
+  },
   // Ticket information
   ticketInfo: {
     ticketNumber: {
@@ -18,10 +22,6 @@ const ticketSchema = new Schema({
       type: String,
     },
     column: {
-      type: String,
-    },
-    //Information about the ticket
-    qrCode: {
       type: String,
     },
   },

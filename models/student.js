@@ -1,4 +1,4 @@
-import mongoose, { Types } from "mongoose";
+import mongoose, { Schema,Types } from "mongoose";
 
 const StudentSchema = new Schema(
   {
@@ -53,15 +53,8 @@ const StudentSchema = new Schema(
         endedAt: { type: Date },
       },
     ],
-    // Student can attend multiple event
-    tickets: [
-      {
-        type: Types.ObjectId,
-        ref: "Ticket",
-      },
-    ],
   },
   { timestamps: true }
 );
 
-export const Student = mongoose.model("Student", StudentSchema);
+export default mongoose.model("Student", StudentSchema);

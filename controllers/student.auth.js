@@ -1,20 +1,20 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import User from "../models/user.model.js";
+import Student from "../models/student.js";
 import { sendOtpEmail } from "../utils/sendEmail.js";
-import { signToken, verifyToken } from "../utils/jwt.js"
-import PendingSignup from "../models/pendingSignup.model.js"
-import pendingSignupModel from "../models/pendingSignup.model.js";
+import { signToken, verifyToken } from "../utils/jwt.js";
+import PendingSignup from "../models/pendingSignup.js";
 
 // Variables for the resend otp
-const OTP_EXP_MIN = 5;        // expires in 5 mins
+const OTP_EXP_MIN = 5; // expires in 5 mins
 const RESEND_COOLDOWN_SEC = 60; // wait 60 sec between resends
-const MAX_RESENDS = 5;        // max 5 resends per OTP window
+const MAX_RESENDS = 5; // max 5 resends per OTP window
 
 //SEND and resend OTP
 export const sendOtp = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    // Request body
+    const { name, phone, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res
@@ -25,27 +25,35 @@ export const sendOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // If already registered, stop
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    const existingUser = await Student.findOne({ email: normalizedEmail });
     if (existingUser)
       return res.status(409).json({ message: "Email already registered" });
 
     // If already pending, treat as resend (force them to use resend endpoint)
-    const pending = await PendingSignup.findOne({ email: normalizedEmail });
+    const pending = await PendingSignup.findOne({ 
+        email: normalizedEmail,
+         type: "register",
+    });
     if (pending) {
       return res.status(409).json({
         message: "OTP already sent please wait 5 min to token to expire",
       });
     }
 
+    // otp generation
     const otp = crypto.randomInt(1000, 9999).toString();
     const otpHash = await bcrypt.hash(otp, 10);
     const passwordHash = await bcrypt.hash(password, 12);
 
+    //Creating temporary user
     await PendingSignup.create({
       email: normalizedEmail,
       name,
+      phone,
+      organizationName,
       passwordHash,
       otpHash,
+      type:"register",
       expiresAt: new Date(Date.now() + OTP_EXP_MIN * 60 * 1000), // pandingsignup otp get expired at 5 mins
       lastSentAt: new Date(),
       resendCount: 0,
@@ -73,7 +81,7 @@ export const resendOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // If already registered, stop
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    const existingUser = await Student.findOne({ email: normalizedEmail });
     if (existingUser)
       return res.status(409).json({ message: "Email already registered" });
 
@@ -85,8 +93,7 @@ export const resendOtp = async (req, res) => {
     }
 
     // resend rules
-    const secondsSinceLast =
-      (Date.now() - pending.lastSentAt.getTime()) / 1000;
+    const secondsSinceLast = (Date.now() - pending.lastSentAt.getTime()) / 1000;
 
     if (secondsSinceLast < RESEND_COOLDOWN_SEC) {
       return res.status(429).json({
@@ -135,17 +142,23 @@ export const verifyOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // already registered?
-    const existing = await User.findOne({ email: normalizedEmail });
-    if (existing) return res.status(409).json({ message: "Email already registered" });
+    const existing = await Student.findOne({ email: normalizedEmail });
+    if (existing)
+      return res.status(409).json({ message: "Email already registered" });
 
     // get pending signup
     const pending = await PendingSignup.findOne({ email: normalizedEmail });
-    if (!pending) return res.status(400).json({ message: "OTP not found. Please request a new OTP." });
+    if (!pending)
+      return res
+        .status(400)
+        .json({ message: "OTP not found. Please request a new OTP." });
 
     // expiry
     if (pending.expiresAt.getTime() < Date.now()) {
       await pending.deleteOne();
-      return res.status(400).json({ message: "OTP expired. Please request a new OTP." });
+      return res
+        .status(400)
+        .json({ message: "OTP expired. Please request a new OTP." });
     }
 
     // verify otp
@@ -153,9 +166,10 @@ export const verifyOtp = async (req, res) => {
     if (!valid) return res.status(400).json({ message: "Invalid OTP" });
 
     // create user from pending data
-    const user = await User.create({
+    const user = await Student.create({
       name: pending.name,
       email: pending.email,
+      phone: pending.phone,
       password: pending.passwordHash,
       isVerified: true,
     });
@@ -164,48 +178,55 @@ export const verifyOtp = async (req, res) => {
     await pending.deleteOne();
 
     // token
-    const token = await signToken({ sub: user._id.toString(), email: user.email });
+    const token = await signToken({
+      sub: user._id.toString(),
+      email: user.email,
+    });
 
     return res.status(201).json({
       message: "Registered successfully",
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user._id, name: user.name, email: user.email,phone: user.phone },
       accessToken: token,
     });
   } catch (err) {
     console.error("VERIFY OTP ERROR:", err);
-    return res.status(500).json({ message: err.message || "Internal server error" });
+    return res
+      .status(500)
+      .json({ message: err.message || "Internal server error" });
   }
 };
 
 // Login controller
 
 export const login = async (req, res) => {
-	const { email, password } = req.body;
+  const { email, password } = req.body;
 
-	if (!email || !password) {
-		return res.status(400).json({ message: "email and password are required" });
-	}
+  if (!email || !password) {
+    return res.status(400).json({ message: "email and password are required" });
+  }
 
-	// password is select:false so we must explicitly select it
-	const user = await User.findOne({ email }).select("+password");
-	if (!user) {
-		return res.status(401).json({ message: "Invalid email or password" });
-	}
+  // password is select:false so we must explicitly select it
+  const user = await Student.findOne({ email }).select("+password");
+  if (!user) {
+    return res.status(401).json({ message: "Invalid email or password" });
+  }
 
-	const ok = await bcrypt.compare(password, user.password);
-	if (!ok) {
-		return res.status(401).json({ message: "Invalid password" });
-	}
+  const ok = await bcrypt.compare(password, user.password);
+  if (!ok) {
+    return res.status(401).json({ message: "Invalid password" });
+  }
 
-	const token = await signToken({ sub: user._id.toString(), email: user.email });
+  const token = await signToken({
+    sub: user._id.toString(),
+    email: user.email,
+  });
 
-	return res.json({
-		message: "Logged in successfully",
-		user: { id: user._id, name: user.name, email: user.email },
-		accessToken: token,
-	});
+  return res.json({
+    message: "Logged in successfully",
+    user: { id: user._id, name: user.name, email: user.email,phone: user.phone },
+    accessToken: token,
+  });
 };
-
 
 // RESET PASSWORD FLOW
 
@@ -217,22 +238,31 @@ export const sendPasswordResetOtp = async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    const user = await User.findOne({ email: normalizedEmail });
-    if (!user) return res.status(200).json({ message: "If email exists, OTP sent" }); // prevent enumeration
+    const user = await Student.findOne({ email: normalizedEmail });
+    if (!user)
+      return res.status(200).json({ message: "If email exists, OTP sent" }); // prevent enumeration
 
-    const existing = await pendingSignupModel.findOne({ email: normalizedEmail, type: "reset" });
+    const existing = await PendingSignup.findOne({
+      email: normalizedEmail,
+      type: "reset",
+    });
 
     // resend rules
     if (existing) {
-      const secondsSinceLast = (Date.now() - existing.lastSentAt.getTime()) / 1000;
+      const secondsSinceLast =
+        (Date.now() - existing.lastSentAt.getTime()) / 1000;
       if (secondsSinceLast < RESEND_COOLDOWN_SEC) {
         return res.status(429).json({
-          message: `Please wait ${Math.ceil(RESEND_COOLDOWN_SEC - secondsSinceLast)}s before resending OTP.`,
+          message: `Please wait ${Math.ceil(
+            RESEND_COOLDOWN_SEC - secondsSinceLast
+          )}s before resending OTP.`,
         });
       }
 
       if (existing.resendCount >= MAX_RESENDS) {
-        return res.status(429).json({ message: "Too many OTP requests. Try later." });
+        return res
+          .status(429)
+          .json({ message: "Too many OTP requests. Try later." });
       }
     }
 
@@ -240,7 +270,7 @@ export const sendPasswordResetOtp = async (req, res) => {
     const otp = crypto.randomInt(1000, 9999).toString();
     const otpHash = await bcrypt.hash(otp, 10);
 
-    await pendingSignupModel.findOneAndUpdate(
+    await PendingSignup.findOneAndUpdate(
       { email: normalizedEmail, type: "reset" },
       {
         email: normalizedEmail,
@@ -266,16 +296,23 @@ export const sendPasswordResetOtp = async (req, res) => {
 export const verifyPasswordResetOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    if (!email || !otp) return res.status(400).json({ message: "Email and OTP are required" });
+    if (!email || !otp)
+      return res.status(400).json({ message: "Email and OTP are required" });
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    const record = await pendingSignupModel.findOne({ email: normalizedEmail, type: "reset" });
-    if (!record) return res.status(400).json({ message: "OTP not found or expired" });
+    const record = await PendingSignup.findOne({
+      email: normalizedEmail,
+      type: "reset",
+    });
+    if (!record)
+      return res.status(400).json({ message: "OTP not found or expired" });
 
     if (record.expiresAt.getTime() < Date.now()) {
       await record.deleteOne();
-      return res.status(400).json({ message: "OTP expired. Request a new one." });
+      return res
+        .status(400)
+        .json({ message: "OTP expired. Request a new one." });
     }
 
     const valid = await bcrypt.compare(String(otp), record.otpHash);
@@ -302,7 +339,9 @@ export const setNewPassword = async (req, res) => {
   try {
     const { resetToken, newPassword } = req.body;
     if (!resetToken || !newPassword) {
-      return res.status(400).json({ message: "Reset token and new password are required" });
+      return res
+        .status(400)
+        .json({ message: "Reset token and new password are required" });
     }
 
     // verify token
@@ -310,11 +349,13 @@ export const setNewPassword = async (req, res) => {
     try {
       decoded = verifyToken(resetToken);
     } catch (err) {
-      return res.status(400).json({ message: "Invalid or expired reset token" });
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired reset token" });
     }
 
     const email = decoded.sub;
-    const user = await User.findOne({ email });
+    const user = await Student.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
 
     // hash new password

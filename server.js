@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js'
 import studentRoute from "./routes/student.auth.js";
 import agencyRoute from "./routes/agency.auth.js"
-//import oAuthRoute from "./routes/oAuth.js";
+import oAuthRoute from "./routes/oAuth.js";
 import cors from 'cors';
 
 //config
@@ -18,7 +18,7 @@ app.use(cors());
 //routes
 app.use("/api/v1/students", studentRoute);
 app.use("/api/v1/agency",agencyRoute);
-//app.use("/", oAuthRoute);
+app.use(oAuthRoute);
 
 // Listening to the port 8000
 const PORT = process.env.PORT || 8000;

@@ -1,13 +1,11 @@
 import Student from '../models/student.js';
 import Agency from '../models/agency.js';
 import { OAuth2Client } from "google-auth-library";
-import crypto from 'crypto';
+import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
 dotenv.config();
 
 const SCOPES = ["openid", "email", "profile"];
-
-const stateStore = new Set();
 
 const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
@@ -17,15 +15,11 @@ const client = new OAuth2Client(
 
 export const authController = {
   initiateGoogleAuth: async (req, res) => {
-    try {
-      const state = crypto.randomBytes(16).toString("hex");
-      stateStore.add(state);
-      
+    try {     
       const authUrl = client.generateAuthUrl({
         access_type: 'offline',
         scope: SCOPES,
-        prompt: 'consent',
-        state
+        prompt: 'select_account'
       });
 
       res.redirect(authUrl);
@@ -36,13 +30,7 @@ export const authController = {
   },
 
   handleGoogleCallback: async (req, res) => {
-    const { code, state } = req.query;
-
-    if (!code || !state || !stateStore.has(state)) {
-      return res.status(400).send("Invalid OAuth state.");
-    }
-
-    stateStore.delete(state);
+    const code = req.query;
 
     try {
       const { tokens } = await client.getToken(code);
@@ -69,7 +57,9 @@ export const authController = {
         });
       }
 
-      res.redirect(`${process.env.FRONTEND_URL}/visa-officer/dashboard`);
+      const token = jwt.sign({ googleId: Agency.googleId,}, process.env.JWT_SECRET);
+
+      res.redirect(`${process.env.FRONTEND_URL}/visa-officer/dashboard`).json({accessToken: token});
     } catch (error) {
       console.error("Google callback error:", error);
       res.status(500).send("Authentication failed");
@@ -111,16 +101,9 @@ export const authController = {
         });
       }
 
-      return res.status(200).json({
-        success: true,
-        message: "Authentication successful",
-        user: {
-          id: user._id,
-          googleId: user.googleId,
-          email: user.email,
-          name: user.name
-        }
-      });
+       const token = jwt.sign({ googleId: Student.googleId,}, process.env.JWT_SECRET);
+
+      return res.status(200).json({message: "Authentication successful", accessToken: token});
 
     } catch (error) {
       console.error("Mobile auth error:", error);

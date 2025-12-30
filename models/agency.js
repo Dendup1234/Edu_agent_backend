@@ -3,14 +3,11 @@ import mongoose,{Schema,Types} from "mongoose";
 const agencySchema = new Schema(
   {
     organizationName: {
-      type: String,
-      required: true,
-      trim: true
+      type: String
     },
 
     email: {
-      type: String,
-      required: true
+      type: String
     },
 
     password: {

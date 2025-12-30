@@ -7,11 +7,10 @@ export const protect = async (req, res, next) => {
 		if (!authHeader) {
 			return res.status(401).json({ message: "No token provided" });
 		}
-
+		//Spliting the token
 		const token = authHeader.split(" ")[1];
 
 		const payload = await verifyToken(token);
-
 		req.user = payload;
 		next();
 	} catch (err) {

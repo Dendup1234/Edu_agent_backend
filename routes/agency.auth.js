@@ -38,18 +38,45 @@ router.get("/profile", protect, async (req, res) => {
   }
 });
 //profiles all
-router.get("/", protect, async(req, res) => {
+router.get("/", protect, async (req, res) => {
   try {
-      const agency = await Agency.find().select("-password").lean();
-      return res.json({
-        count: agency.length,
-        agency,
-      });
-    } catch (e) {
-      console.log(e);
-      return res.status(500).json({ message: "Server error" });
-    }
+    const agency = await Agency.find().select("-password").lean();
+    return res.json({
+      count: agency.length,
+      agency,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
+//updating profile
+router.patch("/profile", protect, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const update = req.body;
+    // forbidden fields to be updated
+    const forbidden = ["_id", "password"];
+    forbidden.forEach((field) => delete update[field]);
+    //Find by id and update
+    const updatedAgency = await Agency.findByIdAndUpdate(userId, update, {
+      new: true,
+      runValidators: true,
+    })
+      .select("-password")
+      .lean();
+
+    if (!updatedAgency) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({
+      message: "Profile updated",
+      profile: updatedAgency,
+    });
+  } catch (e) {
+    return res.status(500).json({ message: "Server error" });
+  }
 });
 
 export default router;

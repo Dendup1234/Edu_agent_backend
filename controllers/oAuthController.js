@@ -30,7 +30,7 @@ export const authController = {
   },
 
   handleGoogleCallback: async (req, res) => {
-    const code = req.query;
+    const { code } = req.query;
 
     try {
       const { tokens } = await client.getToken(code);

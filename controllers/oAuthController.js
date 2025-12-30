@@ -1,6 +1,8 @@
 import User from "../models/user.model.js";
 import { OAuth2Client } from "google-auth-library";
 import crypto from 'crypto';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const SCOPES = ["openid", "email", "profile"];
 
@@ -13,7 +15,7 @@ const client = new OAuth2Client(
 );
 
 export const authController = {
-  initiateGoogleAuth: (req, res) => {
+  initiateGoogleAuth: async (req, res) => {
     try {
       const state = crypto.randomBytes(16).toString("hex");
       stateStore.add(state);
@@ -66,7 +68,7 @@ export const authController = {
         });
       }
 
-      res.redirect(`${process.env.FRONTEND_URL}/visa-officer`);
+      res.redirect(`${process.env.FRONTEND_URL}/visa-officer/dashboard`);
     } catch (error) {
       console.error("Google callback error:", error);
       res.status(500).send("Authentication failed");

@@ -27,6 +27,10 @@ const agentSchema = new Schema(
       default: false,
     },
 
+    profileUrl: {
+      type: String,
+    },
+    
     agency: {
       type: Types.ObjectId,
       ref: "Agency",

@@ -16,7 +16,7 @@ app.use(cors());
 
 //routes
 app.use("/api/auth/user", userRoute);
-app.use("/", oAuthRoute);
+app.use(oAuthRoute);
 
 // Listening to the port 8000
 const PORT = process.env.PORT || 8000;

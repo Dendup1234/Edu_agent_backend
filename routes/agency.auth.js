@@ -11,7 +11,7 @@ router.post("/login", login);
 router.post("/password-reset/send-otp", sendPasswordResetOtp);   
 router.post("/password-reset/verify-otp", verifyPasswordResetOtp);
 router.post("/password-reset/set-new", setNewPassword);   
-
+//profile
 router.get("/profile", protect, async (req, res) => {
   try {
     const user_id = req.user.sub;

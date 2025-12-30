@@ -9,6 +9,9 @@ const agencySchema = new Schema(
     email: {
       type: String
     },
+    name:{
+      type: String
+    },
 
     password: {
       type: String,

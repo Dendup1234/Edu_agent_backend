@@ -50,7 +50,6 @@ export const sendOtp = async (req, res) => {
       email: normalizedEmail,
       name,
       phone,
-      organizationName,
       passwordHash,
       otpHash,
       type:"register",
@@ -181,6 +180,7 @@ export const verifyOtp = async (req, res) => {
     const token = await signToken({
       sub: user._id.toString(),
       email: user.email,
+      role: 'Student'
     });
 
     return res.status(201).json({

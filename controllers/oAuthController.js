@@ -57,7 +57,7 @@ export const authController = {
         });
       }
 
-      const token = jwt.sign({ googleId: Agency.googleId,}, process.env.JWT_SECRET);
+      const token = jwt.sign({ googleId: Agency.googleId}, process.env.JWT_SECRET);
 
       res.redirect(`${process.env.FRONTEND_URL}/visa-officer/dashboard`).json({accessToken: token});
     } catch (error) {
@@ -101,7 +101,7 @@ export const authController = {
         });
       }
 
-       const token = jwt.sign({ googleId: Student.googleId,}, process.env.JWT_SECRET);
+      const token = jwt.sign({ googleId: Student.googleId}, process.env.JWT_SECRET);
 
       return res.status(200).json({message: "Authentication successful", accessToken: token});
 

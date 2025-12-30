@@ -1,3 +1,4 @@
+/*
 import express from 'express';
 import { authController } from '../controllers/authController.js';
 
@@ -9,3 +10,4 @@ router.get('/google/callback', authController.handleGoogleCallback);
 router.post('/mobile', authController.handleMobileAuth);
 
 export default router;
+*/

@@ -1,4 +1,5 @@
-import User from "../models/user.model.js";
+/*
+import User from "../models/student.js";
 import { OAuth2Client } from "google-auth-library";
 import crypto from 'crypto';
 
@@ -134,3 +135,4 @@ export const authController = {
     }
   }
 };
+*/

@@ -1,6 +1,6 @@
 import express from "express";
 import { protect } from "../middlewares/auth.middleware.js";
-import { sendOtp,resendOtp, verifyOtp, login, sendPasswordResetOtp, verifyPasswordResetOtp, setNewPassword } from "../controllers/auth.controller.js"
+import { sendOtp,resendOtp, verifyOtp, login, sendPasswordResetOtp, verifyPasswordResetOtp, setNewPassword } from "../controllers/student.auth.js"
 const router = express.Router();
 
 router.post("/send-otp", sendOtp);

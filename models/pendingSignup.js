@@ -2,20 +2,27 @@ import mongoose from "mongoose";
 
 const pendingSignupSchema = new mongoose.Schema(
   {
-    email: { type: String, required: true, unique: true, index: true },
-    name: { type: String, required: true },
-
+    email: { 
+      type: String },
+    name: { 
+      type: String },
+    phone:{
+      type:String
+    },
+    organizationName:{
+      type: String,
+    },
     // Store hashed password (never plain text)
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String },
 
-    otpHash: { type: String, required: true },
-    expiresAt: { type: Date, required: true },
+    otpHash: { type: String },
+    expiresAt: { type: Date },
     resendCount: { type: Number, default: 0 },
     lastSentAt: { type: Date, default: Date.now },
     type: { type: String, enum: ["register", "reset"], required: true },
 
     // optional: anti-abuse tracking
-    verified: { type: Boolean, default: false }
+    verified: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -1,5 +1,5 @@
-/*
-import User from "../models/student.js";
+import Student from '../models/student.js';
+import Agency from '../models/agency.js';
 import { OAuth2Client } from "google-auth-library";
 import crypto from 'crypto';
 import dotenv from 'dotenv';
@@ -59,10 +59,10 @@ export const authController = {
       const payload = ticket.getPayload();
       if (!payload) throw new Error("Invalid token payload");
 
-      let user = await User.findOne({ googleId: payload.sub });
+      let user = await Agency.findOne({ googleId: payload.sub });
 
       if (!user) {
-        user = await User.create({
+        user = await Agency.create({
           googleId: payload.sub,
           email: payload.email,
           name: payload.name
@@ -101,10 +101,10 @@ export const authController = {
 
       const { sub: googleId, email, name } = payload;
 
-      let user = await User.findOne({ googleId });
+      let user = await Student.findOne({ googleId });
 
       if (!user) {
-        user = await User.create({
+        user = await Student.create({
           googleId,
           email,
           name
@@ -137,4 +137,3 @@ export const authController = {
     }
   }
 };
-*/

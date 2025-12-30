@@ -57,7 +57,7 @@ export const authController = {
         });
       }
 
-      const token = jwt.sign({ googleId: Agency.googleId}, process.env.JWT_SECRET);
+      const token = jwt.sign({ googleId: user.googleId, id: user._id }, process.env.JWT_SECRET);
 
       res.cookie("accessToken",token).redirect(`${process.env.FRONTEND_URL}/visa-officer/dashboard`);
     } catch (error) {

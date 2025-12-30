@@ -5,43 +5,19 @@ import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
 dotenv.config();
 
-const SCOPES = ["openid", "email", "profile"];
-
-const client = new OAuth2Client(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_CALLBACK_URL
-);
-
 export const authController = {
-  initiateGoogleAuth: async (req, res) => {
-    try {     
-      const authUrl = client.generateAuthUrl({
-        access_type: 'offline',
-        scope: SCOPES,
-        prompt: 'select_account'
-      });
 
-      res.redirect(authUrl);
-    } catch (error) {
-      console.error("Auth initiation error:", error);
-      res.status(500).send("Failed to initiate authentication");
-    }
-  },
-
-  handleGoogleCallback: async (req, res) => {
-    const { code } = req.query;
-
+  handleWebAuth: async (req, res) => {
     try {
-      const { tokens } = await client.getToken(code);
+      const { id_token } = req.body
 
-      if (!tokens.id_token) {
+      if (!id_token) {
         throw new Error("Missing ID token");
       }
 
       const ticket = await client.verifyIdToken({
         idToken: tokens.id_token,
-        audience: process.env.GOOGLE_CLIENT_ID
+        audience: 
       });
 
       const payload = ticket.getPayload();
@@ -57,9 +33,10 @@ export const authController = {
         });
       }
 
-      const token = jwt.sign({ googleId: user.googleId, id: user._id }, process.env.JWT_SECRET);
+      const jwtToken = jwt.sign({ googleId: user.googleId, id: user._id }, process.env.JWT_SECRET);
 
-      res.cookie("accessToken",token).redirect(`${process.env.FRONTEND_URL}/visa-officer/dashboard`);
+      res.cookie("accessToken",jwtToken).redirect(`${process.env.FRONTEND_URL}/visa-officer/dashboard`);
+      console.log(res)
     } catch (error) {
       console.error("Google callback error:", error);
       res.status(500).send("Authentication failed");

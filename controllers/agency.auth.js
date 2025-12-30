@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import Student from "../models/student.js";
+import Agency from "../models/agency.js";
 import { sendOtpEmail } from "../utils/sendEmail.js";
 import { signToken, verifyToken } from "../utils/jwt.js";
 import PendingSignup from "../models/pendingSignup.js";
@@ -14,7 +14,7 @@ const MAX_RESENDS = 5; // max 5 resends per OTP window
 export const sendOtp = async (req, res) => {
   try {
     // Request body
-    const { name, phone, email, password } = req.body;
+    const { name, contactInfo, organizationName, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res
@@ -25,7 +25,7 @@ export const sendOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // If already registered, stop
-    const existingUser = await Student.findOne({ email: normalizedEmail });
+    const existingUser = await Agency.findOne({ email: normalizedEmail });
     if (existingUser)
       return res.status(409).json({ message: "Email already registered" });
 
@@ -49,7 +49,7 @@ export const sendOtp = async (req, res) => {
     await PendingSignup.create({
       email: normalizedEmail,
       name,
-      phone,
+      contactInfo,
       organizationName,
       passwordHash,
       otpHash,
@@ -81,7 +81,7 @@ export const resendOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // If already registered, stop
-    const existingUser = await Student.findOne({ email: normalizedEmail });
+    const existingUser = await Agency.findOne({ email: normalizedEmail });
     if (existingUser)
       return res.status(409).json({ message: "Email already registered" });
 
@@ -142,7 +142,7 @@ export const verifyOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // already registered?
-    const existing = await Student.findOne({ email: normalizedEmail });
+    const existing = await Agency.findOne({ email: normalizedEmail });
     if (existing)
       return res.status(409).json({ message: "Email already registered" });
 
@@ -166,10 +166,11 @@ export const verifyOtp = async (req, res) => {
     if (!valid) return res.status(400).json({ message: "Invalid OTP" });
 
     // create user from pending data
-    const user = await Student.create({
+    const user = await Agency.create({
       name: pending.name,
       email: pending.email,
-      phone: pending.phone,
+      contactInfo: pending.phone,
+      organizationName:pending.organizationName,
       password: pending.passwordHash,
       isVerified: true,
     });
@@ -206,7 +207,7 @@ export const login = async (req, res) => {
   }
 
   // password is select:false so we must explicitly select it
-  const user = await Student.findOne({ email }).select("+password");
+  const user = await Agency.findOne({ email }).select("+password");
   if (!user) {
     return res.status(401).json({ message: "Invalid email or password" });
   }
@@ -238,7 +239,7 @@ export const sendPasswordResetOtp = async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    const user = await Student.findOne({ email: normalizedEmail });
+    const user = await Agency.findOne({ email: normalizedEmail });
     if (!user)
       return res.status(200).json({ message: "If email exists, OTP sent" }); // prevent enumeration
 
@@ -355,7 +356,7 @@ export const setNewPassword = async (req, res) => {
     }
 
     const email = decoded.sub;
-    const user = await Student.findOne({ email });
+    const user = await Agency.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
 
     // hash new password

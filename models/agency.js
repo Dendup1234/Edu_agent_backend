@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose,{Schema,Types} from "mongoose";
 
 const agencySchema = new Schema(
   {
@@ -67,4 +67,4 @@ const agencySchema = new Schema(
   { timestamps: true}
 );
 
-export const Agency = mongoose.model('Agency', agencySchema);
+export default mongoose.model('Agency', agencySchema);

@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
 dotenv.config();
 
+const client = new OAuth2Client();
+
 export const authController = {
 
   handleWebAuth: async (req, res) => {
@@ -16,8 +18,8 @@ export const authController = {
       }
 
       const ticket = await client.verifyIdToken({
-        idToken: tokens.id_token,
-        audience: 
+        idToken: id_token,
+        audience: ''
       });
 
       const payload = ticket.getPayload();

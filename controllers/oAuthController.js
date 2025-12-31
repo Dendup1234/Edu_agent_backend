@@ -19,7 +19,7 @@ export const authController = {
 
       const ticket = await client.verifyIdToken({
         idToken: id_token,
-        audience: ''
+        audience: '1080035045964-llt4obq8aeun39r89artl5qf0n4tvjrt.apps.googleusercontent.com'
       });
 
       const payload = ticket.getPayload();
@@ -80,7 +80,7 @@ export const authController = {
         });
       }
 
-      const token = jwt.sign({ googleId: Student.googleId}, process.env.JWT_SECRET);
+      const jwtToken = jwt.sign({ googleId: user.googleId, id: user._id }, process.env.JWT_SECRET);
 
       return res.status(200).json({message: "Authentication successful", accessToken: token});
 

@@ -37,8 +37,8 @@ export const authController = {
 
       const jwtToken = jwt.sign({ googleId: user.googleId, id: user._id }, process.env.JWT_SECRET);
 
-      res.cookie("accessToken",jwtToken);
-      console.log(res)
+      return res.status(200).json({message: "Authentication successful", accessToken: jwtToken});
+
     } catch (error) {
       console.error("Google callback error:", error);
       res.status(500).send("Authentication failed");
@@ -82,7 +82,7 @@ export const authController = {
 
       const jwtToken = jwt.sign({ googleId: user.googleId, id: user._id }, process.env.JWT_SECRET);
 
-      return res.status(200).json({message: "Authentication successful", accessToken: token});
+      return res.status(200).json({message: "Authentication successful", accessToken: jwtToken});
 
     } catch (error) {
       console.error("Mobile auth error:", error);

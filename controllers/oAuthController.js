@@ -37,7 +37,7 @@ export const authController = {
 
       const jwtToken = jwt.sign({ googleId: user.googleId, id: user._id }, process.env.JWT_SECRET);
 
-      res.cookie("accessToken",jwtToken).redirect(`${process.env.FRONTEND_URL}/visa-officer/dashboard`);
+      res.cookie("accessToken",jwtToken);
       console.log(res)
     } catch (error) {
       console.error("Google callback error:", error);

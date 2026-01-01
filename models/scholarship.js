@@ -10,6 +10,22 @@ const scholarshipSchema = new Schema({
   howToApply: {
     type: String,
   },
+  amount: {
+    type: String,
+  },
+  eligiblility: {
+    type: String,
+  },
+  fieldOfStudy: {
+    type: [String],
+  },
+  applicationDateline: {
+    type: Date,
+  },
+  status: {
+    type: String,
+    enum: ["open", "closed", "upcoming"],
+  },
   providedBy: {
     type: Types.ObjectId,
     ref: "University",

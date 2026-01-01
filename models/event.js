@@ -37,28 +37,6 @@ const eventSchema = new mongoose.Schema(
       type: String,
       default: "Asia/Thimphu",
     },
-
-    // Registration window
-    registration: [
-      {
-        feeAmount: {
-          type: Number,
-          min: 0,
-          default: 0,
-        },
-        currency: {
-          type: String,
-          default: "USD",
-        },
-        registrationDeadline: {
-          type: Date,
-        },
-        isRegistrationOpen: {
-          type: Boolean,
-          default: true,
-        },
-      },
-    ],
 	// Meeting informations
     meetings: [
       {

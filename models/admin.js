@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose,{Schema} from "mongoose";
 
 const adminSchema = new Schema(
   {
@@ -26,4 +26,4 @@ const adminSchema = new Schema(
   { timestamps: true }
 );
 
-export default Admin = mongoose.model("Admin", adminSchema);
+export default mongoose.model("Admin", adminSchema);

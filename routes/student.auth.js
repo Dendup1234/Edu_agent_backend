@@ -40,7 +40,7 @@ router.get("/profile", protect, async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 });
-// All user
+// All
 router.get("/", protect, async (req, res) => {
   try {
     const students = await Student.find().select("-password").lean();
@@ -60,7 +60,7 @@ router.patch("/profile", protect, async (req, res) => {
     const userId = req.user.sub;
     const update = req.body;
     // forbidden fields to be updated
-    const forbidden = ["_id", "passoword"];
+    const forbidden = ["_id", "password"];
     forbidden.forEach((field) => delete update[field]);
     //Find by id and update
     const updatedStudent = await Student.findByIdAndUpdate(userId, update, {
@@ -81,5 +81,17 @@ router.patch("/profile", protect, async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 });
+
+//Deleting for particular user for the(only for admin)
+router.delete("/:id", protect, async (req, res) => {
+  const student = await Student.findByIdAndUpdate(
+    req.params.id,
+    { isActive: false },
+    { new: true }
+  );
+  
+  res.json({ message: "Student deactivated" });
+});
+
 
 export default router;

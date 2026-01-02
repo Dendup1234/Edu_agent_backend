@@ -35,7 +35,7 @@ export const authController = {
         });
       }
 
-      const jwtToken = jwt.sign({ googleId: user.googleId, sub: user._id.toString() }, process.env.JWT_SECRET);
+      const jwtToken = jwt.sign({ googleId: user.googleId }, process.env.JWT_SECRET);
 
       return res.status(200).json({message: "Authentication successful", accessToken: jwtToken});
 
@@ -68,19 +68,17 @@ export const authController = {
         });
       }
 
-      const { sub: googleId, email, name } = payload;
-
-      let user = await Student.findOne({ googleId });
+      let user = await Student.findOne({ googleId: payload.sub });
 
       if (!user) {
         user = await Student.create({
-          googleId,
-          email,
-          name
+          googleId: payload.sub,
+          email: payload.email,
+          name: payload.name
         });
       }
 
-      const jwtToken = jwt.sign({ googleId: user.googleId, id: user._id }, process.env.JWT_SECRET);
+      const jwtToken = jwt.sign({ googleId: user.googleId }, process.env.JWT_SECRET);
 
       return res.status(200).json({message: "Authentication successful", accessToken: jwtToken});
 

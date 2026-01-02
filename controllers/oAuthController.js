@@ -65,7 +65,7 @@ export const authController = {
       const ticket = await client.verifyIdToken({
         idToken: id_token,
         audience:
-          "211640976708-lelad1md8d7dqj8gqoompn7lnfkh0ier.apps.googleusercontent.com",
+          "211640976708-lelad1md8d7dqj8gqoompn7lnfkh0ier.apps.googleusercontent.com//",
       });
 
       const payload = ticket.getPayload();

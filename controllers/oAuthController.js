@@ -1,70 +1,84 @@
-import Student from '../models/student.js';
-import Agency from '../models/agency.js';
+import Student from "../models/student.js";
+import Agency from "../models/agency.js";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 const client = new OAuth2Client();
 
-export const authController = {
+function issueAccessToken({ user }) {
+  return jwt.sign(
+    {
+      sub: user._id.toString(),
+      email: user.email,
+    },
+    process.env.JWT_SECRET
+  );
+}
 
+export const authController = {
   handleWebAuth: async (req, res) => {
     try {
-      const { id_token } = req.body
+      const { id_token } = req.body;
 
-      if (!id_token) {
-        throw new Error("Missing ID token");
-      }
-
-      const ticket = await client.verifyIdToken({
-        idToken: id_token,
-        audience: '1080035045964-llt4obq8aeun39r89artl5qf0n4tvjrt.apps.googleusercontent.com'
+      const payload = await verifyGoogleIdToken({
+        id_token,
+        client: webClient,
       });
 
-      const payload = ticket.getPayload();
-      if (!payload) throw new Error("Invalid token payload");
+      const email = payload.email;
 
-      let user = await Agency.findOne({ googleId: payload.sub });
-
-      if (!user) {
-        user = await Agency.create({
-          googleId: payload.sub,
-          email: payload.email,
-          name: payload.name
-        });
+      if (!email) {
+        return res
+          .status(400)
+          .json({ message: "Google account missing email" });
       }
 
-      const jwtToken = jwt.sign({ googleId: user.googleId, id: user._id }, process.env.JWT_SECRET);
+      let user = await Agency.findOne({ googleId });
 
-      return res.status(200).json({message: "Authentication successful", accessToken: jwtToken});
+  
 
+      const accessToken = issueAccessToken({ user});
+
+      return res.status(200).json({
+        message: "Authentication successful",
+        accessToken,
+        user: {
+          id: user._id,
+          email: user.email,
+        },
+      });
     } catch (error) {
-      console.error("Google callback error:", error);
-      res.status(500).send("Authentication failed");
+      console.error("Google WEB auth error:", error);
+      const status = error?.status || 500;
+      return res
+        .status(status)
+        .json({ message: error?.message || "Authentication failed" });
     }
   },
 
   handleMobileAuth: async (req, res) => {
     try {
       const { id_token } = req.body;
-      
+
       if (!id_token) {
-        return res.status(400).json({ 
-          error: "Missing id_token" 
+        return res.status(400).json({
+          error: "Missing id_token",
         });
       }
 
       const ticket = await client.verifyIdToken({
         idToken: id_token,
-        audience: '211640976708-lelad1md8d7dqj8gqoompn7lnfkh0ier.apps.googleusercontent.com'
+        audience:
+          "211640976708-lelad1md8d7dqj8gqoompn7lnfkh0ier.apps.googleusercontent.com",
       });
 
       const payload = ticket.getPayload();
-      
+
       if (!payload) {
-        return res.status(401).json({ 
-          error: "Invalid token" 
+        return res.status(401).json({
+          error: "Invalid token",
         });
       }
 
@@ -76,26 +90,30 @@ export const authController = {
         user = await Student.create({
           googleId,
           email,
-          name
+          name,
         });
       }
 
-      const jwtToken = jwt.sign({ googleId: user.googleId, id: user._id }, process.env.JWT_SECRET);
+      const jwtToken = jwt.sign(
+        { googleId: user.googleId, id: user._id },
+        process.env.JWT_SECRET
+      );
 
-      return res.status(200).json({message: "Authentication successful", accessToken: jwtToken});
-
+      return res
+        .status(200)
+        .json({ message: "Authentication successful", accessToken: jwtToken });
     } catch (error) {
       console.error("Mobile auth error:", error);
-      
+
       if (error.message.includes("Token used too late")) {
-        return res.status(401).json({ 
-          error: "Token expired" 
+        return res.status(401).json({
+          error: "Token expired",
         });
       }
-      
-      return res.status(500).json({ 
-        error: "Authentication failed" 
+
+      return res.status(500).json({
+        error: "Authentication failed",
       });
     }
-  }
+  },
 };

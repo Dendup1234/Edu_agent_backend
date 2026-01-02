@@ -37,8 +37,6 @@ export const authController = {
 
       let user = await Agency.findOne({ googleId });
 
-  
-
       const accessToken = issueAccessToken({ user});
 
       return res.status(200).json({

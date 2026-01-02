@@ -8,6 +8,7 @@ dotenv.config();
 const client = new OAuth2Client();
 
 export const authController = {
+
   handleWebAuth: async (req, res) => {
     try {
       const { id_token } = req.body
@@ -16,39 +17,31 @@ export const authController = {
         throw new Error("Missing ID token");
       }
 
-      const payload = await verifyGoogleIdToken({
-        id_token,
-        client: webClient,
+      const ticket = await client.verifyIdToken({
+        idToken: id_token,
+        audience: '1080035045964-llt4obq8aeun39r89artl5qf0n4tvjrt.apps.googleusercontent.com'
       });
 
-      const email = payload.email;
+      const payload = ticket.getPayload();
+      if (!payload) throw new Error("Invalid token payload");
 
-      if (!email) {
-        return res
-          .status(400)
-          .json({ message: "Google account missing email" });
+      let user = await Agency.findOne({ googleId: payload.sub });
+
+      if (!user) {
+        user = await Agency.create({
+          googleId: payload.sub,
+          email: payload.email,
+          name: payload.name
+        });
       }
 
-      let user = await Agency.findOne({ googleId });
+      const jwtToken = jwt.sign({ googleId: user.googleId, sub: user._id.toString() }, process.env.JWT_SECRET);
 
-  
+      return res.status(200).json({message: "Authentication successful", accessToken: jwtToken});
 
-      const accessToken = issueAccessToken({ user});
-
-      return res.status(200).json({
-        message: "Authentication successful",
-        accessToken,
-        user: {
-          id: user._id,
-          email: user.email,
-        },
-      });
     } catch (error) {
-      console.error("Google WEB auth error:", error);
-      const status = error?.status || 500;
-      return res
-        .status(status)
-        .json({ message: error?.message || "Authentication failed" });
+      console.error("Google callback error:", error);
+      res.status(500).send("Authentication failed");
     }
   },
 
@@ -64,8 +57,7 @@ export const authController = {
 
       const ticket = await client.verifyIdToken({
         idToken: id_token,
-        audience:
-          "211640976708-lelad1md8d7dqj8gqoompn7lnfkh0ier.apps.googleusercontent.com//",
+        audience: '211640976708-lelad1md8d7dqj8gqoompn7lnfkh0ier.apps.googleusercontent.com'
       });
 
       const payload = ticket.getPayload();
@@ -88,10 +80,7 @@ export const authController = {
         });
       }
 
-      const jwtToken = jwt.sign(
-        { googleId: user.googleId, id: user._id },
-        process.env.JWT_SECRET
-      );
+      const jwtToken = jwt.sign({ googleId: user.googleId, id: user._id }, process.env.JWT_SECRET);
 
       return res.status(200).json({message: "Authentication successful", accessToken: jwtToken});
 

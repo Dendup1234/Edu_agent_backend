@@ -35,7 +35,7 @@ export const authController = {
         });
       }
 
-      const jwtToken = jwt.sign({ googleId: user.googleId }, process.env.JWT_SECRET);
+      const jwtToken = jwt.sign({ googleId: user.googleId, id: user._id }, process.env.JWT_SECRET);
 
       return res.status(200).json({message: "Authentication successful", accessToken: jwtToken});
 

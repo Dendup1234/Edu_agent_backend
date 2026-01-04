@@ -1,11 +1,21 @@
-import mongoose, { Schema,Types } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 
 const StudentSchema = new Schema(
   {
     email: {
       type: String,
     },
-
+    ticket: [
+      {
+        type: Types.ObjectId,
+        ref: "Ticket",
+      },
+    ],
+    // Reference when student select a particular agency
+    selectedAgency: {
+      type: Types.ObjectId,
+      ref: "Agency",
+    },
     phone: {
       type: String,
       trim: true,

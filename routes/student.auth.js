@@ -10,6 +10,8 @@ import {
   setNewPassword,
 } from "../controllers/student.auth.js";
 import Student from "../models/student.js";
+import Agency from "../models/agency.js";
+import mongoose from "mongoose";
 const router = express.Router();
 
 //For authentication
@@ -34,19 +36,6 @@ router.get("/profile", protect, async (req, res) => {
     return res.json({
       profile: student,
       tokenUser: { userId: user_id, email: req.user.email },
-    });
-  } catch (e) {
-    console.log(e);
-    return res.status(500).json({ message: "Server error" });
-  }
-});
-// All
-router.get("/", protect, async (req, res) => {
-  try {
-    const students = await Student.find().select("-password").lean();
-    return res.json({
-      count: students.length,
-      students,
     });
   } catch (e) {
     console.log(e);
@@ -82,16 +71,43 @@ router.patch("/profile", protect, async (req, res) => {
   }
 });
 
-//Deleting for particular user for the(only for admin)
-router.delete("/:id", protect, async (req, res) => {
-  const student = await Student.findByIdAndUpdate(
-    req.params.id,
-    { isActive: false },
-    { new: true }
-  );
-  
-  res.json({ message: "Student deactivated" });
+// When student select a particular agency
+router.post("/select-agency", protect, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const { agencyId } = req.body;
+    //Check agency id
+    if (!agencyId) {
+      return res.status(400).json({ message: "agencyId is required" });
+    }
+    // Validity of the agency id
+    if (!mongoose.Types.ObjectId.isValid(agencyId)) {
+      return res.status(400).json({ message: "Enter the valid agency id" });
+    }
+    const agency = Agency.findById(agencyId);
+    // check if the agency exist
+    if (!agency) {
+      res.status(404).json({ message: "No agency found" });
+    }
+    // Updating the agency to the student
+    const updatedStudent = await Student.findByIdAndUpdate(userId, {
+      selectedAgency: agencyId,
+    }).populate("selectedAgency", "name");
+    if (!updatedStudent) {
+      return res.status(404).json({ message: "Student does not exist" });
+    }
+    return res.status(200).json({
+      message: "Agency successfully selected",
+      student: {
+        id: updatedStudent._id,
+        name: updatedStudent.name,
+        agency: updatedStudent.selectedAgency,
+      },
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
 });
-
 
 export default router;

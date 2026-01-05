@@ -16,6 +16,10 @@ const StudentSchema = new Schema(
       type: Types.ObjectId,
       ref: "Agency",
     },
+    selectedCourse:{
+      type: Types.ObjectId,
+      ref: 'Course'
+    },
     phone: {
       type: String,
       trim: true,

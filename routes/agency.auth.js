@@ -209,4 +209,5 @@ router.post(
   }
 );
 
+// Getting the courses from the particular university
 export default router;

@@ -208,6 +208,19 @@ router.post(
     }
   }
 );
+//All agency
+router.get("/", protect, async (req, res) => {
+  try {
+    const agency = await Agency.find().select("-password").lean();
+    return res.json({
+      count: agency.length,
+      agency,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
 // Getting the courses from the particular university
 export default router;

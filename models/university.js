@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 
 const universitySchema = new Schema(
   {
@@ -25,6 +25,13 @@ const universitySchema = new Schema(
       enum: ["Active", "Inactive"],
       default: "Active",
     },
+    courses: [
+      {
+        type: Types.ObjectId,
+        ref: "Course",
+      },
+    ],
+    
   },
   {
     timestamps: true,

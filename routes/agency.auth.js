@@ -11,6 +11,8 @@ import {
 } from "../controllers/agency.auth.js";
 import Agency from "../models/agency.js";
 import University from "../models/university.js";
+import mongoose from "mongoose";
+import Course from "../models/course.js";
 
 // Router import
 const router = express.Router();
@@ -50,7 +52,7 @@ router.patch("/profile", protect, async (req, res) => {
     // forbidden fields to be updated
     const forbidden = ["_id", "password"];
     forbidden.forEach((field) => delete update[field]);
-    //Find by id and updateeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnb29nbGVJZCI6IjExMjM2NzE5NDE5MDUxOTczNTAyNCIsImlkIjoiNjk1N2YwOTM1NTgyNTdmNWZkZjljMGY5IiwiaWF0IjoxNzY3NDMwNjc2fQ.Gaph65C38IBZ0MIJIr5MP_DvqFS5WcZmK4NZaJFpeds
+    //Find by id and update
     const updatedAgency = await Agency.findByIdAndUpdate(userId, update, {
       new: true,
       runValidators: true,
@@ -71,13 +73,14 @@ router.patch("/profile", protect, async (req, res) => {
 });
 
 // Creating a university
-router.post("/university", protect, async (req, res) => {
+router.post("/universities", protect, async (req, res) => {
   try {
     const userId = req.user.sub;
     const { name, logo, websiteURL, country, about, mission, status } =
       req.body;
     const university = await University.create({
       name,
+      userId,
       logo,
       websiteURL,
       country,
@@ -106,5 +109,104 @@ router.post("/university", protect, async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 });
+// Getting the particular universities from the agency
+router.get("/universities", protect, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    // No token stored
+    if (!userId) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    const agency = await Agency.findById(userId).populate({
+      path: "partnerUniversities",
+      select: "name country status about mission websiteURL logo",
+    });
+    // Agency not found
+    if (!agency) {
+      return res.status(404).json({ message: "Agency not found" });
+    }
+
+    return res.status(200).json({
+      count: agency.partnerUniversities.length,
+      universities: agency.partnerUniversities,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+//Creating a particular courses for the specific university
+router.post(
+  "/universities/:universityId/courses",
+  protect,
+  async (req, res) => {
+    try {
+      const { universityId } = req.params;
+      const userId = req.user.sub;
+      const {
+        title,
+        level,
+        about,
+        duration,
+        tuitionFee,
+        description,
+        entryRequirements,
+        status,
+        intakes,
+      } = req.body;
+      //Checking the validity of the university id
+      if (!mongoose.Types.ObjectId.isValid(universityId)) {
+        return res
+          .status(400)
+          .json({ message: "Invalid University id format" });
+      }
+      // Checking if the university exist
+      const university = await University.findOne({
+        _id: universityId,
+      });
+      if (!university) {
+        return res.status(404).json({ message: "University not found" });
+      }
+
+      // Checking if the university is connected to the particular agency
+      const agency = await Agency.findOne({
+        _id: userId,
+        partnerUniversities: universityId,
+      });
+      if (!agency) {
+        return res.status(404).json({
+          message: "Particular university is not connect to the agency",
+        });
+      }
+
+      // Creating a course
+      const course = await Course.create({
+        title,
+        level,
+        about,
+        duration,
+        tuitionFee,
+        description,
+        entryRequirements,
+        status,
+        intakes,
+      });
+      //adding the course id to the university
+      await University.findByIdAndUpdate(universityId, {
+        $addToSet: { courses: course._id },
+      });
+
+      return res
+        .status(200)
+        .json({ message: "Course created successfully", course: course });
+    } catch (e) {
+      console.log(e);
+      return res.status(500).json({ message: "server error" });
+    }
+  }
+);
 
 export default router;

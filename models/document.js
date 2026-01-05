@@ -15,19 +15,16 @@ const documentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    name: {
-      type: String,
-      required: true,
-    },
-    fileUrl: {
-      type: String,
-      required: true,
-    },
-    fileSize: {
-      type: Number,
-    },
-    fileType: {
-      type: String,
+    
+    filename: String,
+    fileType: String,
+    fileSize: Number,
+    fileKey: String,
+    fileURL: String,
+
+    uploadedAt: {
+    type: Date,
+    default: Date.now
     },
     status: {
       type: String,

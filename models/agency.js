@@ -55,7 +55,7 @@ const agencySchema = new Schema(
       default: [],
     },
 
-    contactInfo: {
+    phone: {
       type: String,
       trim: true,
     },

@@ -14,7 +14,7 @@ const MAX_RESENDS = 5; // max 5 resends per OTP window
 export const sendOtp = async (req, res) => {
   try {
     // Request body
-    const { name, contactInfo, organizationName, email, password } = req.body;
+    const { name, phone, organizationName, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res
@@ -49,7 +49,7 @@ export const sendOtp = async (req, res) => {
     await PendingSignup.create({
       email: normalizedEmail,
       name,
-      contactInfo,
+      phone,
       organizationName,
       passwordHash,
       otpHash,
@@ -169,7 +169,7 @@ export const verifyOtp = async (req, res) => {
     const user = await Agency.create({
       name: pending.name,
       email: pending.email,
-      contactInfo: pending.contactInfo,
+      phone: pending.phone,
       organizationName:pending.organizationName,
       password: pending.passwordHash,
       isVerified: true,

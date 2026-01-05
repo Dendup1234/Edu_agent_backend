@@ -1,43 +1,41 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 
-const universitySchema = new mongoose.Schema(
+const universitySchema = new Schema(
   {
     name: {
       type: String,
-      required: true,
-      trim: true,
-      unique: true,
     },
     logo: {
       type: String,
-      trim: true,
     },
     websiteURL: {
       type: String,
-      trim: true
     },
     country: {
       type: String,
-      required: true,
-      trim: true,
     },
     about: {
       type: String,
-      trim: true,
     },
-    mission:{
-        type: String,
-        trim: true
+    mission: {
+      type: String,
     },
-    status:{
-        type: String,
-        enum:["Active","Inactive"],
-        default: "Active"
-    }
+    status: {
+      type: String,
+      enum: ["Active", "Inactive"],
+      default: "Active",
+    },
+    courses: [
+      {
+        type: Types.ObjectId,
+        ref: "Course",
+      },
+    ],
+    
   },
   {
-    timestamps: true, 
+    timestamps: true,
   }
 );
 
-export const University = mongoose.Schema('University',universitySchema);
+export default mongoose.model("University", universitySchema);

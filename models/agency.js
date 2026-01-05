@@ -1,25 +1,25 @@
-import mongoose,{Schema,Types} from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 
 const agencySchema = new Schema(
   {
     organizationName: {
-      type: String
+      type: String,
     },
 
     email: {
-      type: String
+      type: String,
     },
-    name:{
-      type: String
+    name: {
+      type: String,
     },
 
     password: {
       type: String,
-      minlength: 8
+      minlength: 8,
     },
 
     googleId: {
-      type: String
+      type: String,
     },
 
     isVerified: {
@@ -34,37 +34,40 @@ const agencySchema = new Schema(
 
     servicesOffered: {
       type: [String],
-      default: []
+      default: [],
+    },
+    establishment: {
+      type: String,
     },
 
     address: {
       type: String,
-      trim: true
+      trim: true,
     },
 
     about: {
       type: String,
-      trim: true
+      trim: true,
     },
 
     process: {
       type: [String],
-      default: []
+      default: [],
     },
 
     contactInfo: {
-        type: String,
-        trim: true
+      type: String,
+      trim: true,
     },
-    
+
     partnerUniversities: [
       {
         type: Types.ObjectId,
-        ref: "University"
-      }
-    ]
+        ref: "University",
+      },
+    ],
   },
-  { timestamps: true}
+  { timestamps: true }
 );
 
-export default mongoose.model('Agency', agencySchema);
+export default mongoose.model("Agency", agencySchema);

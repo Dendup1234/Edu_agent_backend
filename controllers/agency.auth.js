@@ -169,7 +169,7 @@ export const verifyOtp = async (req, res) => {
     const user = await Agency.create({
       name: pending.name,
       email: pending.email,
-      contactInfo: pending.phone,
+      contactInfo: pending.contactInfo,
       organizationName:pending.organizationName,
       password: pending.passwordHash,
       isVerified: true,

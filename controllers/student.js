@@ -1,9 +1,12 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import Student from "../models/student.js";
 import Agency from "../models/agency.js";
+import Lead from "../models/lead.js"
 import { sendOtpEmail } from "../utils/sendEmail.js";
 import { signToken, verifyToken } from "../utils/jwt.js";
 import PendingSignup from "../models/pendingSignup.js";
+import mongoose from "mongoose";
 
 // Variables for the resend otp
 const OTP_EXP_MIN = 5; // expires in 5 mins
@@ -14,7 +17,7 @@ const MAX_RESENDS = 5; // max 5 resends per OTP window
 export const sendOtp = async (req, res) => {
   try {
     // Request body
-    const { name, phone, organizationName, email, password } = req.body;
+    const { name, phone, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res
@@ -25,14 +28,14 @@ export const sendOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // If already registered, stop
-    const existingUser = await Agency.findOne({ email: normalizedEmail });
+    const existingUser = await Student.findOne({ email: normalizedEmail });
     if (existingUser)
       return res.status(409).json({ message: "Email already registered" });
 
     // If already pending, treat as resend (force them to use resend endpoint)
-    const pending = await PendingSignup.findOne({ 
-        email: normalizedEmail,
-         type: "register",
+    const pending = await PendingSignup.findOne({
+      email: normalizedEmail,
+      type: "register",
     });
     if (pending) {
       return res.status(409).json({
@@ -50,10 +53,9 @@ export const sendOtp = async (req, res) => {
       email: normalizedEmail,
       name,
       phone,
-      organizationName,
       passwordHash,
       otpHash,
-      type:"register",
+      type: "register",
       expiresAt: new Date(Date.now() + OTP_EXP_MIN * 60 * 1000), // pandingsignup otp get expired at 5 mins
       lastSentAt: new Date(),
       resendCount: 0,
@@ -81,7 +83,7 @@ export const resendOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // If already registered, stop
-    const existingUser = await Agency.findOne({ email: normalizedEmail });
+    const existingUser = await Student.findOne({ email: normalizedEmail });
     if (existingUser)
       return res.status(409).json({ message: "Email already registered" });
 
@@ -142,7 +144,7 @@ export const verifyOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // already registered?
-    const existing = await Agency.findOne({ email: normalizedEmail });
+    const existing = await Student.findOne({ email: normalizedEmail });
     if (existing)
       return res.status(409).json({ message: "Email already registered" });
 
@@ -166,11 +168,10 @@ export const verifyOtp = async (req, res) => {
     if (!valid) return res.status(400).json({ message: "Invalid OTP" });
 
     // create user from pending data
-    const user = await Agency.create({
+    const user = await Student.create({
       name: pending.name,
       email: pending.email,
       phone: pending.phone,
-      organizationName:pending.organizationName,
       password: pending.passwordHash,
       isVerified: true,
     });
@@ -186,7 +187,12 @@ export const verifyOtp = async (req, res) => {
 
     return res.status(201).json({
       message: "Registered successfully",
-      user: { id: user._id, name: user.name, email: user.email,phone: user.phone },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      },
       accessToken: token,
     });
   } catch (err) {
@@ -207,7 +213,7 @@ export const login = async (req, res) => {
   }
 
   // password is select:false so we must explicitly select it
-  const user = await Agency.findOne({ email }).select("+password");
+  const user = await Student.findOne({ email }).select("+password");
   if (!user) {
     return res.status(401).json({ message: "Invalid email or password" });
   }
@@ -224,7 +230,12 @@ export const login = async (req, res) => {
 
   return res.json({
     message: "Logged in successfully",
-    user: { id: user._id, name: user.name, email: user.email,phone: user.phone },
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+    },
     accessToken: token,
   });
 };
@@ -239,7 +250,7 @@ export const sendPasswordResetOtp = async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    const user = await Agency.findOne({ email: normalizedEmail });
+    const user = await Student.findOne({ email: normalizedEmail });
     if (!user)
       return res.status(200).json({ message: "If email exists, OTP sent" }); // prevent enumeration
 
@@ -356,7 +367,7 @@ export const setNewPassword = async (req, res) => {
     }
 
     const email = decoded.sub;
-    const user = await Agency.findOne({ email });
+    const user = await Student.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
 
     // hash new password
@@ -369,3 +380,97 @@ export const setNewPassword = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// Getting profile of the student
+export const getProfile = async (req, res) => {
+  try {
+    const user_id = req.user.sub;
+    //Hides password and return plain json format
+    const student = await Student.findById(user_id).select("-password").lean();
+    if (!student) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.json({
+      profile: student,
+      tokenUser: { userId: user_id, email: req.user.email },
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+//Updating a profile
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const update = req.body;
+    // forbidden fields to be updated
+    const forbidden = ["_id", "password"];
+    forbidden.forEach((field) => delete update[field]);
+    //Find by id and update
+    const updatedStudent = await Student.findByIdAndUpdate(userId, update, {
+      new: true,
+      runValidators: true,
+    })
+      .select("-password")
+      .lean();
+
+    if (!updatedStudent) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({
+      message: "Profile updated",
+      profile: updatedStudent,
+    });
+  } catch (e) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+//When student selects particular agency
+export const selectAgency = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const { agencyId } = req.body;
+    //Check agency id
+    if (!agencyId) {
+      return res.status(400).json({ message: "agencyId is required" });
+    }
+    // Validity of the agency id
+    if (!mongoose.Types.ObjectId.isValid(agencyId)) {
+      return res.status(400).json({ message: "Enter the valid agency id" });
+    }
+    const agency = Agency.findById(agencyId);
+    // check if the agency exist
+    if (!agency) {
+      res.status(404).json({ message: "No agency found" });
+    }
+    // Updating the agency to the student
+    const updatedStudent = await Student.findByIdAndUpdate(userId, {
+      selectedAgency: agencyId,
+    }).populate("selectedAgency", "name");
+    if (!updatedStudent) {
+      return res.status(404).json({ message: "Student does not exist" });
+    }
+    //Creating a new lead between the student and the agency
+    const lead = await Lead.create({
+      student: userId,
+      agency: agencyId,
+    });
+    return res.status(200).json({
+      message: "New lead successfully created",
+      student: {
+        id: updatedStudent._id,
+        name: updatedStudent.name,
+        agency: updatedStudent.selectedAgency,
+      },
+      lead: lead,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+

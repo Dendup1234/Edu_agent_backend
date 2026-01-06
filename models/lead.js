@@ -1,17 +1,17 @@
-import mongoose from "mongoose";
+import mongoose, {Schema,Types} from "mongoose";
 
 const LeadSchema = new Schema(
   {
     student: {
       type: Types.ObjectId,
       ref: "Student",
-      required: true
+      required: true,
     },
 
     agency: {
       type: Types.ObjectId,
       ref: "Agency",
-      required: true
+      required: true,
     },
 
     status: {
@@ -25,15 +25,15 @@ const LeadSchema = new Schema(
         "converted",
         "lost",
       ],
-      default: "new"
+      default: "new",
     },
 
     assignedTo: {
       type: Types.ObjectId,
-      ref: "agent"
-    }
+      ref: "Agent",
+    },
   },
   { timestamps: true }
 );
 
-export const Lead = mongoose.model("Lead", LeadSchema);
+export default mongoose.model("Lead", LeadSchema);

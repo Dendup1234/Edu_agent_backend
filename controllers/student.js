@@ -447,9 +447,9 @@ export const selectAgency = async (req, res) => {
       res.status(404).json({ message: "No agency found" });
     }
     // Updating the agency to the student
-    const updatedStudent = await Student.findByIdAndUpdate(userId, {
-      selectedAgency: agencyId,
-    }).populate("selectedAgency", "name");
+    const updatedStudent = await Lead.findByIdAndUpdate(userId, {
+      agency: agencyId,
+    }).populate("agency");
     if (!updatedStudent) {
       return res.status(404).json({ message: "Student does not exist" });
     }

@@ -5,6 +5,7 @@ const StudentSchema = new Schema(
     email: {
       type: String,
     },
+    
     ticket: [
       {
         type: Types.ObjectId,

@@ -36,6 +36,7 @@ const agencySchema = new Schema(
       type: [String],
       default: [],
     },
+    
     establishment: {
       type: String,
     },

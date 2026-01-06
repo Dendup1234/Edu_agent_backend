@@ -12,10 +12,8 @@ import {
   updateProfile,
   selectAgency
 } from "../controllers/student.js";
-import Student from "../models/student.js";
-import Agency from "../models/agency.js";
-import Lead from "../models/lead.js";
-import mongoose from "mongoose";
+import { generateSAS, confirmUpload } from "../controllers/Application.js";
+
 const router = express.Router();
 
 //For authentication
@@ -26,12 +24,19 @@ router.post("/login", login);
 router.post("/password-reset/send-otp", sendPasswordResetOtp);
 router.post("/password-reset/verify-otp", verifyPasswordResetOtp);
 router.post("/password-reset/set-new", setNewPassword);
+
 //Profile section
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
+
 // When student select a particular agency
-router.post("/select-agency", protect,selectAgency);
+router.post("/select-agency", protect, selectAgency);
 
 //selecting a particular course
+
+
+//Profile upload
+router.post("/uploads/sas", protect, generateSAS);
+router.post("/uploads/confirm", protect, confirmUpload);
 
 export default router;

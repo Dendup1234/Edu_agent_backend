@@ -46,7 +46,7 @@ export const generateSAS = async (req, res) => {
     const sasToken = generateBlobSASQueryParameters(
       {
         containerName,
-        fileName,
+        blobName: fileName,
         permissions: BlobSASPermissions.parse("cw"),
         startsOn,
         expiresOn,

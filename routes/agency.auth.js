@@ -109,7 +109,7 @@ router.post("/universities", protect, async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 });
-// Getting the particular universities from the agency
+// Getting the all partnered universities from the agency
 router.get("/universities", protect, async (req, res) => {
   try {
     const userId = req.user.sub;
@@ -138,7 +138,7 @@ router.get("/universities", protect, async (req, res) => {
   }
 });
 
-//Creating a particular courses for the specific university
+//Creating a courses for the specific university
 router.post(
   "/universities/:universityId/courses",
   protect,

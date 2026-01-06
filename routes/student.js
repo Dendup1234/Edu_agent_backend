@@ -8,11 +8,12 @@ import {
   sendPasswordResetOtp,
   verifyPasswordResetOtp,
   setNewPassword,
+} from "../controllers/student/student.auth.js";
+import {
   getProfile,
   updateProfile,
-  selectAgency
-} from "../controllers/student.js";
-import { generateSAS, confirmUpload } from "../controllers/Application.js";
+  selectAgency,
+} from "../controllers/student/student.profile.js";
 
 const router = express.Router();
 
@@ -32,11 +33,8 @@ router.patch("/profile", protect, updateProfile);
 // When student select a particular agency
 router.post("/select-agency", protect, selectAgency);
 
-//selecting a particular course
+//Course
 
-
-//Profile upload
-router.post("/uploads/sas", protect, generateSAS);
-router.post("/uploads/confirm", protect, confirmUpload);
+//router.post("/select-course",protect,)
 
 export default router;

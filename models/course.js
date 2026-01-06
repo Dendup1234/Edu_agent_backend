@@ -19,13 +19,16 @@ const CourseSchema = new mongoose.Schema(
     tuitionFee: {
       totalfee: {
         type: String,
+		deafult:""
       },
       currency: {
         type: String,
+		default:""
       },
     },
     description: {
       type: String,
+	  deafult: "",
     },
     entryRequirements: {
       type: [String],
@@ -39,6 +42,7 @@ const CourseSchema = new mongoose.Schema(
     intakes: {
       type: Number,
       min: 0,
+	  default: 0
     },
   },
   { timestamps: true }

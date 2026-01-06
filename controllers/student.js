@@ -454,9 +454,9 @@ export const selectAgency = async (req, res) => {
     return res.status(200).json({
       message: "New lead successfully created",
       student: {
-        id: updatedStudent._id,
-        name: updatedStudent.name,
-        agency: updatedStudent.selectedAgency,
+        id: user._id,
+        name: user.name,
+        agency: user.selectedAgency,
       },
       lead: lead,
     });

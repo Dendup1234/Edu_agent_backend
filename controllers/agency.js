@@ -1,9 +1,12 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import Student from "../models/student.js";
+import Agency from "../models/agency.js";
 import { sendOtpEmail } from "../utils/sendEmail.js";
 import { signToken, verifyToken } from "../utils/jwt.js";
 import PendingSignup from "../models/pendingSignup.js";
+import University from "../models/university.js";
+import mongoose from "mongoose";
+import Course from "../models/course.js";
 
 // Variables for the resend otp
 const OTP_EXP_MIN = 5; // expires in 5 mins
@@ -14,7 +17,7 @@ const MAX_RESENDS = 5; // max 5 resends per OTP window
 export const sendOtp = async (req, res) => {
   try {
     // Request body
-    const { name, phone, email, password } = req.body;
+    const { name, phone, organizationName, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res
@@ -25,14 +28,14 @@ export const sendOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // If already registered, stop
-    const existingUser = await Student.findOne({ email: normalizedEmail });
+    const existingUser = await Agency.findOne({ email: normalizedEmail });
     if (existingUser)
       return res.status(409).json({ message: "Email already registered" });
 
     // If already pending, treat as resend (force them to use resend endpoint)
-    const pending = await PendingSignup.findOne({ 
-        email: normalizedEmail,
-         type: "register",
+    const pending = await PendingSignup.findOne({
+      email: normalizedEmail,
+      type: "register",
     });
     if (pending) {
       return res.status(409).json({
@@ -50,9 +53,10 @@ export const sendOtp = async (req, res) => {
       email: normalizedEmail,
       name,
       phone,
+      organizationName,
       passwordHash,
       otpHash,
-      type:"register",
+      type: "register",
       expiresAt: new Date(Date.now() + OTP_EXP_MIN * 60 * 1000), // pandingsignup otp get expired at 5 mins
       lastSentAt: new Date(),
       resendCount: 0,
@@ -80,7 +84,7 @@ export const resendOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // If already registered, stop
-    const existingUser = await Student.findOne({ email: normalizedEmail });
+    const existingUser = await Agency.findOne({ email: normalizedEmail });
     if (existingUser)
       return res.status(409).json({ message: "Email already registered" });
 
@@ -141,7 +145,7 @@ export const verifyOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // already registered?
-    const existing = await Student.findOne({ email: normalizedEmail });
+    const existing = await Agency.findOne({ email: normalizedEmail });
     if (existing)
       return res.status(409).json({ message: "Email already registered" });
 
@@ -165,10 +169,11 @@ export const verifyOtp = async (req, res) => {
     if (!valid) return res.status(400).json({ message: "Invalid OTP" });
 
     // create user from pending data
-    const user = await Student.create({
+    const user = await Agency.create({
       name: pending.name,
       email: pending.email,
       phone: pending.phone,
+      organizationName: pending.organizationName,
       password: pending.passwordHash,
       isVerified: true,
     });
@@ -179,12 +184,17 @@ export const verifyOtp = async (req, res) => {
     // token
     const token = await signToken({
       sub: user._id.toString(),
-      email: user.email
+      email: user.email,
     });
 
     return res.status(201).json({
       message: "Registered successfully",
-      user: { id: user._id, name: user.name, email: user.email,phone: user.phone },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      },
       accessToken: token,
     });
   } catch (err) {
@@ -205,7 +215,7 @@ export const login = async (req, res) => {
   }
 
   // password is select:false so we must explicitly select it
-  const user = await Student.findOne({ email }).select("+password");
+  const user = await Agency.findOne({ email }).select("+password");
   if (!user) {
     return res.status(401).json({ message: "Invalid email or password" });
   }
@@ -222,7 +232,12 @@ export const login = async (req, res) => {
 
   return res.json({
     message: "Logged in successfully",
-    user: { id: user._id, name: user.name, email: user.email,phone: user.phone },
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+    },
     accessToken: token,
   });
 };
@@ -237,7 +252,7 @@ export const sendPasswordResetOtp = async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    const user = await Student.findOne({ email: normalizedEmail });
+    const user = await Agency.findOne({ email: normalizedEmail });
     if (!user)
       return res.status(200).json({ message: "If email exists, OTP sent" }); // prevent enumeration
 
@@ -354,7 +369,7 @@ export const setNewPassword = async (req, res) => {
     }
 
     const email = decoded.sub;
-    const user = await Student.findOne({ email });
+    const user = await Agency.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
 
     // hash new password
@@ -365,5 +380,221 @@ export const setNewPassword = async (req, res) => {
   } catch (error) {
     console.error("SET NEW PASSWORD ERROR:", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Getting profile
+export const getProfile = async (req, res) => {
+  try {
+    const user_id = req.user.sub;
+    //Hides password and return plain json format
+    const agency = await Agency.findById(user_id).select("-password").lean();
+    if (!agency) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.json({
+      profile: agency,
+      tokenUser: { userId: user_id, email: req.user.email },
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+//Updating a profile
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const update = req.body;
+    // forbidden fields to be updated
+    const forbidden = ["_id", "password"];
+    forbidden.forEach((field) => delete update[field]);
+    //Find by id and update
+    const updatedAgency = await Agency.findByIdAndUpdate(userId, update, {
+      new: true,
+      runValidators: true,
+    })
+      .select("-password")
+      .lean();
+
+    if (!updatedAgency) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({
+      message: "Profile updated",
+      profile: updatedAgency,
+    });
+  } catch (e) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Creating university
+export const createUni = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const { name, logo, websiteURL, country, about, mission, status } =
+      req.body;
+    const university = await University.create({
+      name,
+      userId,
+      logo,
+      websiteURL,
+      country,
+      about,
+      mission,
+      status,
+    });
+    //Referencing the agency to the university
+    const agency = await Agency.findByIdAndUpdate(userId, {
+      $addToSet: { partnerUniversities: university._id },
+    });
+    if (!agency) {
+      return res.status(404).json({ message: "Unauthorized" });
+    }
+
+    return res.status(201).json({
+      message: "University created successfully",
+      university: university,
+      agency: {
+        agency_id: agency._id,
+        partnerUniversities: agency.partnerUniversities,
+      },
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Getting the university
+export const getUni = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    // No token stored
+    if (!userId) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    const agency = await Agency.findById(userId).populate({
+      path: "partnerUniversities",
+      select: "name country status about mission websiteURL logo",
+    });
+    // Agency not found
+    if (!agency) {
+      return res.status(404).json({ message: "Agency not found" });
+    }
+
+    return res.status(200).json({
+      count: agency.partnerUniversities.length,
+      universities: agency.partnerUniversities,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+//Creating a particular courses for the specific university
+export const createCourse = async (req, res) => {
+  try {
+    const { universityId } = req.params;
+    const userId = req.user.sub;
+    const {
+      title,
+      level,
+      about,
+      duration,
+      tuitionFee,
+      description,
+      entryRequirements,
+      status,
+      intakes,
+    } = req.body;
+    //Checking the validity of the university id
+    if (!mongoose.Types.ObjectId.isValid(universityId)) {
+      return res.status(400).json({ message: "Invalid University id format" });
+    }
+    // Checking if the university exist
+    const university = await University.findOne({
+      _id: universityId,
+    });
+    if (!university) {
+      return res.status(404).json({ message: "University not found" });
+    }
+
+    // Checking if the university is connected to the particular agency
+    const agency = await Agency.findOne({
+      _id: userId,
+      partnerUniversities: universityId,
+    });
+    if (!agency) {
+      return res.status(404).json({
+        message: "Particular university is not connect to the agency",
+      });
+    }
+
+    // Creating a course
+    const course = await Course.create({
+      title,
+      level,
+      about,
+      duration,
+      tuitionFee,
+      description,
+      entryRequirements,
+      status,
+      intakes,
+    });
+    //adding the course id to the university
+    await University.findByIdAndUpdate(universityId, {
+      $addToSet: { courses: course._id },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Course created successfully", course: course });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "server error" });
+  }
+};
+
+//Getting all the agency
+
+export const getAllAgency = async (req, res) => {
+  try {
+    const agency = await Agency.find().select("-password").lean();
+    return res.json({
+      count: agency.length,
+      agency,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Getting agency by their id
+export const getAgencybyId = async (req, res) => {
+  try {
+    const { agencyId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(agencyId)) {
+      return res.status(400).json({ message: "Invalid agency id" });
+    }
+    // Getting the agency by their particular id
+    const agency = await Agency.findById(agencyId).select(
+      "-password -googleId"
+    ); // hide sensitive fields
+
+    if (!agency) {
+      return res.status(404).json({ message: "Agency not found" });
+    }
+
+    return res.status(200).json({ message: "Successful", agency: agency });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
   }
 };

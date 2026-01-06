@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
 dotenv.config();
-import Application from "../models/Application.js";
-import Document from "../models/Document.js";
+import Application from "../models/agency.js";
+import Document from "../models/document.js";
 
 import {
   StorageSharedKeyCredential,

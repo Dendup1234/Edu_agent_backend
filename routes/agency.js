@@ -17,6 +17,8 @@ import {
   getAgencybyId,
 } from "../controllers/agency.js";
 
+import { generateSAS } from "../controllers/Application.js";
+
 // Router import
 const router = express.Router();
 //Auth apis
@@ -38,5 +40,8 @@ router.get("/universities", protect, getUni);
 router.post("/universities/:universityId/courses", protect, createCourse);
 //All agency
 router.get("/", protect, getAllAgency);
+
+//Profile upload
+router.post("/uploads/sas", generateSAS);
 
 export default router;

@@ -1,8 +1,6 @@
 import dotenv from "dotenv";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 dotenv.config();
-import Application from "../models/agency.js";
-import Document from "../models/document.js";
 import Agency from "../models/agency.js";
 
 import {
@@ -27,7 +25,7 @@ const containerClient = blobServiceClient.getContainerClient(containerName);
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "application/pdf"];
 const MAX_SIZE = 50 * 1024 * 1024; 
 
-app.post("/uploads/sas", async (req, res) => {
+export const generateSAS = async (req, res) => {
   try {
     const { fileName } = req.body;
 
@@ -48,11 +46,11 @@ app.post("/uploads/sas", async (req, res) => {
     const sasToken = generateBlobSASQueryParameters(
       {
         containerName,
-        blobName,
+        fileName,
         permissions: BlobSASPermissions.parse("cw"),
         startsOn,
         expiresOn,
-        contentType: mimeType
+        // contentType: mimeType
       },
       blobServiceClient.credential
     ).toString();
@@ -67,9 +65,9 @@ app.post("/uploads/sas", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "SAS generation failed" });
   }
-});
+};
 
-app.post("/uploads/confirm", async (req, res) => {
+export const confirmUpload = async (req, res) => {
   try {
     const { blobName, originalName, applicationId, leadId, universityId, courseId, agencyId } = req.body;
 
@@ -142,4 +140,4 @@ app.post("/uploads/confirm", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Confirmation failed" });
   }
-});
+};

@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { sendOtpEmail } from "../../utils/sendEmail.js";
 import { signToken, verifyToken } from "../../utils/jwt.js";
 import PendingSignup from "../../models/pendingSignup.js";
+import Agency from "../../models/agency.js";
 // Variables for the resend otp
 const OTP_EXP_MIN = 5; // expires in 5 mins
 const RESEND_COOLDOWN_SEC = 60; // wait 60 sec between resends

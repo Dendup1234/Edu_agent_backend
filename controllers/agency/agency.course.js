@@ -104,6 +104,10 @@ export const updateCourse = async (req, res) => {
 //Getting the course from particular uni
 export const getCourse = async (req, res) => {
   try {
+    const userId = req.user.sub;
+    if (!userId) {
+      return res.status(404).json({ message: "No token" });
+    }
     const { universityId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(universityId)) {
       return res.status(400).json({ message: "Invalid id" });
@@ -120,6 +124,30 @@ export const getCourse = async (req, res) => {
       message: "Successful",
       course: courses,
     });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+// Deactivating the course
+export const deactivateCourse = async (req, res) => {
+  try {
+    const { universityId, courseId } = req.params;
+    if (
+      !mongoose.Types.ObjectId.isValid(universityId) ||
+      !mongoose.Types.ObjectId.isValid(courseId)
+    ) {
+      return res.status(400).json({ message: "Invalid Id" });
+    }
+    const course = await Course.findByIdAndUpdate(courseId, {
+      status: "closed",
+    },{ new: true });
+    if (!course) {
+      return res.status(404).json({ message: "Course is not found" });
+    }
+    return res
+      .status(200)
+      .json({ message: "Course deactivated sucessfully", course: course });
   } catch (e) {
     console.log(e);
     return res.status(500).json({ message: "Server error" });

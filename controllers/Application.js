@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-// import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 dotenv.config();
 import Agency from "../models/agency.js";
 

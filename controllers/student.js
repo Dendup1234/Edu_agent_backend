@@ -446,26 +446,14 @@ export const selectAgency = async (req, res) => {
     if (!agency) {
       res.status(404).json({ message: "No agency found" });
     }
-    // Updating the agency to the student
-    const updatedStudent = await Student.findByIdAndUpdate(userId, {
-      selectedAgency: agencyId,
-    }).populate("selectedAgency", "name");
-    if (!updatedStudent) {
-      return res.status(404).json({ message: "Student does not exist" });
-    }
+    
     //Creating a new lead between the student and the agency
     const lead = await Lead.create({
       student: userId,
       agency: agencyId,
     });
     return res.status(200).json({
-      message: "New lead successfully created",
-      student: {
-        id: updatedStudent._id,
-        name: updatedStudent.name,
-        agency: updatedStudent.selectedAgency,
-      },
-      lead: lead,
+      message: "New lead successfully created"
     });
   } catch (e) {
     console.log(e);

@@ -15,8 +15,8 @@ const documentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    
-    filename: String,
+
+    fileName: String,
     fileType: String,
     fileSize: Number,
     fileKey: String,

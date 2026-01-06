@@ -25,9 +25,11 @@ router.post("/login", login);
 router.post("/password-reset/send-otp", sendPasswordResetOtp);
 router.post("/password-reset/verify-otp", verifyPasswordResetOtp);
 router.post("/password-reset/set-new", setNewPassword);
+
 //Profile section
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
+
 // When student select a particular agency
 router.post("/select-agency", protect, selectAgency);
 

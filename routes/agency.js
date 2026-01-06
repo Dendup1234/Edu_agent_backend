@@ -40,6 +40,7 @@ router.post("/login", login);
 router.post("/password-reset/send-otp", sendPasswordResetOtp);
 router.post("/password-reset/verify-otp", verifyPasswordResetOtp);
 router.post("/password-reset/set-new", setNewPassword);
+
 //profile apis
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
@@ -60,5 +61,9 @@ router.patch(
 
 //All agency
 router.get("/", protect, getAllAgency);
+
+//Profile upload
+router.post("/uploads/sas", protect, generateSAS);
+router.post("/uploads/confirm", protect, confirmUpload);
 
 export default router;

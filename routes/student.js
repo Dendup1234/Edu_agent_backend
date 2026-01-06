@@ -32,9 +32,6 @@ router.patch("/profile", protect, updateProfile);
 // When student select a particular agency
 router.post("/select-agency", protect, selectAgency);
 
-//selecting a particular course
-
-
 //Profile upload
 router.post("/uploads/sas", protect, generateSAS);
 router.post("/uploads/confirm", protect, confirmUpload);

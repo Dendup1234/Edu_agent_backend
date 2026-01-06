@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
 dotenv.config();
 import Agency from "../models/agency.js";
+import Student from "../models/student.js";
 
 import {
   StorageSharedKeyCredential,
@@ -69,7 +70,7 @@ export const generateSAS = async (req, res) => {
 
 export const confirmUpload = async (req, res) => {
   try {
-    const { blobName, agencyId } = req.body;
+    const { blobName, agencyId, studentId } = req.body;
 
     // Validate required info
     if (!blobName) {
@@ -88,9 +89,18 @@ export const confirmUpload = async (req, res) => {
       { logo: blobClient.url },
       { new: true }
     );
+
+    // Save profile url in student
+    const student = await Student.findByIdAndUpdate(
+      studentId,
+      { profilePicture: blobClient.url },
+      { new: true }
+    );
+
     res.json({
       message: "Upload confuirmed"
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Confirmation failed" });

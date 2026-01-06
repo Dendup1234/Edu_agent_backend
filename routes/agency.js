@@ -8,16 +8,27 @@ import {
   sendPasswordResetOtp,
   verifyPasswordResetOtp,
   setNewPassword,
+} from "../controllers/agency/agency.auth.js";
+
+import {
+  createCourse,
+  getCourse,
+  updateCourse,
+} from "../controllers/agency/agency.course.js";
+
+import {
   getProfile,
   updateProfile,
+  getAgencybyId,
+  getAllAgency,
+} from "../controllers/agency/agency.profile.js";
+
+import {
   createUni,
   getUni,
-  createCourse,
-  getAllAgency,
-  getAgencybyId,
-} from "../controllers/agency.js";
-
-import { generateSAS, confirmUpload } from "../controllers/Application.js";
+  updateUni,
+  deactivateUni,
+} from "../controllers/agency/agency.uni.js";
 
 // Router import
 const router = express.Router();
@@ -33,14 +44,20 @@ router.post("/password-reset/set-new", setNewPassword);
 //profile apis
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
-router.get("/profile/:agencyId",protect, getAgencybyId);
-
+router.get("/profile/:agencyId", protect, getAgencybyId);
 // university apis
 router.post("/universities", protect, createUni);
 router.get("/universities", protect, getUni);
-
+router.patch("/universities/:universityId", protect, updateUni);
+router.delete("/universities/:universityId", deactivateUni);
 //Courses apis
 router.post("/universities/:universityId/courses", protect, createCourse);
+router.get("/universities/:universityId/courses", protect, getCourse);
+router.patch(
+  "/universities/:universityId/courses/:courseId",
+  protect,
+  updateCourse
+);
 
 //All agency
 router.get("/", protect, getAllAgency);

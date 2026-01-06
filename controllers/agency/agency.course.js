@@ -1,0 +1,127 @@
+import Agency from "../../models/agency.js";
+import University from "../../models/university.js";
+import mongoose from "mongoose";
+import Course from "../../models/course.js";
+
+//Creating a particular courses for the specific university
+export const createCourse = async (req, res) => {
+  try {
+    const { universityId } = req.params;
+    const userId = req.user.sub;
+    const {
+      title,
+      level,
+      about,
+      duration,
+      tuitionFee,
+      description,
+      entryRequirements,
+      status,
+      intakes,
+    } = req.body;
+    //Checking the validity of the university id
+    if (!mongoose.Types.ObjectId.isValid(universityId)) {
+      return res.status(400).json({ message: "Invalid University id format" });
+    }
+    // Checking if the university exist
+    const university = await University.findOne({
+      _id: universityId,
+    });
+    if (!university) {
+      return res.status(404).json({ message: "University not found" });
+    }
+
+    // Checking if the university is connected to the particular agency
+    const agency = await Agency.findOne({
+      _id: userId,
+      partnerUniversities: universityId,
+    });
+    if (!agency) {
+      return res.status(404).json({
+        message: "Particular university is not connect to the agency",
+      });
+    }
+
+    // Creating a course
+    const course = await Course.create({
+      title,
+      level,
+      about,
+      duration,
+      tuitionFee,
+      description,
+      entryRequirements,
+      status,
+      intakes,
+    });
+    //adding the course id to the university
+    await University.findByIdAndUpdate(universityId, {
+      $addToSet: { courses: course._id },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Course created successfully", course: course });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "server error" });
+  }
+};
+// updating the courses
+export const updateCourse = async (req, res) => {
+  try {
+    const { universityId, courseId } = req.params;
+    const userId = req.user.sub;
+    if (!userId) {
+      return res.status(404).json({ message: "No token" });
+    }
+    if (
+      !mongoose.Types.ObjectId.isValid(universityId) ||
+      !mongoose.Types.ObjectId.isValid(courseId)
+    ) {
+      return res.status(400).json({ message: "Invalid Id" });
+    }
+    const update = req.body;
+    //updating the course
+    const course = await Course.findByIdAndUpdate(courseId, update, {
+      new: true,
+      runValidators: true,
+    })
+      .select("-_id")
+      .lean();
+    if (!course) {
+      return res.status(404).json({ message: "course not found" });
+    }
+    return res.status(200).json({
+      message: "Course updated successfully",
+      course: course,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "server error" });
+  }
+};
+//Getting the course from particular uni
+export const getCourse = async (req, res) => {
+  try {
+    const { universityId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(universityId)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+    const courses = await University.findById(universityId).populate({
+      path: "courses",
+      select:
+        "title level about duration tutionfee description entryRequirements status intakes",
+    });
+    if (!courses) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+    return res.status(200).json({
+      message: "Successful",
+      course: courses,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};

@@ -8,11 +8,12 @@ import {
   sendPasswordResetOtp,
   verifyPasswordResetOtp,
   setNewPassword,
+} from "../controllers/student/student.auth.js";
+import {
   getProfile,
   updateProfile,
-  selectAgency
-} from "../controllers/student.js";
-import { generateSAS, confirmUpload } from "../controllers/Application.js";
+  selectAgency,
+} from "../controllers/student/student.profile.js";
 
 const router = express.Router();
 

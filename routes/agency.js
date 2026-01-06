@@ -17,7 +17,7 @@ import {
   getAgencybyId,
 } from "../controllers/agency.js";
 
-import { generateSAS } from "../controllers/Application.js";
+import { generateSAS, confirmUpload } from "../controllers/Application.js";
 
 // Router import
 const router = express.Router();
@@ -43,5 +43,6 @@ router.get("/", protect, getAllAgency);
 
 //Profile upload
 router.post("/uploads/sas", generateSAS);
+router.post("/uploads/confirm", confirmUpload);
 
 export default router;

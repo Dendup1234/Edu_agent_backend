@@ -8,10 +8,12 @@ import {
   sendPasswordResetOtp,
   verifyPasswordResetOtp,
   setNewPassword,
+} from "../controllers/student/student.auth.js";
+import {
   getProfile,
   updateProfile,
-  selectAgency
-} from "../controllers/student.js";
+  selectAgency,
+} from "../controllers/student/student.profile.js";
 
 const router = express.Router();
 
@@ -27,8 +29,10 @@ router.post("/password-reset/set-new", setNewPassword);
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
 // When student select a particular agency
-router.post("/select-agency", protect,selectAgency);
+router.post("/select-agency", protect, selectAgency);
 
-//selecting a particular course
+//Course
+
+//router.post("/select-course",protect,)
 
 export default router;

@@ -8,17 +8,27 @@ import {
   sendPasswordResetOtp,
   verifyPasswordResetOtp,
   setNewPassword,
+} from "../controllers/agency/agency.auth.js";
+
+import {
+  createCourse,
+  getCourse,
+  updateCourse,
+} from "../controllers/agency/agency.course.js";
+
+import {
   getProfile,
   updateProfile,
+  getAgencybyId,
+  getAllAgency,
+} from "../controllers/agency/agency.profile.js";
+
+import {
   createUni,
   getUni,
-  createCourse,
-  getAllAgency,
-  getAgencybyId,
-  getCourse,
   updateUni,
   deactivateUni,
-} from "../controllers/agency.js";
+} from "../controllers/agency/agency.uni.js";
 
 // Router import
 const router = express.Router();
@@ -42,6 +52,11 @@ router.delete("/universities/:universityId", deactivateUni);
 //Courses apis
 router.post("/universities/:universityId/courses", protect, createCourse);
 router.get("/universities/:universityId/courses", protect, getCourse);
+router.patch(
+  "/universities/:universityId/courses/:courseId",
+  protect,
+  updateCourse
+);
 
 //All agency
 router.get("/", protect, getAllAgency);

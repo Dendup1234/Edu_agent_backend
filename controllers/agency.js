@@ -496,6 +496,7 @@ export const getUni = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 //Creating a particular courses for the specific university
 export const createCourse = async (req, res) => {
   try {

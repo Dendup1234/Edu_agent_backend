@@ -12,10 +12,7 @@ import {
   updateProfile,
   selectAgency
 } from "../controllers/student.js";
-import Student from "../models/student.js";
-import Agency from "../models/agency.js";
-import Lead from "../models/lead.js";
-import mongoose from "mongoose";
+
 const router = express.Router();
 
 //For authentication

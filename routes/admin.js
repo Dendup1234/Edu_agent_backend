@@ -4,7 +4,7 @@ import {
   getAllAgencies,
   getAllStudents,
   deactivateStudent,
-} from "../controllers/admin.controller.js";
+} from "../controllers/admin.js";
 
 const router = express.Router();
 

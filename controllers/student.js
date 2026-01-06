@@ -446,19 +446,14 @@ export const selectAgency = async (req, res) => {
     if (!agency) {
       res.status(404).json({ message: "No agency found" });
     }
+    
     //Creating a new lead between the student and the agency
     const lead = await Lead.create({
       student: userId,
       agency: agencyId,
     });
     return res.status(200).json({
-      message: "New lead successfully created",
-      student: {
-        id: user._id,
-        name: user.name,
-        agency: user.selectedAgency,
-      },
-      lead: lead,
+      message: "New lead successfully created"
     });
   } catch (e) {
     console.log(e);

@@ -5,21 +5,19 @@ const StudentSchema = new Schema(
     email: {
       type: String,
     },
+    
     ticket: [
       {
         type: Types.ObjectId,
         ref: "Ticket",
       },
     ],
-    // Reference when student select a particular agency
-    selectedAgency: {
-      type: Types.ObjectId,
-      ref: "Agency",
+    
+    profilePicture: {
+      type: String,
+      trim: true,
     },
-    selectedCourse:{
-      type: Types.ObjectId,
-      ref: 'Course'
-    },
+
     phone: {
       type: String,
       trim: true,

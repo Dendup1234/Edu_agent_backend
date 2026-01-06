@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
 dotenv.config();
-import Application from "../models/agency.js";
-import Document from "../models/document.js";
+import Agency from "../models/agency.js";
+import Student from "../models/student.js";
 
 import {
   StorageSharedKeyCredential,
@@ -26,7 +26,7 @@ const containerClient = blobServiceClient.getContainerClient(containerName);
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "application/pdf"];
 const MAX_SIZE = 50 * 1024 * 1024; 
 
-app.post("/uploads/sas", async (req, res) => {
+export const generateSAS = async (req, res) => {
   try {
     const { mimeType, size } = req.body;
 
@@ -47,7 +47,7 @@ app.post("/uploads/sas", async (req, res) => {
     const sasToken = generateBlobSASQueryParameters(
       {
         containerName,
-        blobName,
+        blobName: blobName,
         permissions: BlobSASPermissions.parse("cw"),
         startsOn,
         expiresOn,
@@ -66,19 +66,15 @@ app.post("/uploads/sas", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "SAS generation failed" });
   }
-});
+};
 
-app.post("/uploads/confirm", async (req, res) => {
+export const confirmUpload = async (req, res) => {
   try {
-    const { blobName, originalName, applicationId, leadId, universityId, courseId } = req.body;
+    const { blobName, agencyId, studentId } = req.body;
 
     // Validate required info
-    if (!blobName || !originalName) {
+    if (!blobName) {
       return res.status(400).json({ error: "Missing blobName or originalName" });
-    }
-
-    if (!applicationId && (!leadId || !universityId)) {
-      return res.status(400).json({ error: "Missing leadId or universityId to create application" });
     }
 
     const blobClient = containerClient.getBlobClient(blobName);
@@ -87,50 +83,26 @@ app.post("/uploads/confirm", async (req, res) => {
       return res.status(400).json({ error: "Upload not found" });
     }
 
-    const props = await blobClient.getProperties();
+    // Save profile url in agency
+    const agency = await Agency.findByIdAndUpdate(
+      agencyId,
+      { logo: blobClient.url },
+      { new: true }
+    );
 
-    // Create the document
-    const document = await Document.create({
-      fileName: blobName,
-      fileType: props.contentType,
-      fileSize: props.contentLength,
-      fileURL: blobClient.url
-    });
+    // Save profile url in student
+    const student = await Student.findByIdAndUpdate(
+      studentId,
+      { profilePicture: blobClient.url },
+      { new: true }
+    );
 
-    let application;
-
-    if (applicationId) {
-      // Attach to existing application
-      application = await Application.findByIdAndUpdate(
-        applicationId,
-        { $push: { documents: document._id } },
-        { new: true }
-      );
-
-      if (!application) {
-        return res.status(404).json({ error: "Application not found" });
-      }
-    } else {
-      // Create new application and attach document
-      application = await Application.create({
-        lead: leadId,
-        university: universityId,
-        course: courseId || null,
-        documents: [document._id],
-        status: "draft"
-      });
-    }
-
-    // Respond with application info
     res.json({
-      success: true,
-      applicationId: application._id,
-      applicationStatus: application.status,
-      visaStatus: application.visaStatus,
-      documents: application.documents
+      message: "Upload confuirmed"
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Confirmation failed" });
   }
-});
+};

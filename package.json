@@ -13,6 +13,7 @@
 	"license": "ISC",
 	"type": "module",
 	"dependencies": {
+		"@azure/storage-blob": "^12.29.1",
 		"bcryptjs": "^3.0.3",
 		"cookie-parser": "^1.4.7",
 		"cors": "^2.8.5",
@@ -25,6 +26,7 @@
 		"mongodb": "^7.0.0",
 		"mongoose": "^9.0.2",
 		"nodemailer": "^7.0.12",
-		"nodemon": "^3.1.11"
+		"nodemon": "^3.1.11",
+		"uuid": "^13.0.0"
 	}
 }

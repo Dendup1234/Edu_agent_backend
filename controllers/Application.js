@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 dotenv.config();
 import Application from "../models/agency.js";
 import Document from "../models/document.js";
+import Agency from "../models/agency.js";
 
 import {
   StorageSharedKeyCredential,
@@ -28,18 +29,18 @@ const MAX_SIZE = 50 * 1024 * 1024;
 
 app.post("/uploads/sas", async (req, res) => {
   try {
-    const { mimeType, size } = req.body;
+    const { fileName } = req.body;
 
-    if (!ALLOWED_TYPES.includes(mimeType)) {
-      return res.status(400).json({ error: "Invalid file type" });
-    }
+    // if (!ALLOWED_TYPES.includes(mimeType)) {
+    //   return res.status(400).json({ error: "Invalid file type" });
+    // }
 
-    if (size > MAX_SIZE) {
-      return res.status(400).json({ error: "File too large" });
-    }
+    // if (size > MAX_SIZE) {
+    //   return res.status(400).json({ error: "File too large" });
+    // }
 
-    const ext = mimeType.split("/")[1] || "bin";
-    const blobName = `${uuidv4()}.${ext}`;
+    // const ext = mimeType.split("/")[1] || "bin";
+    // const blobName = `${uuidv4()}.${ext}`;
 
     const startsOn = new Date(Date.now() - 5 * 60 * 1000);
     const expiresOn = new Date(Date.now() + 15 * 60 * 1000);
@@ -56,11 +57,11 @@ app.post("/uploads/sas", async (req, res) => {
       blobServiceClient.credential
     ).toString();
 
-    const blobClient = containerClient.getBlockBlobClient(blobName);
+    const blobClient = containerClient.getBlockBlobClient(fileName);
 
     res.json({
       sasUrl: `${blobClient.url}?${sasToken}`,
-      blobName
+      // blobName
     });
   } catch (err) {
     console.error(err);
@@ -70,7 +71,7 @@ app.post("/uploads/sas", async (req, res) => {
 
 app.post("/uploads/confirm", async (req, res) => {
   try {
-    const { blobName, originalName, applicationId, leadId, universityId, courseId } = req.body;
+    const { blobName, originalName, applicationId, leadId, universityId, courseId, agencyId } = req.body;
 
     // Validate required info
     if (!blobName || !originalName) {
@@ -89,45 +90,53 @@ app.post("/uploads/confirm", async (req, res) => {
 
     const props = await blobClient.getProperties();
 
+    // Save profile url in agency
+    const agency = await Agency.findByIdAndUpdate(
+      agencyId,
+      { logo: blobClient.url },
+      { new: true }
+    );
+
     // Create the document
-    const document = await Document.create({
-      fileName: blobName,
-      fileType: props.contentType,
-      fileSize: props.contentLength,
-      fileURL: blobClient.url
-    });
+    // const document = await Document.create({
+    //   fileName: blobName,
+    //   fileType: props.contentType,
+    //   fileSize: props.contentLength,
+    //   fileURL: blobClient.url
+    // });
 
-    let application;
+    // let application;
 
-    if (applicationId) {
-      // Attach to existing application
-      application = await Application.findByIdAndUpdate(
-        applicationId,
-        { $push: { documents: document._id } },
-        { new: true }
-      );
+    // if (applicationId) {
+    //   // Attach to existing application
+    //   application = await Application.findByIdAndUpdate(
+    //     applicationId,
+    //     { $push: { documents: document._id } },
+    //     { new: true }
+    //   );
 
-      if (!application) {
-        return res.status(404).json({ error: "Application not found" });
-      }
-    } else {
-      // Create new application and attach document
-      application = await Application.create({
-        lead: leadId,
-        university: universityId,
-        course: courseId || null,
-        documents: [document._id],
-        status: "draft"
-      });
-    }
+    //   if (!application) {
+    //     return res.status(404).json({ error: "Application not found" });
+    //   }
+    // } else {
+    //   // Create new application and attach document
+    //   application = await Application.create({
+    //     lead: leadId,
+    //     university: universityId,
+    //     course: courseId || null,
+    //     documents: [document._id],
+    //     status: "draft"
+    //   });
+    // }
 
     // Respond with application info
     res.json({
+      message: "Upload",
       success: true,
-      applicationId: application._id,
-      applicationStatus: application.status,
-      visaStatus: application.visaStatus,
-      documents: application.documents
+      // applicationId: application._id,
+      // applicationStatus: application.status,
+      // visaStatus: application.visaStatus,
+      // documents: application.documents
     });
   } catch (err) {
     console.error(err);

@@ -1,7 +1,12 @@
-import mongoose, { Schema,Types } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 
 const StudentSchema = new Schema(
   {
+    name: {
+      type: String,
+      trim: true,
+    },
+
     email: {
       type: String,
     },
@@ -16,24 +21,50 @@ const StudentSchema = new Schema(
       select: false,
     },
 
+    googleId: {
+      type: String,
+    },
+
     emailVerified: {
       type: Boolean,
       default: false,
     },
 
-    googleId: {
-      type: String,
+    registeredAgency: {
+      type: Types.ObjectId,
+      ref: "Agency",
     },
 
-    name: {
+    status: {
       type: String,
-      trim: true,
+      enum: [
+        "new",
+        "contacted",
+        "qualified",
+        "negotiated",
+        "applied",
+        "converted",
+        "lost",
+      ],
+      default: "new",
     },
 
-    isActive: {
-      type: Boolean,
-      default: true,
+    selectedUniversity: {
+      type: Types.ObjectId,
+      ref: "University",
     },
+
+    selectedCourse: {
+      type: Types.ObjectId,
+      ref: "Course",
+    },
+
+    ticket: [
+      {
+        type: Types.ObjectId,
+        ref: "Ticket",
+      },
+    ],
 
     dob: {
       type: Date,
@@ -53,6 +84,12 @@ const StudentSchema = new Schema(
         endedAt: { type: Date },
       },
     ],
+
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
   },
   { timestamps: true }
 );

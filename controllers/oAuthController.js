@@ -5,43 +5,21 @@ import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
 dotenv.config();
 
-const SCOPES = ["openid", "email", "profile"];
-
-const client = new OAuth2Client(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_CALLBACK_URL
-);
+const client = new OAuth2Client();
 
 export const authController = {
-  initiateGoogleAuth: async (req, res) => {
-    try {     
-      const authUrl = client.generateAuthUrl({
-        access_type: 'offline',
-        scope: SCOPES,
-        prompt: 'select_account'
-      });
 
-      res.redirect(authUrl);
-    } catch (error) {
-      console.error("Auth initiation error:", error);
-      res.status(500).send("Failed to initiate authentication");
-    }
-  },
-
-  handleGoogleCallback: async (req, res) => {
-    const code = req.query;
-
+  handleWebAuth: async (req, res) => {
     try {
-      const { tokens } = await client.getToken(code);
+      const { id_token } = req.body
 
-      if (!tokens.id_token) {
+      if (!id_token) {
         throw new Error("Missing ID token");
       }
 
       const ticket = await client.verifyIdToken({
-        idToken: tokens.id_token,
-        audience: process.env.GOOGLE_CLIENT_ID
+        idToken: id_token,
+        audience: '1080035045964-llt4obq8aeun39r89artl5qf0n4tvjrt.apps.googleusercontent.com'
       });
 
       const payload = ticket.getPayload();
@@ -57,9 +35,10 @@ export const authController = {
         });
       }
 
-      const token = jwt.sign({ googleId: Agency.googleId}, process.env.JWT_SECRET);
+      const jwtToken = jwt.sign({ sub: user._id.toString() }, process.env.JWT_SECRET);
 
-      res.redirect(`${process.env.FRONTEND_URL}/visa-officer/dashboard`).json({accessToken: token});
+      return res.status(200).json({message: "Authentication successful", accessToken: jwtToken});
+
     } catch (error) {
       console.error("Google callback error:", error);
       res.status(500).send("Authentication failed");
@@ -78,7 +57,7 @@ export const authController = {
 
       const ticket = await client.verifyIdToken({
         idToken: id_token,
-        audience: process.env.GOOGLE_CLIENT_ID
+        audience: '211640976708-lelad1md8d7dqj8gqoompn7lnfkh0ier.apps.googleusercontent.com'
       });
 
       const payload = ticket.getPayload();
@@ -89,21 +68,19 @@ export const authController = {
         });
       }
 
-      const { sub: googleId, email, name } = payload;
-
-      let user = await Student.findOne({ googleId });
+      let user = await Student.findOne({ googleId: payload.sub });
 
       if (!user) {
         user = await Student.create({
-          googleId,
-          email,
-          name
+          googleId: payload.sub,
+          email: payload.email,
+          name: payload.name
         });
       }
 
-      const token = jwt.sign({ googleId: Student.googleId}, process.env.JWT_SECRET);
+      const jwtToken = jwt.sign({ sub: user._id.toString() }, process.env.JWT_SECRET);
 
-      return res.status(200).json({message: "Authentication successful", accessToken: token});
+      return res.status(200).json({message: "Authentication successful", accessToken: jwtToken});
 
     } catch (error) {
       console.error("Mobile auth error:", error);

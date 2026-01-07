@@ -3,9 +3,8 @@ import { authController } from '../controllers/oAuthController.js';
 
 const router = express.Router();
 
-router.get('/', authController.initiateGoogleAuth);
-router.get('/google/callback', authController.handleGoogleCallback);
+router.post('/google-signin-agency', authController.handleWebAuth);
 
-router.post('/mobile', authController.handleMobileAuth);
+router.post('/google-signin-student', authController.handleMobileAuth);
 
 export default router;

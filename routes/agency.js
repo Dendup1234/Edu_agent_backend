@@ -36,8 +36,11 @@ import {
 
 import { generateSAS, confirmUpload } from "../controllers/Application.js";
 
-// Router import
+import {createEvent, getAllEvents, getEvent, updateEvent, deleteEvent} from "../controllers/agency/agency.event.js"
+
+//Router import
 const router = express.Router();
+
 //Auth apis
 router.post("/send-otp", sendOtp);
 router.post("/resend-otp", resendOtp);
@@ -47,11 +50,12 @@ router.post("/password-reset/send-otp", sendPasswordResetOtp);
 router.post("/password-reset/verify-otp", verifyPasswordResetOtp);
 router.post("/password-reset/set-new", setNewPassword);
 
-//profile apis
+//Profile apis
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
 router.get("/profile/:agencyId", protect, getAgencybyId);
-// university apis
+
+//University apis
 router.post("/universities", protect, createUni);
 router.get("/universities", protect, getUni);
 router.patch("/universities/:universityId", protect, updateUni);
@@ -78,5 +82,12 @@ router.get("/", protect, getAllAgency);
 //Profile upload
 router.post("/uploads/sas", protect, generateSAS);
 router.post("/uploads/confirm", protect, confirmUpload);
+
+//Event apis
+router.post("/events", protect, createEvent)
+router.get("/events", protect, getAllEvents)
+router.get("/events/:eventId", protect, getEvent)
+router.patch("/events/:eventId", protect, updateEvent)
+router.delete("/events/:eventId", protect, deleteEvent)
 
 export default router;

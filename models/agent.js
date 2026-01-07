@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import student from "./student";
 const { Schema, Types } = mongoose;
 
 const agentSchema = new Schema(
@@ -40,16 +41,18 @@ const agentSchema = new Schema(
       default: "no-role",
     },
 
-    isActive: {
-      type: Boolean,
-      default: true
-    },
-
     status: {
       type: String,
-      enum: ["active", "inactive", "on_leave"],
+      enum: ["active", "inactive"],
       default: "active"
-    }
+    },
+
+    assignedStudents: [
+      {
+        type: Types.ObjectId,
+        ref: student
+      }
+    ]
   },
   { timestamps: true }
 );

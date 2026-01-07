@@ -69,6 +69,11 @@ const eventSchema = new mongoose.Schema(
     agendaItems: {
       type: [String],
     },
+     status: {
+      type: String,
+      enum: ["Active", "Inactive"],
+      default: "Active",
+    },
 
   },
   { timestamps: true }

@@ -1,7 +1,6 @@
 import Agency from "../../models/agency.js";
 import University from "../../models/university.js";
 import mongoose from "mongoose";
-import Course from "../../models/course.js";
 
 // Creating university
 export const createUni = async (req, res) => {
@@ -125,6 +124,26 @@ export const deactivateUni = async (req, res) => {
     return res
       .status(200)
       .json({ message: "University deactivated successfully" });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "server error" });
+  }
+};
+
+//Get uni by their university id
+export const getUniById = async (req, res) => {
+  try {
+    const { universityId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(universityId)) {
+      return res.status(400).json({ message: "Invalid University id format" });
+    }
+    const university = await University.findById(universityId);
+    if (!university) {
+      return res.status(404).json({ message: "university does not exist" });
+    }
+    return res
+      .status(200)
+      .json({ message: "Extracted successfully", unversity: university });
   } catch (e) {
     console.log(e);
     return res.status(500).json({ message: "server error" });

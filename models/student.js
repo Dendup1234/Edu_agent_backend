@@ -35,7 +35,7 @@ const StudentSchema = new Schema(
       ref: "Agency",
     },
 
-     status: {
+    status: {
       type: String,
       enum: [
         "new",
@@ -88,8 +88,8 @@ const StudentSchema = new Schema(
     status: {
       type: String,
       enum: ["active", "inactive"],
-      default: "active"
-    }
+      default: "active",
+    },
   },
   { timestamps: true }
 );

@@ -33,7 +33,7 @@ import {
 
 import {generateSAS, confirmUpload} from "../controllers/Application.js"
 
-import {createEvent, getAllEvents} from "../controllers/agency/agency.event.js"
+import {createEvent, getAllEvents, getEvent, updateEvent, deleteEvent} from "../controllers/agency/agency.event.js"
 
 //Router import
 const router = express.Router();
@@ -82,5 +82,8 @@ router.post("/uploads/confirm", protect, confirmUpload);
 //Event apis
 router.post("/events", protect, createEvent)
 router.get("/events", protect, getAllEvents)
+router.get("/events/:eventId", protect, getEvent)
+router.patch("/events/:eventId", protect, updateEvent)
+router.delete("/events/:eventId", protect, deleteEvent)
 
 export default router;

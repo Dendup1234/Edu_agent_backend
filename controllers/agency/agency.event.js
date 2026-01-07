@@ -96,5 +96,14 @@ export const updateEvent = async(req, res) => {
 export const deleteEvent = async(req, res) => {
     try {
         const {eventId} = req.parmas
+        const event = await Event.findByIdAndUpdate(
+            eventId, 
+            { status: "inactive" },
+            { new: true }
+        )
+        res.json({message: "event deactivated"})
+    }
+    catch (err){
+        res.status(400).json({message: err.message})
     }
 }

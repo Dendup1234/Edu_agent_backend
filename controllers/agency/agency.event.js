@@ -50,29 +50,29 @@ export const createEvent = async (req, res) => {
     res.status(201).json({message: "Evnet created successfully"})
     } 
     catch(err) {
-    res.status(400).json({message: err.message})
+    res.status(500).json({message: err.message})
     }
 }
 
 export const getAllEvents = async(req, res) => {
     try {
         const organizerId = req.user.sub;
-        const events = await Event.find({organizerId})
+        const events = await Event.findById({organizerId})
         res.json(events)
     }
     catch (err){
-        res.status(400).json({message: err.message})
+        res.status(500).json({message: err.message})
     }
 }
 
 export const getEvent = async(req, res) => {
     try {
         const { eventId } = req.params
-        const event = await Event.find(eventId)
+        const event = await Event.findById(eventId)
         res.json(event)
     }
     catch (err){
-        res.status(400).json({message: err.message})
+        res.status(500).json({message: err.message})
     }
 }
 
@@ -89,13 +89,13 @@ export const updateEvent = async(req, res) => {
         res.json({message: "event updated successful"})
     }
     catch (err){
-        res.status(400).json({message: err.message})
+        res.status(500).json({message: err.message})
     }
 }
 
 export const deleteEvent = async(req, res) => {
     try {
-        const {eventId} = req.parmas
+        const {eventId} = req.params
         const event = await Event.findByIdAndUpdate(
             eventId, 
             { status: "inactive" },
@@ -104,6 +104,6 @@ export const deleteEvent = async(req, res) => {
         res.json({message: "event deactivated"})
     }
     catch (err){
-        res.status(400).json({message: err.message})
+        res.status(500).json({message: err.message})
     }
 }

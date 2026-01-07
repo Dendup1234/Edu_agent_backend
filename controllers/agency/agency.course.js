@@ -53,6 +53,9 @@ export const createCourse = async (req, res) => {
       entryRequirements,
       status,
       intakes,
+      userId,
+      providedBy: universityId,
+      createdBy: userId,
     });
     //adding the course id to the university
     await University.findByIdAndUpdate(universityId, {
@@ -129,6 +132,7 @@ export const getCourse = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 // Deactivating the course
 export const deactivateCourse = async (req, res) => {
   try {
@@ -139,9 +143,13 @@ export const deactivateCourse = async (req, res) => {
     ) {
       return res.status(400).json({ message: "Invalid Id" });
     }
-    const course = await Course.findByIdAndUpdate(courseId, {
-      status: "closed",
-    },{ new: true });
+    const course = await Course.findByIdAndUpdate(
+      courseId,
+      {
+        status: "closed",
+      },
+      { new: true }
+    );
     if (!course) {
       return res.status(404).json({ message: "Course is not found" });
     }
@@ -152,4 +160,57 @@ export const deactivateCourse = async (req, res) => {
     console.log(e);
     return res.status(500).json({ message: "Server error" });
   }
+};
+
+//Getting all the courses from the agency only the title
+export const getCourseByAgency = async (req, res) => {
+  try {
+    const { agencyId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(agencyId)) {
+      return res.status(400).json({ message: "Invalid Id" });
+    }
+    const courses = await Agency.findById(agencyId)
+      .select("-password")
+      .populate({
+        path: "partnerUniversities",
+        populate: {
+          path: "courses",
+          select: "title",
+        },
+      });
+    if (!courses) {
+      return res.status(404).json({ message: "Course not found " });
+    }
+    return res.status(200).json({
+      message: "Course extracted successfully",
+      course: courses,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+//Getting the course by the id
+export const getCourseById = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    if (!userId) {
+      return res.status(404).json({ message: "Unauthorized token" });
+    }
+    const { courseId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ message: "Invalid Id" });
+    }
+    const courses = await Course.findById(courseId).populate({
+      path: "providedBy",
+      select: "logo",
+    });
+    if (!courses) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+    return res
+      .status(200)
+      .json({ message: "Extracted successfully", course: courses });
+  } catch (e) {}
 };

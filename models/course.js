@@ -1,13 +1,13 @@
 import mongoose, { Schema, Types } from "mongoose";
 
-const CourseSchema = new mongoose.Schema(
+const CourseSchema = new Schema(
   {
     title: { type: String, required: true },
     //level of the courses
     level: {
       type: String,
       enum: ["undergraduate", "graduate", "diploma", "phd"],
-	  default: "undergraduate"
+      default: "undergraduate",
     },
     //About field
     about: {
@@ -15,20 +15,21 @@ const CourseSchema = new mongoose.Schema(
     },
     duration: {
       type: String,
+      default: "",
     },
     tuitionFee: {
       totalfee: {
         type: String,
-		deafult:""
+        deafult: "",
       },
       currency: {
         type: String,
-		default:""
+        default: "",
       },
     },
     description: {
       type: String,
-	  deafult: "",
+      deafult: "",
     },
     entryRequirements: {
       type: [String],
@@ -42,7 +43,11 @@ const CourseSchema = new mongoose.Schema(
     intakes: {
       type: Number,
       min: 0,
-	  default: 0
+      default: 0,
+    },
+    providedBy: {
+      type: Types.ObjectId,
+      ref: "Univsersity",
     },
   },
   { timestamps: true }

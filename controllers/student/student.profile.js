@@ -63,12 +63,12 @@ export const selectAgency = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(agencyId)) {
       return res.status(400).json({ message: "Enter the valid agency id" });
     }
-    const agency = Agency.findById(agencyId);
+    const agency = await Agency.findById(agencyId);
     // check if the agency exist
     if (!agency) {
       res.status(404).json({ message: "No agency found" });
     }
-    const student = Student.findByIdAndUpdate(userId, {
+    const student = await Student.findByIdAndUpdate(userId, {
       registeredAgency: agencyId,
     });
     return res.status(200).json({

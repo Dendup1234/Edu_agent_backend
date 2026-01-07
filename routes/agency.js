@@ -70,12 +70,8 @@ router.delete(
   protect,
   deactivateCourse
 );
-router.get(
-  "/universities/courses/:courseId",
-  protect,
-  getCourseById
-);
-router.get("/courses/:agencyId", protect, getCourseByAgency);
+router.get("/courses/:courseId", protect, getCourseById);
+router.get("/courses/agency/:agencyId", protect, getCourseByAgency);
 //All agency
 router.get("/", protect, getAllAgency);
 

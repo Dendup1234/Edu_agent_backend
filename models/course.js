@@ -47,7 +47,11 @@ const CourseSchema = new Schema(
     },
     providedBy: {
       type: Types.ObjectId,
-      ref: "Univsersity",
+      ref: "University",
+    },
+    createdBy: {
+      type: Types.ObjectId,
+      ref: "Agency",
     },
   },
   { timestamps: true }

@@ -169,21 +169,18 @@ export const getCourseByAgency = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(agencyId)) {
       return res.status(400).json({ message: "Invalid Id" });
     }
-    const courses = await Agency.findById(agencyId)
-      .select("-password")
-      .populate({
-        path: "partnerUniversities",
-        populate: {
-          path: "courses",
-          select: "title",
-        },
-      });
-    if (!courses) {
-      return res.status(404).json({ message: "Course not found " });
+    const courses = await Course.find({ createdBy: agencyId })
+      .select("title")
+      .lean();
+    if (courses.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No courses" });
     }
+
     return res.status(200).json({
       message: "Course extracted successfully",
-      course: courses,
+      courses: courses,
     });
   } catch (e) {
     console.log(e);
@@ -202,15 +199,20 @@ export const getCourseById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(courseId)) {
       return res.status(400).json({ message: "Invalid Id" });
     }
-    const courses = await Course.findById(courseId).populate({
-      path: "providedBy",
-      select: "logo",
-    });
+    const courses = await Course.findById(courseId)
+      .populate({
+        path: "providedBy",
+        select: "logo",
+      })
+      .lean();
     if (!courses) {
       return res.status(404).json({ message: "Course not found" });
     }
     return res
       .status(200)
       .json({ message: "Extracted successfully", course: courses });
-  } catch (e) {}
+  } catch (e) {
+    console.log(e);
+    return res.status(200).json({ message: "Server error" });
+  }
 };

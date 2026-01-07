@@ -2,12 +2,6 @@ import mongoose from "mongoose";
 
 const ApplicationSchema = new Schema(
   {
-    lead: {
-      type: Types.ObjectId,
-      ref: "Lead",
-      required: true
-    },
-
     university: {
       type: Types.ObjectId,
       ref: "University",

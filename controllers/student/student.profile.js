@@ -1,6 +1,5 @@
 import Student from "../../models/student.js";
 import Agency from "../../models/agency.js";
-import Lead from "../../models/lead.js";
 
 import mongoose from "mongoose";
 
@@ -69,14 +68,11 @@ export const selectAgency = async (req, res) => {
     if (!agency) {
       res.status(404).json({ message: "No agency found" });
     }
-    //Creating a new lead between the student and the agency
-    const lead = await Lead.create({
-      student: userId,
-      agency: agencyId,
-    });
+    const student = Student.findByIdAndUpdate(userId, 
+      {registeredAgency: agencyId}
+    )
     return res.status(200).json({
-      message: "New lead successfully created",
-      lead: lead,
+      message: "Selection successful"
     });
   } catch (e) {
     console.log(e);

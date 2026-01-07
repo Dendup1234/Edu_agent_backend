@@ -6,8 +6,8 @@ const CourseSchema = new mongoose.Schema(
     //level of the courses
     level: {
       type: String,
-      enum: ["undergraduate", "graduate", "diploma", "phd"],
-	  default: "undergraduate"
+      enum: ["Undergraduate", "Graduate", "Diploma", "PhD"],
+	  default: "Undergraduate"
     },
     //About field
     about: {

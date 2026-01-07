@@ -23,6 +23,6 @@ const createEvent = async (req, res) => {
 
         agendaItems
         } = req.body;
-
+    const event = await Event.create()
     
 }

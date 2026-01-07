@@ -71,7 +71,10 @@ export const getAgencybyId = async (req, res) => {
     // Getting the agency by their particular id
     const agency = await Agency.findById(agencyId).select(
       "-password -googleId"
-    ); // hide sensitive fields
+    ).populate({
+      path: "partnerUniversities",
+      select: "logo"
+    }); // hide sensitive fields
 
     if (!agency) {
       return res.status(404).json({ message: "Agency not found" });

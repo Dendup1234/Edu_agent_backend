@@ -14,6 +14,7 @@ import {
   createCourse,
   getCourse,
   updateCourse,
+  deactivateCourse,
 } from "../controllers/agency/agency.course.js";
 
 import {
@@ -59,6 +60,11 @@ router.patch(
   "/universities/:universityId/courses/:courseId",
   protect,
   updateCourse
+);
+router.delete(
+  "/universities/:universityId/courses/:courseId",
+  protect,
+  deactivateCourse
 );
 
 //All agency

@@ -85,10 +85,11 @@ const StudentSchema = new Schema(
       },
     ],
 
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active"
+    }
   },
   { timestamps: true }
 );

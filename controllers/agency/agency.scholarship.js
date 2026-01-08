@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Scholarship from "../../models/scholarship";
+import Scholarship from "../../models/scholarship.js";
 
 // Create a scholarship
 export const createScholarship = async (req, res) => {
@@ -70,7 +70,7 @@ export const getAllScholarship = async (req, res) => {
   }
 };
 
-//Getting all scholarship from agency when open for student from partimeter
+//Getting all scholarship from agency (when open) for student from partimeter
 export const getAllScholarshipStudent = async (req, res) => {
   try {
     const { agencyId } = req.params;
@@ -97,7 +97,9 @@ export const getAllScholarshipStudent = async (req, res) => {
 export const getAllScholarshipLanding = async (req, res) => {
   try {
     // Finding the scholarship from agency
-    const scholarship = await Scholarship.find();
+    const scholarship = await Scholarship.find({
+      status: "open",
+    });
     return res.status(200).json({
       message: "Successful",
       scholarship: scholarship,

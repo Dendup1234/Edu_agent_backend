@@ -32,6 +32,7 @@ import {
   updateUni,
   deactivateUni,
   getUniById,
+  getUniStudent,
 } from "../controllers/agency/agency.uni.js";
 
 import { generateSAS, confirmUpload } from "../controllers/Application.js";
@@ -77,6 +78,7 @@ router.get("/universities", protect, getUni);
 router.patch("/universities/:universityId", protect, updateUni);
 router.delete("/universities/:universityId", protect, deactivateUni);
 router.get("/universities/:universityId", protect, getUniById);
+router.get("/universities/agency/:agencyId", protect, getUniStudent);
 //Courses apis
 router.post("/universities/:universityId/courses", protect, createCourse);
 router.get("/universities/:universityId/courses", protect, getCourse);

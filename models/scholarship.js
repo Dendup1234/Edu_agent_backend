@@ -26,6 +26,7 @@ const scholarshipSchema = new Schema({
     type: String,
     enum: ["open", "closed", "upcoming"],
   },
+  // other source
   providedBy: {
     name: {
       type: String,
@@ -33,6 +34,11 @@ const scholarshipSchema = new Schema({
     logoUrl: {
       type: String,
     },
+  },
+  // Created by the agency
+  createdBy: {
+    type: Types.ObjectId,
+    ref: "Agency",
   },
 });
 

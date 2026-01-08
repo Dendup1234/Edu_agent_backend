@@ -47,7 +47,7 @@ export const createEvent = async (req, res) => {
 
         organizerId: organizerId
     }); 
-    res.status(201).json({message: "Evnet created successfully"})
+    res.status(201).json({message: "Event created successfully"})
     } 
     catch(err) {
     res.status(500).json({message: err.message})

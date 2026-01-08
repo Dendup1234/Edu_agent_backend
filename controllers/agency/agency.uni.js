@@ -76,6 +76,28 @@ export const getUni = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+// Getting uni for the student page
+export const getUniStudent = async (req, res) => {
+  try {
+    const { agencyId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(agencyId)) {
+      return res.status(400).json({ message: "Invalid Id" });
+    }
+    const university = await Agency.findById(agencyId)
+      .select("name")
+      .populate({
+        path: "partnerUniversities",
+        match: { status: "Active" },
+        select: "logo status",
+      });
+    return res
+      .status(200)
+      .json({ message: "Successful", university: university });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
 
 // Updating the university
 export const updateUni = async (req, res) => {
@@ -137,7 +159,10 @@ export const getUniById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(universityId)) {
       return res.status(400).json({ message: "Invalid University id format" });
     }
-    const university = await University.findById(universityId);
+    const university = await University.findById(universityId).populate({
+      path: "courses",
+      select: "title",
+    });
     if (!university) {
       return res.status(404).json({ message: "university does not exist" });
     }

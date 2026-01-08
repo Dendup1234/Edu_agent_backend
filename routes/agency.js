@@ -32,11 +32,28 @@ import {
   updateUni,
   deactivateUni,
   getUniById,
+  getUniStudent,
 } from "../controllers/agency/agency.uni.js";
 
 import { generateSAS, confirmUpload } from "../controllers/Application.js";
 
-import {createEvent, getAllEvents, getEvent, updateEvent, deleteEvent} from "../controllers/agency/agency.event.js"
+import {
+  createEvent,
+  getAllEvents,
+  getEvent,
+  updateEvent,
+  deleteEvent,
+} from "../controllers/agency/agency.event.js";
+
+import {
+  createScholarship,
+  getAllScholarship,
+  getAllScholarshipStudent,
+  getAllScholarshipLanding,
+  getScholarshipById,
+  updateScholarship,
+  deactivateScholarship,
+} from "../controllers/agency/agency.scholarship.js";
 
 //Router import
 const router = express.Router();
@@ -61,6 +78,7 @@ router.get("/universities", protect, getUni);
 router.patch("/universities/:universityId", protect, updateUni);
 router.delete("/universities/:universityId", protect, deactivateUni);
 router.get("/universities/:universityId", protect, getUniById);
+router.get("/universities/agency/:agencyId", protect, getUniStudent);
 //Courses apis
 router.post("/universities/:universityId/courses", protect, createCourse);
 router.get("/universities/:universityId/courses", protect, getCourse);
@@ -84,10 +102,19 @@ router.post("/uploads/sas", protect, generateSAS);
 router.post("/uploads/confirm", protect, confirmUpload);
 
 //Event apis
-router.post("/events", protect, createEvent)
-router.get("/events", protect, getAllEvents)
-router.get("/events/:eventId", protect, getEvent)
-router.patch("/events/:eventId", protect, updateEvent)
-router.delete("/events/:eventId", protect, deleteEvent)
+router.post("/events", protect, createEvent);
+router.get("/events", protect, getAllEvents);
+router.get("/events/:eventId", protect, getEvent);
+router.patch("/events/:eventId", protect, updateEvent);
+router.delete("/events/:eventId", protect, deleteEvent);
+
+// Scholarships apis
+router.post("/scholarships", protect, createScholarship);
+router.get("/scholarships", protect, getAllScholarship);
+router.get("/scholarships/:scholarshipId", protect, getScholarshipById);
+router.get("/scholarships/agency/:agencyId", protect, getAllScholarshipStudent);
+router.get("/scholarships/landing/", protect, getAllScholarshipLanding);
+router.patch("/scholarships/:scholarshipId", protect, updateScholarship);
+router.delete("/scholarships/:scholarshipId", protect, deactivateScholarship);
 
 export default router;

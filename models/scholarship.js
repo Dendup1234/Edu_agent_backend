@@ -13,7 +13,7 @@ const scholarshipSchema = new Schema({
   amount: {
     type: String,
   },
-  eligiblility: {
+  eligibility: {
     type: String,
   },
   fieldOfStudy: {
@@ -24,8 +24,9 @@ const scholarshipSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ["open", "closed", "upcoming"],
+    enum: ["open", "closed"],
   },
+  // other source
   providedBy: {
     name: {
       type: String,
@@ -33,6 +34,11 @@ const scholarshipSchema = new Schema({
     logoUrl: {
       type: String,
     },
+  },
+  // Created by the agency
+  createdBy: {
+    type: Types.ObjectId,
+    ref: "Agency",
   },
 });
 

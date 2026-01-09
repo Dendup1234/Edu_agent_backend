@@ -24,6 +24,9 @@ import {
   updateProfile,
   getAgencybyId,
   getAllAgency,
+  getLeadDashboard,
+  getStudentLead,
+  getStudentAppStatus,
 } from "../controllers/agency/agency.profile.js";
 
 import {
@@ -33,6 +36,8 @@ import {
   deactivateUni,
   getUniById,
   getUniStudent,
+  searchUniByName,
+  getUniDashboard,
 } from "../controllers/agency/agency.uni.js";
 
 import { generateSAS, confirmUpload } from "../controllers/Application.js";
@@ -53,6 +58,8 @@ import {
   getScholarshipById,
   updateScholarship,
   deactivateScholarship,
+  searchScholarshipByName,
+  getScholarshipDashboard,
 } from "../controllers/agency/agency.scholarship.js";
 
 //Router import
@@ -71,6 +78,9 @@ router.post("/password-reset/set-new", setNewPassword);
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
 router.get("/profile/:agencyId", protect, getAgencybyId);
+router.get("/profile/dashboard/leads/", protect, getLeadDashboard);
+router.get("/profile/students/leads/", protect, getStudentLead);
+router.get("/profile/students/leads/:studentId", protect, getStudentAppStatus);
 
 //University apis
 router.post("/universities", protect, createUni);
@@ -79,6 +89,8 @@ router.patch("/universities/:universityId", protect, updateUni);
 router.delete("/universities/:universityId", protect, deactivateUni);
 router.get("/universities/:universityId", protect, getUniById);
 router.get("/universities/agency/:agencyId", protect, getUniStudent);
+router.get("/universities/query/search", protect, searchUniByName);
+router.get("/universities/dashboard/unipage", protect, getUniDashboard);
 //Courses apis
 router.post("/universities/:universityId/courses", protect, createCourse);
 router.get("/universities/:universityId/courses", protect, getCourse);
@@ -116,5 +128,11 @@ router.get("/scholarships/agency/:agencyId", protect, getAllScholarshipStudent);
 router.get("/scholarships/landing/", protect, getAllScholarshipLanding);
 router.patch("/scholarships/:scholarshipId", protect, updateScholarship);
 router.delete("/scholarships/:scholarshipId", protect, deactivateScholarship);
+router.get("/scholarships/query/search", protect, searchScholarshipByName);
+router.get(
+  "/scholarships/dashboard/scholarships",
+  protect,
+  getScholarshipDashboard
+);
 
 export default router;

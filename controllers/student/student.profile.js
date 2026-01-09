@@ -68,9 +68,20 @@ export const selectAgency = async (req, res) => {
     if (!agency) {
       res.status(404).json({ message: "No agency found" });
     }
-    const student = await Student.findByIdAndUpdate(userId, {
-      registeredAgency: agencyId,
-    });
+    const student = await Student.findByIdAndUpdate(
+      userId,
+      {
+        registeredAgency: agencyId,
+        joinDate: new Date(),
+        $push: {
+          statusHistory: {
+            status_name: "new",
+            status_date: new Date(),
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    );
     return res.status(200).json({
       message: "Selection successful",
       student: student,
@@ -78,5 +89,34 @@ export const selectAgency = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: err.message });
+  }
+};
+
+// Deactivating a student
+export const deactivateStudent = async (req, res) => {
+  const userId = req.user.sub;
+  if (!userId) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+  try {
+    const { studentId } = req.params;
+
+    const student = await Student.findByIdAndUpdate(
+      studentId,
+      { isValid: false },
+      { new: true }
+    ).select("-password");
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    return res.json({
+      message: "Student deactivated",
+      student,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Server error" });
   }
 };

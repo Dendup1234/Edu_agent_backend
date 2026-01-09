@@ -28,10 +28,7 @@ const StudentSchema = new Schema(
       type: String,
     },
 
-    emailVerified: {
-      type: Boolean,
-      default: false,
-    },
+
 
     registeredAgency: {
       type: Types.ObjectId,
@@ -80,7 +77,16 @@ const StudentSchema = new Schema(
 
     education: [
       {
-        qualification: { type: String, trim: true },
+        qualification: {
+          type: String,
+          enum: [
+            "High School",
+            "Diploma",
+            "Bachelor Degree",
+            "Undergraduate",
+            "Master",
+          ],
+        },
         institute: { type: String, trim: true },
         year: { type: Number },
         startedAt: { type: Date },
@@ -88,11 +94,38 @@ const StudentSchema = new Schema(
       },
     ],
 
+    isValid: {
+      type: Boolean,
+      default: true,
+    },
     onlineStatus: {
       type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      enum: ["Active", "inActive"],
+      default: "Active",
     },
+    joinDate: {
+      type: Date,
+    },
+    statusHistory: [
+      {
+        status_name: {
+          type: String,
+          enum: [
+            "new",
+            "contacted",
+            "qualified",
+            "negotiated",
+            "applied",
+            "converted",
+            "lost",
+          ],
+        },
+        status_date: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

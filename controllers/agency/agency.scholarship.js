@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Scholarship from "../../models/scholarship.js";
+import Agency from "../../models/agency.js";
 
 // Create a scholarship
 export const createScholarship = async (req, res) => {
@@ -184,5 +185,67 @@ export const deactivateScholarship = async (req, res) => {
   } catch (e) {
     console.log(e);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Scholarship search
+export const searchScholarshipByName = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    if (!userId) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    const q = (req.query.q || "").trim();
+    if (!q) {
+      return res.status(400).json({ message: "q (search term) is required" });
+    }
+
+    // Scholarships search through query
+    const scholarship = await Scholarship.find({
+      createdBy: userId,
+      title: { $regex: q, $options: "i" },
+    }).lean();
+
+    return res.status(200).json({
+      message: "Successful",
+      scholarship: scholarship,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "server error" });
+  }
+};
+
+//Scholarship dashboard to show active and inactive count
+export const getScholarshipDashboard = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    if (!userId) {
+      return res.status(404).json({
+        message: "No token found",
+      });
+    }
+    // finding the active scholarship count
+    const activeScholarship = await Scholarship.find({
+      createdBy: userId,
+      status: "open",
+    });
+    const activeScholarshipCount = activeScholarship.length;
+
+    // finding the inactive scholarship count
+    const inActiveScholarship = await Scholarship.find({
+      createdBy: userId,
+      status: "closed",
+    });
+    const InActiveScholarshipCount = inActiveScholarship.length;
+    return res.status(200).json({
+      message: "Successs",
+      activeCount: activeScholarshipCount,
+      inActiveCount: InActiveScholarshipCount,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "server error" });
   }
 };

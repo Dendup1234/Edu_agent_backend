@@ -279,3 +279,86 @@ export const searchUniByName = async (req, res) => {
     return res.status(500).json({ message: "server error" });
   }
 };
+
+// Dashboard for the uni
+export const getUniDashboard = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    if (!userId) {
+      return res.status(401).json({ message: "token invalid" });
+    }
+    // Getting the active uni count
+    const uniActive = await Agency.findById(userId)
+      .select("_id")
+      .populate({
+        path: "partnerUniversities",
+        select: "_id",
+        match: { status: "Active" },
+      })
+      .lean();
+
+    const uniActiveCount = uniActive.partnerUniversities.length;
+    // Getting the inactive
+    const uniInactive = await Agency.findById(userId)
+      .select("_id")
+      .populate({
+        path: "partnerUniversities",
+        select: "_id",
+        match: { status: "Inactive" },
+      })
+      .lean();
+    const uniInactiveCount = uniInactive.partnerUniversities.length;
+
+    // Getting the active course count
+    const courseActive = await Agency.findById(userId)
+      .select("partnerUniversities")
+      .populate({
+        path: "partnerUniversities",
+        select: "courses",
+        match: { status: "Active" },
+        populate: {
+          path: "courses",
+          select: "_id",
+          match: { status: "open" },
+        },
+      })
+      .lean();
+
+    const courseActiveCount = courseActive.partnerUniversities.reduce(
+      (total, uni) => total + (uni.courses?.length || 0),
+      0
+    );
+
+    // Getting the inactive course count
+    const courseInactive = await Agency.findById(userId)
+      .select("partnerUniversities")
+      .populate({
+        path: "partnerUniversities",
+        select: "courses",
+        match: { status: "Active" },
+        populate: {
+          path: "courses",
+          select: "_id",
+          match: { status: "closed" },
+        },
+      })
+      .lean();
+
+    const courseInactiveCount = courseInactive.partnerUniversities.reduce(
+      (total, uni) => total + (uni.courses?.length || 0),
+      0
+    );
+
+    //Success
+    return res.status(200).json({
+      message: "Success",
+      activeUni: uniActiveCount,
+      inactiveUni: uniInactiveCount,
+      activeCourse: courseActiveCount,
+      inactiveCourse: courseInactiveCount,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "server error" });
+  }
+};

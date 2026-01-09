@@ -14,9 +14,10 @@ import {
   getProfile,
   updateProfile,
   selectAgency,
+  deactivateStudent,
 } from "../controllers/student/student.profile.js";
 
-import {generateSAS, confirmUpload} from "../controllers/Application.js"
+import { generateSAS, confirmUpload } from "../controllers/Application.js";
 
 const router = express.Router();
 
@@ -32,6 +33,7 @@ router.post("/password-reset/set-new", setNewPassword);
 //Profile section
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
+router.delete("/profile/:studentId", protect, deactivateStudent);
 
 // When student select a particular agency
 router.post("/select-agency", protect, selectAgency);

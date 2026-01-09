@@ -1,25 +1,49 @@
 import mongoose from "mongoose";
 
-const messageSchema = new mongoose.Schema({
-  User: {
-    type: String,
-    required: true,
-    enum: ["Student", "Mentor", "Agent"],
-    index: true,
+const messageSchema = new mongoose.Schema(
+  {
+    conversationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      index: true,
+    },
+
+    senderModel: {
+      type: String,
+      required: true,
+      enum: ["Student", "Mentor", "Agent", "Agency"],
+    },
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      refPath: "senderModel",
+    },
+
+    receiverModel: {
+      type: String,
+      required: true,
+      enum: ["Student", "Mentor", "Agent", "Agency"],
+    },
+    receiver: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      refPath: "receiverModel",
+    },
+
+    content: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    status: {
+      type: String,
+      enum: ["sent", "delivered", "read"],
+      default: "sent",
+    },
   },
-  sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  receiver: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  }, // Or a conversation ID
-  content: { type: String, required: true },
-  status: {
-    type: String,
-    enum: ["sent", "delivered", "read"],
-    default: "sent",
-  },
-  createdAt: { type: Date, default: Date.now },
-});
+  { timestamps: true }
+);
+
+messageSchema.index({ conversationId: 1, createdAt: 1 });
 
 export default mongoose.model("Message", messageSchema);

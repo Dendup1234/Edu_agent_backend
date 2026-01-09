@@ -1,8 +1,5 @@
 import Agency from "../../models/agency.js";
-import University from "../../models/university.js";
 import mongoose from "mongoose";
-import Course from "../../models/course.js";
-
 // Getting profile
 export const getProfile = async (req, res) => {
   try {
@@ -69,12 +66,12 @@ export const getAgencybyId = async (req, res) => {
       return res.status(400).json({ message: "Invalid agency id" });
     }
     // Getting the agency by their particular id
-    const agency = await Agency.findById(agencyId).select(
-      "-password -googleId"
-    ).populate({
-      path: "partnerUniversities",
-      select: "logo"
-    }); // hide sensitive fields
+    const agency = await Agency.findById(agencyId)
+      .select("-password -googleId")
+      .populate({
+        path: "partnerUniversities",
+        select: "logo",
+      }); // hide sensitive fields
 
     if (!agency) {
       return res.status(404).json({ message: "Agency not found" });
@@ -87,3 +84,11 @@ export const getAgencybyId = async (req, res) => {
   }
 };
 
+// Lead profile dashboard
+export const leadDashboard = async (req, res) => {
+  const userId = req.user.sub;
+  if (!userId) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+  
+};

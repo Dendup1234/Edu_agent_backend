@@ -31,7 +31,6 @@ const universitySchema = new Schema(
         ref: "Course",
       },
     ],
-    
   },
   {
     timestamps: true,

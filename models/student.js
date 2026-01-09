@@ -88,7 +88,7 @@ const StudentSchema = new Schema(
       },
     ],
 
-    status: {
+    onlineStatus: {
       type: String,
       enum: ["active", "inactive"],
       default: "active",

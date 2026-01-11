@@ -1,16 +1,11 @@
 import mongoose from "mongoose";
+import student from "./student";
 
 const ApplicationSchema = new Schema(
   {
-    university: {
+    applicationFor: {
       type: Types.ObjectId,
-      ref: "University",
-      required: true
-    },
-
-    course: {
-      type: Types.ObjectId,
-      ref: "Course"
+      ref: "Student"
     },
 
     status: {
@@ -28,17 +23,6 @@ const ApplicationSchema = new Schema(
         "withdrawn",
       ],
       default: "draft"
-    },
-
-    visaCountry: {
-      type: String,
-      trim: true
-    },
-
-    visaStatus: {
-      type: String,
-      enum: ["not_required", "pending", "approved", "rejected"],
-      default: "pending"
     },
 
     documents: [

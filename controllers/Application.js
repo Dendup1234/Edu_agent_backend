@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 dotenv.config();
 import Agency from "../models/agency.js";
 import Student from "../models/student.js";
+import Document from "../models/document.js"
 
 import {
   StorageSharedKeyCredential,
@@ -10,6 +11,7 @@ import {
   generateBlobSASQueryParameters,
   BlobSASPermissions
 } from "@azure/storage-blob";
+import { application } from "express";
 
 const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME;
 const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
@@ -97,8 +99,24 @@ export const confirmUpload = async (req, res) => {
       { new: true }
     );
 
+    // Create the document
+    const document = await Document.create({
+      uploadBy: studentId,
+      agency: agencyId,
+      fileName: blobName,
+      fileType: props.contentType,
+      fileSize: props.contentLength,
+      fileURL: blobClient.url
+    });
+
+    const application = await Application.create({
+      applicationFor: studentId,
+      documents: [document._id],
+      status: "draft"
+    });
+    
     res.json({
-      message: "Upload confuirmed"
+      message: "Upload confuirmed", status: application.status
     });
 
   } catch (err) {

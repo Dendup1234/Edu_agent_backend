@@ -19,7 +19,6 @@ const documentSchema = new mongoose.Schema(
     fileName: String,
     fileType: String,
     fileSize: Number,
-    fileKey: String,
     fileURL: String,
 
     uploadedAt: {

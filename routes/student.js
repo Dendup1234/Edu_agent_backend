@@ -18,7 +18,7 @@ import {
 } from "../controllers/student/student.profile.js";
 
 import { generateSAS, confirmUpload } from "../controllers/Application.js";
-
+import { searchCourseByName } from "../controllers/student/student.course.js";
 const router = express.Router();
 
 //For authentication
@@ -41,5 +41,8 @@ router.post("/select-agency", protect, selectAgency);
 //Profile upload
 router.post("/uploads/sas", protect, generateSAS);
 router.post("/uploads/confirm", protect, confirmUpload);
+
+//Course api
+router.get("/courses/query/:agencyId/search", protect, searchCourseByName);
 
 export default router;

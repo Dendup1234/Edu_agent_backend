@@ -169,17 +169,14 @@ export const getCourseByAgency = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(agencyId)) {
       return res.status(400).json({ message: "Invalid Id" });
     }
-    const courses = await Course.find({ 
+    const courses = await Course.find({
       createdBy: agencyId,
-      status: "open"
-
-     })
+      status: "open",
+    })
       .select("title")
       .lean();
     if (courses.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No courses" });
+      return res.status(404).json({ message: "No courses" });
     }
 
     return res.status(200).json({

@@ -27,8 +27,12 @@ const scholarshipSchema = new Schema({
     enum: ["open", "closed", "upcoming"],
   },
   providedBy: {
-    type: Types.ObjectId,
-    ref: "University",
+    name: {
+      type: String,
+    },
+    logoUrl: {
+      type: String,
+    },
   },
 });
 

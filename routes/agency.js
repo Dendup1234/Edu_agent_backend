@@ -15,6 +15,8 @@ import {
   getCourse,
   updateCourse,
   deactivateCourse,
+  getCourseByAgency,
+  getCourseById,
 } from "../controllers/agency/agency.course.js";
 
 import {
@@ -29,9 +31,10 @@ import {
   getUni,
   updateUni,
   deactivateUni,
+  getUniById,
 } from "../controllers/agency/agency.uni.js";
 
-import {generateSAS, confirmUpload} from "../controllers/Application.js"
+import { generateSAS, confirmUpload } from "../controllers/Application.js";
 
 import {createEvent, getAllEvents, getEvent, updateEvent, deleteEvent} from "../controllers/agency/agency.event.js"
 
@@ -56,8 +59,8 @@ router.get("/profile/:agencyId", protect, getAgencybyId);
 router.post("/universities", protect, createUni);
 router.get("/universities", protect, getUni);
 router.patch("/universities/:universityId", protect, updateUni);
-router.delete("/universities/:universityId", deactivateUni);
-
+router.delete("/universities/:universityId", protect, deactivateUni);
+router.get("/universities/:universityId", protect, getUniById);
 //Courses apis
 router.post("/universities/:universityId/courses", protect, createCourse);
 router.get("/universities/:universityId/courses", protect, getCourse);
@@ -71,7 +74,8 @@ router.delete(
   protect,
   deactivateCourse
 );
-
+router.get("/courses/:courseId", protect, getCourseById);
+router.get("/courses/agency/:agencyId", protect, getCourseByAgency);
 //All agency
 router.get("/", protect, getAllAgency);
 

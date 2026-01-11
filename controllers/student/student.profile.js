@@ -68,11 +68,12 @@ export const selectAgency = async (req, res) => {
     if (!agency) {
       res.status(404).json({ message: "No agency found" });
     }
-    const student = Student.findByIdAndUpdate(userId, 
-      {registeredAgency: agencyId}
-    )
+    const student = Student.findByIdAndUpdate(userId, {
+      registeredAgency: agencyId,
+    });
     return res.status(200).json({
-      message: "Selection successful"
+      message: "Selection successful",
+      student: student,
     });
   } catch (e) {
     console.log(e);

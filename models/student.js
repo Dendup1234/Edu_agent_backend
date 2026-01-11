@@ -35,7 +35,7 @@ const StudentSchema = new Schema(
       ref: "Agency",
     },
 
-     status: {
+    status: {
       type: String,
       enum: [
         "new",
@@ -91,7 +91,7 @@ const StudentSchema = new Schema(
       default: "active"
     },
 
-    profilePictureL: {
+    profilePicture: {
       type: String
     }
   },

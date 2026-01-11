@@ -12,6 +12,7 @@ const messageSchema = new mongoose.Schema(
       required: true,
       enum: ["Student", "Mentor", "Agent", "Agency"],
     },
+    
     sender: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

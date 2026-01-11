@@ -89,6 +89,10 @@ const StudentSchema = new Schema(
       type: String,
       enum: ["active", "inactive"],
       default: "active"
+    },
+
+    profilePictureL: {
+      type: String
     }
   },
   { timestamps: true }

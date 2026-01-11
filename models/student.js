@@ -88,8 +88,12 @@ const StudentSchema = new Schema(
     status: {
       type: String,
       enum: ["active", "inactive"],
-      default: "active",
+      default: "active"
     },
+
+    profilePicture: {
+      type: String
+    }
   },
   { timestamps: true }
 );

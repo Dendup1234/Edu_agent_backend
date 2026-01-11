@@ -93,7 +93,7 @@ export const confirmUpload = async (req, res) => {
     // Save profile url in student
     const student = await Student.findByIdAndUpdate(
       studentId,
-      { profilePicture: blobClient.url },
+      { profileURL: blobClient.url },
       { new: true }
     );
 

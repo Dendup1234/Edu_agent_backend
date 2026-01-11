@@ -28,8 +28,6 @@ const StudentSchema = new Schema(
       type: String,
     },
 
-
-
     registeredAgency: {
       type: Types.ObjectId,
       ref: "Agency",

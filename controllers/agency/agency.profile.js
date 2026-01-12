@@ -131,7 +131,7 @@ export const getLeadDashboard = async (req, res) => {
   }
 };
 
-//Getting the list of students in the lead table
+//Getting the list of students in the lead table and the student table
 export const getStudentLead = async (req, res) => {
   try {
     const userId = req.user.sub;
@@ -139,7 +139,10 @@ export const getStudentLead = async (req, res) => {
       return res.status(401).json({ message: "token not found" });
     }
 
-    const students = await Student.find({ registeredAgency: userId })
+    const students = await Student.find({
+      registeredAgency: userId,
+      isValid: true,
+    })
       .select("name education joinDate status statusHistory isValid")
       .lean();
 
@@ -148,7 +151,6 @@ export const getStudentLead = async (req, res) => {
         student.education?.length > 0
           ? student.education[student.education.length - 1].qualification
           : null;
-
       return {
         name: student.name,
         qualification: lastEducation,
@@ -162,6 +164,57 @@ export const getStudentLead = async (req, res) => {
     return res.status(200).json({
       count: leads.length,
       leads,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Getting the student list if they have a selected course and uni
+export const getStudentList = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    if (!userId) {
+      return res.status(401).json({ message: "token not found" });
+    }
+    const studentList = await Student.find({
+      registeredAgency: userId,
+      isValid: true,
+      selectedCourse: { $ne: null },
+      selectedUniversity: { $ne: null },
+    })
+      .select("name statusHistory selectedCourse selectedUniversity")
+      .populate({
+        path: "selectedCourse",
+        select: "title",
+      })
+      .populate({
+        path: "selectedUniversity",
+        select: "name country",
+      })
+      .lean();
+    // Creating the custom map of object
+    const student = studentList.map((s) => ({
+      student: {
+        id: s._id,
+        name: s.name,
+      },
+      course: {
+        id: s.selectedCourse?._id,
+        title: s.selectedCourse?.title,
+      },
+      university: {
+        id: s.selectedUniversity?._id,
+        name: s.selectedUniversity?.name,
+        country: s.selectedUniversity?.country,
+      },
+      statusHistory: s.statusHistory,
+    }));
+
+    return res.status(200).json({
+      message: "Success",
+      students: student,
     });
   } catch (e) {
     console.log(e);
@@ -183,6 +236,46 @@ export const getStudentAppStatus = async (req, res) => {
     return res
       .status(200)
       .json({ message: "Successful", student: studentHistory });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Searching student by their name
+export const searchLeadByName = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const q = (req.query.q || "").trim();
+    if (!q) {
+      return res.status(400).json({ message: "q (search term) is required" });
+    }
+    // Finding the student by their names
+    const students = await Student.find({
+      registeredAgency: userId,
+      isValid: true,
+      name: { $regex: q, $options: "i" },
+    })
+      .select("name education joinDate status statusHistory isValid")
+      .lean();
+
+    const leads = students.map((student) => {
+      const lastEducation =
+        student.education?.length > 0
+          ? student.education[student.education.length - 1].qualification
+          : null;
+      if (!students) {
+        return res.status(404).json({ message: "Student not found" });
+      }
+      return res.status(200).json({
+        name: student.name,
+        qualification: lastEducation,
+        joinDate: student.joinDate,
+        status: student.status, // current status
+        statusHistory: student.statusHistory || [], //all statuses with dates
+        valid: student.isValid,
+      });
+    });
   } catch (e) {
     console.log(e);
     return res.status(500).json({ message: "Server error" });

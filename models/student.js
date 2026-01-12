@@ -10,7 +10,6 @@ const StudentSchema = new Schema(
     profileURL: {
       type: String,
     },
-
     email: {
       type: String,
     },
@@ -107,6 +106,9 @@ const StudentSchema = new Schema(
     },
     statusHistory: [
       {
+        stage: {
+          type: String,
+        },
         status_name: {
           type: String,
           enum: [
@@ -122,6 +124,9 @@ const StudentSchema = new Schema(
         status_date: {
           type: Date,
           default: Date.now,
+        },
+        remarks: {
+          type: String,
         },
       },
     ],

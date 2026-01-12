@@ -53,31 +53,46 @@ export const createUni = async (req, res) => {
 export const getUni = async (req, res) => {
   try {
     const userId = req.user.sub;
-    // No token stored
+
     if (!userId) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+      return res.status(401).json({ message: "Unauthorized" });
     }
+
+    // Only ACTIVE universities
     const agency = await Agency.findById(userId).populate({
       path: "partnerUniversities",
+      match: { status: "Active" }, // only active universities returned
       select: "name country status about mission websiteURL logo",
     });
-    const universityIds = agency.partnerUniversities.map((u) => u._id);
 
-    // Course counts grouped by providedBy (university)
+    if (!agency) {
+      return res.status(404).json({ message: "Agency not found" });
+    }
+
+    const universityIds = (agency.partnerUniversities || []).map((u) => u._id);
+
+    // Count only OPEN courses for ACTIVE universities
     const courseCounts = await Course.aggregate([
-      { $match: { providedBy: { $in: universityIds } } },
+      {
+        $match: {
+          providedBy: { $in: universityIds },
+          status: "open", //only open courses
+        },
+      },
       { $group: { _id: "$providedBy", count: { $sum: 1 } } },
     ]);
 
-    // Student counts grouped by selectedUniversity
+    // Count only VALID students for ACTIVE universities
     const studentCounts = await Student.aggregate([
-      { $match: { selectedUniversity: { $in: universityIds } } },
+      {
+        $match: {
+          selectedUniversity: { $in: universityIds },
+          isValid: true, //only valid students (change to your real field if needed)
+        },
+      },
       { $group: { _id: "$selectedUniversity", count: { $sum: 1 } } },
     ]);
 
-    // Convert to maps for O(1) lookup
     const courseCountMap = new Map(
       courseCounts.map((x) => [String(x._id), x.count])
     );
@@ -85,15 +100,16 @@ export const getUni = async (req, res) => {
       studentCounts.map((x) => [String(x._id), x.count])
     );
 
-    // Attach counts to each university
-    const universitiesWithCounts = agency.partnerUniversities.map((u) => {
-      const id = String(u._id);
-      return {
-        ...u.toObject(),
-        courseCount: courseCountMap.get(id) || 0,
-        studentCount: studentCountMap.get(id) || 0,
-      };
-    });
+    const universitiesWithCounts = (agency.partnerUniversities || []).map(
+      (u) => {
+        const id = String(u._id);
+        return {
+          ...u.toObject(),
+          courseCount: courseCountMap.get(id) || 0,
+          studentCount: studentCountMap.get(id) || 0,
+        };
+      }
+    );
 
     return res.status(200).json({
       agency: agency._id,
@@ -105,6 +121,7 @@ export const getUni = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 // Getting uni for the student page
 export const getUniStudent = async (req, res) => {
   try {
@@ -191,6 +208,9 @@ export const getUniById = async (req, res) => {
     const university = await University.findById(universityId).populate({
       path: "courses",
       select: "title",
+      match: {
+        status: "open",
+      },
     });
     if (!university) {
       return res.status(404).json({ message: "university does not exist" });

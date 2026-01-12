@@ -27,6 +27,8 @@ import {
   getLeadDashboard,
   getStudentLead,
   getStudentAppStatus,
+  getStudentList,
+  searchLeadByName,
 } from "../controllers/agency/agency.profile.js";
 
 import {
@@ -45,9 +47,11 @@ import { generateSAS, confirmUpload } from "../controllers/agency/agency.blob.js
 import {
   createEvent,
   getAllEvents,
-  getEvent,
+  getEventById,
   updateEvent,
   deleteEvent,
+  getAllEventsStudent,
+  searchEventsByName,
 } from "../controllers/agency/agency.event.js";
 
 import {
@@ -81,6 +85,8 @@ router.get("/profile/:agencyId", protect, getAgencybyId);
 router.get("/profile/dashboard/leads/", protect, getLeadDashboard);
 router.get("/profile/students/leads/", protect, getStudentLead);
 router.get("/profile/students/leads/:studentId", protect, getStudentAppStatus);
+router.get("/profile/students/leads/query/search", protect, searchLeadByName);
+router.get("/profile/students/studentlist", protect, getStudentList);
 
 //University apis
 router.post("/universities", protect, createUni);
@@ -117,9 +123,11 @@ router.post("/uploads/confirm", protect, confirmUpload);
 //Event apis
 router.post("/events", protect, createEvent);
 router.get("/events", protect, getAllEvents);
-router.get("/events/:eventId", protect, getEvent);
-router.patch("/events/:eventId", protect, updateEvent);
-router.delete("/events/:eventId", protect, deleteEvent);
+router.get("/events/profile/:eventId", protect, getEventById);
+router.get("/events/student/:agencyId", protect, getAllEventsStudent);
+router.patch("/events/profile/:eventId", protect, updateEvent);
+router.delete("/events/profile/:eventId", protect, deleteEvent);
+router.get("/events/profile/query/search", protect, searchEventsByName);
 
 // Scholarships apis
 router.post("/scholarships", protect, createScholarship);

@@ -16,9 +16,10 @@ import {
   selectAgency,
   deactivateStudent,
 } from "../controllers/student/student.profile.js";
-
+import { searchUniByName } from "../controllers/student/student.uni.js";
 import { generateSAS, confirmUpload } from "../controllers/Application.js";
 import { searchCourseByName } from "../controllers/student/student.course.js";
+import { searchScholarshipByName } from "../controllers/student/student.scholarship.js";
 const router = express.Router();
 
 //For authentication
@@ -45,4 +46,13 @@ router.post("/uploads/confirm", protect, confirmUpload);
 //Course api
 router.get("/courses/query/:agencyId/search", protect, searchCourseByName);
 
+//University api
+router.get("/universities/query/:agencyId/search", protect, searchUniByName);
+
+//Scholarship
+router.get(
+  "/scholarships/query/:agencyId/search",
+  protect,
+  searchScholarshipByName
+);
 export default router;

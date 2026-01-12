@@ -17,7 +17,7 @@ import {
   deactivateStudent,
 } from "../controllers/student/student.profile.js";
 
-import { generateSAS, confirmUpload } from "../controllers/Application.js";
+import { generateSAS, confirmUpload } from "../controllers/student/student.blob.js";
 
 const router = express.Router();
 

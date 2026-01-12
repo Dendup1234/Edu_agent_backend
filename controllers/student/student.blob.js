@@ -72,10 +72,11 @@ export const generateSAS = async (req, res) => {
 
 export const confirmUpload = async (req, res) => {
   try {
-    const { blobName, agencyId, studentId } = req.body;
+    const { blobName, agencyId, mimeType, size } = req.body;
+    const { studentId } = req.user.sub
 
-    if (!blobName) {
-      return res.status(400).json({ error: "Missing blobName or originalName" });
+    if (!blobName || !studentId || !agencyId || !mimeType || !size) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
     const blobClient = containerClient.getBlobClient(blobName);
@@ -84,7 +85,7 @@ export const confirmUpload = async (req, res) => {
       return res.status(400).json({ error: "Upload not found" });
     }
 
-    const student = await Student.findByIdAndUpdate(
+    await Student.findByIdAndUpdate(
       studentId,
       { profileURL: blobClient.url },
       { new: true }
@@ -94,8 +95,8 @@ export const confirmUpload = async (req, res) => {
       uploadBy: studentId,
       agency: agencyId,
       fileName: blobName,
-      fileType: props.contentType,
-      fileSize: props.contentLength,
+      fileType: mimeType,
+      fileSize: size,
       fileURL: blobClient.url
     });
 
@@ -104,9 +105,10 @@ export const confirmUpload = async (req, res) => {
       documents: [document._id],
       status: "draft"
     });
-    
+
     res.json({
-      message: "Upload confuirmed", status: application.status
+      message: "Upload confirmed",
+      status: application.status
     });
 
   } catch (err) {

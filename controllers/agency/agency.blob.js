@@ -70,7 +70,8 @@ export const generateSAS = async (req, res) => {
 
 export const confirmUpload = async (req, res) => {
   try {
-    const { blobName, agencyId, studentId } = req.body;
+    const { blobName } = req.body;
+    const { agencyId } = req.user.sub
 
     // Validate required info
     if (!blobName) {

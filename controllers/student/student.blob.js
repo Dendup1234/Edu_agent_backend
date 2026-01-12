@@ -73,7 +73,7 @@ export const generateSAS = async (req, res) => {
 export const confirmUpload = async (req, res) => {
   try {
     const { blobName, agencyId, mimeType, size } = req.body;
-    const { studentId } = req.user.sub
+    const studentId = req.user.sub
 
     if (!blobName || !studentId || !agencyId || !mimeType || !size) {
       return res.status(400).json({ error: "Missing required fields" });

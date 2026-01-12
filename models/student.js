@@ -6,7 +6,8 @@ const StudentSchema = new Schema(
       type: String,
       trim: true,
     },
-    profileUrl: {
+    
+    profileURL: {
       type: String,
     },
     email: {

@@ -42,7 +42,7 @@ import {
   getUniDashboard,
 } from "../controllers/agency/agency.uni.js";
 
-import { generateSAS, confirmUpload } from "../controllers/Application.js";
+import { generateSAS, confirmUpload } from "../controllers/agency/agency.blob.js";
 
 import {
   createEvent,
@@ -97,6 +97,7 @@ router.get("/universities/:universityId", protect, getUniById);
 router.get("/universities/agency/:agencyId", protect, getUniStudent);
 router.get("/universities/query/search", protect, searchUniByName);
 router.get("/universities/dashboard/unipage", protect, getUniDashboard);
+
 //Courses apis
 router.post("/universities/:universityId/courses", protect, createCourse);
 router.get("/universities/:universityId/courses", protect, getCourse);

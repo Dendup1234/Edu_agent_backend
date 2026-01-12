@@ -1,8 +1,9 @@
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
 dotenv.config();
-import Agency from "../models/agency.js";
-import Student from "../models/student.js";
+import Student from "../../models/student.js";
+import Document from "../../models/document.js";
+import Application from "../../models/application.js"
 
 import {
   StorageSharedKeyCredential,
@@ -10,6 +11,7 @@ import {
   generateBlobSASQueryParameters,
   BlobSASPermissions
 } from "@azure/storage-blob";
+
 
 const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME;
 const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
@@ -70,11 +72,11 @@ export const generateSAS = async (req, res) => {
 
 export const confirmUpload = async (req, res) => {
   try {
-    const { blobName, agencyId, studentId } = req.body;
+    const { blobName, agencyId, mimeType, size } = req.body;
+    const { studentId } = req.user.sub
 
-    // Validate required info
-    if (!blobName) {
-      return res.status(400).json({ error: "Missing blobName or originalName" });
+    if (!blobName || !studentId || !agencyId || !mimeType || !size) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
     const blobClient = containerClient.getBlobClient(blobName);
@@ -83,22 +85,30 @@ export const confirmUpload = async (req, res) => {
       return res.status(400).json({ error: "Upload not found" });
     }
 
-    // Save profile url in agency
-    const agency = await Agency.findByIdAndUpdate(
-      agencyId,
-      { logo: blobClient.url },
+    await Student.findByIdAndUpdate(
+      studentId,
+      { profileURL: blobClient.url },
       { new: true }
     );
 
-    // Save profile url in student
-    const student = await Student.findByIdAndUpdate(
-      studentId,
-      { profilePicture: blobClient.url },
-      { new: true }
-    );
+    const document = await Document.create({
+      uploadBy: studentId,
+      agency: agencyId,
+      fileName: blobName,
+      fileType: mimeType,
+      fileSize: size,
+      fileURL: blobClient.url
+    });
+
+    const application = await Application.create({
+      applicationFor: studentId,
+      documents: [document._id],
+      status: "draft"
+    });
 
     res.json({
-      message: "Upload confuirmed"
+      message: "Upload confirmed",
+      status: application.status
     });
 
   } catch (err) {

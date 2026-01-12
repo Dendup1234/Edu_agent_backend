@@ -19,7 +19,6 @@ const documentSchema = new mongoose.Schema(
     fileName: String,
     fileType: String,
     fileSize: Number,
-    fileKey: String,
     fileURL: String,
 
     uploadedAt: {
@@ -41,4 +40,4 @@ const documentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const Document = mongoose.model("Document", documentSchema);
+export default mongoose.model("Document", documentSchema);

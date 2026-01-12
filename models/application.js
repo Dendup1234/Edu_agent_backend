@@ -1,16 +1,10 @@
 import mongoose from "mongoose";
 
-const ApplicationSchema = new Schema(
+const ApplicationSchema = new mongoose.Schema(
   {
-    university: {
-      type: Types.ObjectId,
-      ref: "University",
-      required: true
-    },
-
-    course: {
-      type: Types.ObjectId,
-      ref: "Course"
+    applicationFor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Student"
     },
 
     status: {
@@ -30,20 +24,9 @@ const ApplicationSchema = new Schema(
       default: "draft"
     },
 
-    visaCountry: {
-      type: String,
-      trim: true
-    },
-
-    visaStatus: {
-      type: String,
-      enum: ["not_required", "pending", "approved", "rejected"],
-      default: "pending"
-    },
-
     documents: [
       {
-        type: Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Document",
       },
     ],
@@ -53,4 +36,4 @@ const ApplicationSchema = new Schema(
   { timestamps: true }
 );
 
-export const Application = mongoose.model("Application", ApplicationSchema);
+export default mongoose.model("Application", ApplicationSchema);

@@ -20,6 +20,9 @@ import { searchUniByName } from "../controllers/student/student.uni.js";
 import { generateSAS, confirmUpload } from "../controllers/Application.js";
 import { searchCourseByName } from "../controllers/student/student.course.js";
 import { searchScholarshipByName } from "../controllers/student/student.scholarship.js";
+
+import { generateSAS, confirmUpload } from "../controllers/student/student.blob.js";
+
 const router = express.Router();
 
 //For authentication

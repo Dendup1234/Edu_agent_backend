@@ -208,6 +208,9 @@ export const getUniById = async (req, res) => {
     const university = await University.findById(universityId).populate({
       path: "courses",
       select: "title",
+      match: {
+        status: "open",
+      },
     });
     if (!university) {
       return res.status(404).json({ message: "university does not exist" });

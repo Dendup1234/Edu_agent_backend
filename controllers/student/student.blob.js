@@ -111,8 +111,8 @@ export const confirmUpload = async (req, res) => {
       status: application.status
     });
 
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Confirmation failed" });
   }
 };

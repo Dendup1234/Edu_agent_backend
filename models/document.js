@@ -4,16 +4,14 @@ const documentSchema = new mongoose.Schema(
   {
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Student",
-      required: true,
+      ref: "Student"
     },
     agency: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Agency",
     },
     documentType: {
-      type: String,
-      required: true,
+      type: String
     },
 
     fileName: String,

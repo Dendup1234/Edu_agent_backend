@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
-import student from "./student";
 
-const ApplicationSchema = new Schema(
+const ApplicationSchema = new mongoose.Schema(
   {
     applicationFor: {
-      type: Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Student"
     },
 
@@ -27,7 +26,7 @@ const ApplicationSchema = new Schema(
 
     documents: [
       {
-        type: Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Document",
       },
     ],
@@ -37,4 +36,4 @@ const ApplicationSchema = new Schema(
   { timestamps: true }
 );
 
-export const Application = mongoose.model("Application", ApplicationSchema);
+export default mongoose.model("Application", ApplicationSchema);

@@ -73,7 +73,6 @@ export const confirmUpload = async (req, res) => {
     const { blobName } = req.body;
     const { agencyId } = req.user.sub
 
-    // Validate required info
     if (!blobName) {
       return res.status(400).json({ error: "Missing blobName or originalName" });
     }
@@ -84,7 +83,6 @@ export const confirmUpload = async (req, res) => {
       return res.status(400).json({ error: "Upload not found" });
     }
 
-    // Save profile url in agency
     const agency = await Agency.findByIdAndUpdate(
       agencyId,
       { logo: blobClient.url },

@@ -73,9 +73,9 @@ export const generateSAS = async (req, res) => {
 export const confirmUpload = async (req, res) => {
   try {
     const { blobName, agencyId, mimeType, size } = req.body;
-    const studentId = req.user.sub
+    const studentId = req.user.sub;
 
-    if (!blobName || !studentId || !agencyId || !mimeType || !size) {
+    if (!blobName || !studentId || !mimeType || !size) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -85,30 +85,41 @@ export const confirmUpload = async (req, res) => {
       return res.status(400).json({ error: "Upload not found" });
     }
 
-    await Student.findByIdAndUpdate(
+    const student = await Student.findByIdAndUpdate(
       studentId,
       { profileURL: blobClient.url },
       { new: true }
     );
 
-    const document = await Document.create({
-      uploadBy: studentId,
-      agency: agencyId,
-      fileName: blobName,
-      fileType: mimeType,
-      fileSize: size,
-      fileURL: blobClient.url
-    });
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
 
-    const application = await Application.create({
-      applicationFor: studentId,
-      documents: [document._id],
-      status: "draft"
-    });
+    if (agencyId) {
+      const document = await Document.create({
+        uploadBy: studentId,
+        agency: agencyId,
+        fileName: blobName,
+        fileType: mimeType,
+        fileSize: size,
+        fileURL: blobClient.url
+      });
 
-    res.json({
+      const application = await Application.create({
+        applicationFor: studentId,
+        documents: [document._id],
+        status: "draft"
+      });
+
+      return res.json({
+        message: "Upload confirmed",
+        status: application.status
+      });
+    }
+
+    return res.json({
       message: "Upload confirmed",
-      status: application.status
+      fileURL: blobClient.url
     });
 
   } catch (error) {

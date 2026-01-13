@@ -103,8 +103,7 @@ export const confirmUpload = async (req, res) => {
         fileName: blobName,
         fileType: mimeType,
         fileSize: size,
-        fileURL: blobClient.url,
-        uploadedAt: Date.now,
+        fileURL: blobClient.url
       });
 
       const application = await Application.create({

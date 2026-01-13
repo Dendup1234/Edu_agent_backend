@@ -189,7 +189,7 @@ export const setNewPassword = async (req, res) => {
 
     // hash new password
     user.password = await bcrypt.hash(newPassword, 12);
-    user.isVerified = true; // verifying the new agent
+    user.isVerified = true; // verifying the new agent when password changes
     await user.save();
 
     return res.json({ message: "Password reset successful" });

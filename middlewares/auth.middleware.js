@@ -20,7 +20,6 @@ export const protect = async (req, res, next) => {
 };
 
 //Only the verfied agent can access the page
-
 export const requireVerifiedAgent = (req, res, next) => {
   // verifying the agent
   if (!req.user.isVerified) {
@@ -36,7 +35,9 @@ export const requireVerifiedAgent = (req, res, next) => {
 export const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: "Forbidden: role not found" });
+      return res
+        .status(403)
+        .json({ message: "Forbidden: Unauthorized access" });
     }
     next();
   };

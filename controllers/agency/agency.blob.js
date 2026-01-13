@@ -55,7 +55,7 @@ export const generateSAS = async (req, res) => {
         expiresOn,
         contentType: mimeType
       },
-      blobServiceClient.credential
+      sharedKeyCredential
     ).toString();
 
     const blobClient = containerClient.getBlockBlobClient(blobName);

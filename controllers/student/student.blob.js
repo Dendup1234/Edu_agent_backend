@@ -39,8 +39,21 @@ const ALLOWED_TYPES = [
 
 const MAX_SIZE = 50 * 1024 * 1024; 
 
-const REQUIRED_DOC_TYPES = ["passport", "academic_result"];
-
+const REQUIRED_DOC_TYPES = [
+  'passport',
+  'academic_results',
+  'latest_transcript',
+  'english_test',
+  'cv',
+  'marriage_cert',
+  'sop',
+  'employment_proof',
+  'lor',
+  'study_leave',
+  'spouse_docs',
+  'visa_history',
+  'passport_photo'
+];
 
 export const generateSAS = async (req, res) => {
   try {

@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import Message from "./models/Message.js"; // Your existing model
+import Message from "./models/Message.js";
 
 // Initialize WebSocket server
 const initializeWebSocket = (server) => {

@@ -109,7 +109,7 @@ export const confirmUpload = async (req, res) => {
       const application = await Application.create({
         applicationFor: studentId,
         documents: [document._id],
-        status: "draft"
+        status: "document_review"
       });
 
       return res.json({

@@ -85,7 +85,7 @@ export const confirmUpload = async (req, res) => {
       return res.status(400).json({ error: "Upload not found" });
     }
 
-    if( type == "agency"){
+    if( imageType == "agency"){
       const agency = await Agency.findByIdAndUpdate(
       agencyId,
       { logo: blobClient.url },
@@ -94,7 +94,7 @@ export const confirmUpload = async (req, res) => {
     res.json({ message: "Upload confuirmed" });
     }
 
-    if ( type == "university"){
+    if ( imageType == "university"){
       const university = await University.findByIdAndDelete(
       universityId,
       { logo : blobClient.url },
@@ -103,9 +103,9 @@ export const confirmUpload = async (req, res) => {
     res.json({ message: "Upload confuirmed" });
     }
        
-    if ( type == "event"){
-      const university = await Event.findByIdAndDelete(
-      universityId,
+    if ( imageType == "event"){
+      const event = await Event.findByIdAndDelete(
+      eventId,
       { logo : blobClient.url },
       { new: true }
     );

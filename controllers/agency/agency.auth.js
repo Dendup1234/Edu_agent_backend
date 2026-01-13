@@ -212,7 +212,7 @@ export const login = async (req, res) => {
   }
 
   // password is select:false so we must explicitly select it
-  const user = await Agency.findOne({ email }).select("+password");
+  const user = await Agency.findOne({ email }).select("password");
   if (!user) {
     return res.status(401).json({ message: "Invalid email or password" });
   }

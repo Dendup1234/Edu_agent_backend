@@ -6,6 +6,7 @@ import studentRoute from "./routes/student.js";
 import agencyRoute from "./routes/agency.js";
 import oAuthRoute from "./routes/oAuth.js";
 import adminRoute from "./routes/admin.js";
+import agentRoute from "./routes/agent.js";
 import cors from "cors";
 
 //config
@@ -20,6 +21,7 @@ app.use(cors());
 app.use("/api/v1/students", studentRoute);
 app.use("/api/v1/agency", agencyRoute);
 app.use("/api/v1/admin", adminRoute);
+app.use("/api/v1/agent", agentRoute);
 app.use(oAuthRoute);
 
 // Listening to the port 8000

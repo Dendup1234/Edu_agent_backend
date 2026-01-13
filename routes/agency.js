@@ -29,6 +29,9 @@ import {
   getStudentAppStatus,
   getStudentList,
   searchLeadByName,
+  createAgent,
+  getAllAgent,
+  getAgentById,
 } from "../controllers/agency/agency.profile.js";
 
 import {
@@ -42,7 +45,10 @@ import {
   getUniDashboard,
 } from "../controllers/agency/agency.uni.js";
 
-import { generateSAS, confirmUpload } from "../controllers/agency/agency.blob.js";
+import {
+  generateSAS,
+  confirmUpload,
+} from "../controllers/agency/agency.blob.js";
 
 import {
   createEvent,
@@ -87,6 +93,9 @@ router.get("/profile/students/leads/", protect, getStudentLead);
 router.get("/profile/students/leads/:studentId", protect, getStudentAppStatus);
 router.get("/profile/students/leads/query/search", protect, searchLeadByName);
 router.get("/profile/students/studentlist", protect, getStudentList);
+router.post("/profile/employee/agents", protect, createAgent);
+router.get("/profile/employee/agents", protect, getAllAgent);
+router.get("/profile/employee/agents/:agentId", protect, getAgentById);
 
 //University apis
 router.post("/universities", protect, createUni);

@@ -10,17 +10,17 @@ const ApplicationSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [
-        document_review,
-        documents_requested,
-        offer_letter_sent,
-        offer_rejected,
-        COE_received,
-        visa_applied,
-        visa_refused,
-        visa_approved,
-        withdrawn
+        "document_review",
+        "documents_requested",
+        "offer_letter_sent",
+        "offer_rejected",
+        "COE_received",
+        "visa_applied",
+        "visa_refused",
+        "visa_approved",
+        "withdrawn"
       ],
-      default: "draft"
+      default: "document_review"
     },
 
     documents: [

@@ -1,8 +1,9 @@
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
 dotenv.config();
-import Agency from "../models/agency.js";
-import Student from "../models/student.js";
+import Agency from "../../models/agency.js";
+import University from "../../models/university.js";
+import Event from "../../models/event.js";
 
 import {
   StorageSharedKeyCredential,
@@ -10,6 +11,7 @@ import {
   generateBlobSASQueryParameters,
   BlobSASPermissions
 } from "@azure/storage-blob";
+
 
 const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME;
 const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
@@ -53,7 +55,7 @@ export const generateSAS = async (req, res) => {
         expiresOn,
         contentType: mimeType
       },
-      blobServiceClient.credential
+      sharedKeyCredential
     ).toString();
 
     const blobClient = containerClient.getBlockBlobClient(blobName);
@@ -70,9 +72,9 @@ export const generateSAS = async (req, res) => {
 
 export const confirmUpload = async (req, res) => {
   try {
-    const { blobName, agencyId, studentId } = req.body;
+    const { blobName, universityId, eventId, imageType } = req.body;
+    const agencyId = req.user.sub
 
-    // Validate required info
     if (!blobName) {
       return res.status(400).json({ error: "Missing blobName or originalName" });
     }
@@ -83,23 +85,32 @@ export const confirmUpload = async (req, res) => {
       return res.status(400).json({ error: "Upload not found" });
     }
 
-    // Save profile url in agency
-    const agency = await Agency.findByIdAndUpdate(
+    if( imageType == "agency"){
+      const agency = await Agency.findByIdAndUpdate(
       agencyId,
       { logo: blobClient.url },
       { new: true }
     );
+    res.json({ message: "Upload confuirmed" });
+    }
 
-    // Save profile url in student
-    const student = await Student.findByIdAndUpdate(
-      studentId,
-      { profilePicture: blobClient.url },
+    if ( imageType == "university"){
+      const university = await University.findByIdAndDelete(
+      universityId,
+      { logo : blobClient.url },
       { new: true }
     );
-
-    res.json({
-      message: "Upload confuirmed"
-    });
+    res.json({ message: "Upload confuirmed" });
+    }
+       
+    if ( imageType == "event"){
+      const event = await Event.findByIdAndDelete(
+      eventId,
+      { logo : blobClient.url },
+      { new: true }
+    );
+    res.json({ message: "Upload confuirmed" });
+    }
 
   } catch (err) {
     console.error(err);

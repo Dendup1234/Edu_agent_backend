@@ -14,9 +14,14 @@ import {
   getProfile,
   updateProfile,
   selectAgency,
+  deactivateStudent,
 } from "../controllers/student/student.profile.js";
 
-import {generateSAS, confirmUpload} from "../controllers/Application.js"
+import { searchUniByName } from "../controllers/student/student.uni.js";
+import { searchCourseByName } from "../controllers/student/student.course.js";
+import { searchScholarshipByName } from "../controllers/student/student.scholarship.js";
+
+import { generateSAS, confirmUpload } from "../controllers/student/student.blob.js";
 
 const router = express.Router();
 
@@ -32,6 +37,7 @@ router.post("/password-reset/set-new", setNewPassword);
 //Profile section
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
+router.delete("/profile/:studentId", protect, deactivateStudent);
 
 // When student select a particular agency
 router.post("/select-agency", protect, selectAgency);
@@ -40,4 +46,16 @@ router.post("/select-agency", protect, selectAgency);
 router.post("/uploads/sas", protect, generateSAS);
 router.post("/uploads/confirm", protect, confirmUpload);
 
+//Course api
+router.get("/courses/query/:agencyId/search", protect, searchCourseByName);
+
+//University api
+router.get("/universities/query/:agencyId/search", protect, searchUniByName);
+
+//Scholarship
+router.get(
+  "/scholarships/query/:agencyId/search",
+  protect,
+  searchScholarshipByName
+);
 export default router;

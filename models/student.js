@@ -6,7 +6,10 @@ const StudentSchema = new Schema(
       type: String,
       trim: true,
     },
-
+    
+    profileURL: {
+      type: String,
+    },
     email: {
       type: String,
     },
@@ -23,11 +26,6 @@ const StudentSchema = new Schema(
 
     googleId: {
       type: String,
-    },
-
-    emailVerified: {
-      type: Boolean,
-      default: false,
     },
 
     registeredAgency: {
@@ -77,7 +75,16 @@ const StudentSchema = new Schema(
 
     education: [
       {
-        qualification: { type: String, trim: true },
+        qualification: {
+          type: String,
+          enum: [
+            "High School",
+            "Diploma",
+            "Bachelor Degree",
+            "Undergraduate",
+            "Master",
+          ],
+        },
         institute: { type: String, trim: true },
         year: { type: Number },
         startedAt: { type: Date },
@@ -85,7 +92,11 @@ const StudentSchema = new Schema(
       },
     ],
 
-    status: {
+    isValid: {
+      type: Boolean,
+      default: true,
+    },
+    onlineStatus: {
       type: String,
       enum: ["active", "inactive"],
       default: "active"

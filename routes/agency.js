@@ -24,6 +24,14 @@ import {
   updateProfile,
   getAgencybyId,
   getAllAgency,
+  getLeadDashboard,
+  getStudentLead,
+  getStudentAppStatus,
+  getStudentList,
+  searchLeadByName,
+  createAgent,
+  getAllAgent,
+  getAgentById,
 } from "../controllers/agency/agency.profile.js";
 
 import {
@@ -32,11 +40,37 @@ import {
   updateUni,
   deactivateUni,
   getUniById,
+  getUniStudent,
+  searchUniByName,
+  getUniDashboard,
 } from "../controllers/agency/agency.uni.js";
 
-import { generateSAS, confirmUpload } from "../controllers/Application.js";
+import {
+  generateSAS,
+  confirmUpload,
+} from "../controllers/agency/agency.blob.js";
 
-import {createEvent, getAllEvents, getEvent, updateEvent, deleteEvent} from "../controllers/agency/agency.event.js"
+import {
+  createEvent,
+  getAllEvents,
+  getEventById,
+  updateEvent,
+  deleteEvent,
+  getAllEventsStudent,
+  searchEventsByName,
+} from "../controllers/agency/agency.event.js";
+
+import {
+  createScholarship,
+  getAllScholarship,
+  getAllScholarshipStudent,
+  getAllScholarshipLanding,
+  getScholarshipById,
+  updateScholarship,
+  deactivateScholarship,
+  searchScholarshipByName,
+  getScholarshipDashboard,
+} from "../controllers/agency/agency.scholarship.js";
 
 //Router import
 const router = express.Router();
@@ -54,6 +88,14 @@ router.post("/password-reset/set-new", setNewPassword);
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
 router.get("/profile/:agencyId", protect, getAgencybyId);
+router.get("/profile/dashboard/leads/", protect, getLeadDashboard);
+router.get("/profile/students/leads/", protect, getStudentLead);
+router.get("/profile/students/leads/:studentId", protect, getStudentAppStatus);
+router.get("/profile/students/leads/query/search", protect, searchLeadByName);
+router.get("/profile/students/studentlist", protect, getStudentList);
+router.post("/profile/employee/agents", protect, createAgent);
+router.get("/profile/employee/agents", protect, getAllAgent);
+router.get("/profile/employee/agents/:agentId", protect, getAgentById);
 
 //University apis
 router.post("/universities", protect, createUni);
@@ -61,6 +103,10 @@ router.get("/universities", protect, getUni);
 router.patch("/universities/:universityId", protect, updateUni);
 router.delete("/universities/:universityId", protect, deactivateUni);
 router.get("/universities/:universityId", protect, getUniById);
+router.get("/universities/agency/:agencyId", protect, getUniStudent);
+router.get("/universities/query/search", protect, searchUniByName);
+router.get("/universities/dashboard/unipage", protect, getUniDashboard);
+
 //Courses apis
 router.post("/universities/:universityId/courses", protect, createCourse);
 router.get("/universities/:universityId/courses", protect, getCourse);
@@ -84,10 +130,27 @@ router.post("/uploads/sas", protect, generateSAS);
 router.post("/uploads/confirm", protect, confirmUpload);
 
 //Event apis
-router.post("/events", protect, createEvent)
-router.get("/events", protect, getAllEvents)
-router.get("/events/:eventId", protect, getEvent)
-router.patch("/events/:eventId", protect, updateEvent)
-router.delete("/events/:eventId", protect, deleteEvent)
+router.post("/events", protect, createEvent);
+router.get("/events", protect, getAllEvents);
+router.get("/events/profile/:eventId", protect, getEventById);
+router.get("/events/student/:agencyId", protect, getAllEventsStudent);
+router.patch("/events/profile/:eventId", protect, updateEvent);
+router.delete("/events/profile/:eventId", protect, deleteEvent);
+router.get("/events/profile/query/search", protect, searchEventsByName);
+
+// Scholarships apis
+router.post("/scholarships", protect, createScholarship);
+router.get("/scholarships", protect, getAllScholarship);
+router.get("/scholarships/:scholarshipId", protect, getScholarshipById);
+router.get("/scholarships/agency/:agencyId", protect, getAllScholarshipStudent);
+router.get("/scholarships/landing/", protect, getAllScholarshipLanding);
+router.patch("/scholarships/:scholarshipId", protect, updateScholarship);
+router.delete("/scholarships/:scholarshipId", protect, deactivateScholarship);
+router.get("/scholarships/query/search", protect, searchScholarshipByName);
+router.get(
+  "/scholarships/dashboard/scholarships",
+  protect,
+  getScholarshipDashboard
+);
 
 export default router;

@@ -1,34 +1,27 @@
 import mongoose from "mongoose";
-import student from "./student";
 const { Schema, Types } = mongoose;
 
 const agentSchema = new Schema(
   {
     name: {
-      type: String
+      type: String,
     },
 
     email: {
-      type: String
+      type: String,
     },
-
+    phone: {
+      type: String,
+    },
     password: {
-      type: String
+      type: String,
     },
-
-    googleId: {
-      type: String
-    },
-
+    // Verifed for the password changed
     isVerified: {
       type: Boolean,
       default: false,
     },
 
-    profileUrl: {
-      type: String,
-    },
-    
     agency: {
       type: Types.ObjectId,
       ref: "Agency",
@@ -44,17 +37,17 @@ const agentSchema = new Schema(
     status: {
       type: String,
       enum: ["active", "inactive"],
-      default: "active"
+      default: "active",
     },
 
     assignedStudents: [
       {
         type: Types.ObjectId,
-        ref: student
-      }
-    ]
+        ref: "Student",
+      },
+    ],
   },
   { timestamps: true }
 );
 
-export const Agent = mongoose.model("Agent", agentSchema);
+export default mongoose.model("Agent", agentSchema);

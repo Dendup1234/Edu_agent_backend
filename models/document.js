@@ -4,41 +4,42 @@ const documentSchema = new mongoose.Schema(
   {
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Student",
-      required: true,
+      ref: "Student"
     },
+
     agency: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Agency",
     },
+
     documentType: {
-      type: String,
-      required: true,
+      type: String
     },
 
     fileName: String,
     fileType: String,
     fileSize: Number,
-    fileKey: String,
     fileURL: String,
 
     uploadedAt: {
     type: Date,
     default: Date.now
     },
-    status: {
-      type: String,
-      enum: ["pending", "approved", "rejected", "needs_revision"],
-      default: "pending",
-    },
+
     reviewStatus: {
-      verified: { type: Boolean, default: false },
-      verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Agent" },
-      verifiedAt: Date,
+      type: String,
+      enum: ["under_review", "approved", "needs_revision"],
+      default: "under_review",
     },
+
+    verifiedBy: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "Agent" 
+    },
+
     isResubmitted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-export const Document = mongoose.model("Document", documentSchema);
+export default mongoose.model("Document", documentSchema);

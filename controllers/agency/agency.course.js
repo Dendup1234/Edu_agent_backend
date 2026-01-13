@@ -162,20 +162,21 @@ export const deactivateCourse = async (req, res) => {
   }
 };
 
-//Getting all the courses from the agency only the title
+//Getting all the courses from the agency only the title and when the status is open
 export const getCourseByAgency = async (req, res) => {
   try {
     const { agencyId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(agencyId)) {
       return res.status(400).json({ message: "Invalid Id" });
     }
-    const courses = await Course.find({ createdBy: agencyId })
+    const courses = await Course.find({
+      createdBy: agencyId,
+      status: "open",
+    })
       .select("title")
       .lean();
     if (courses.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No courses" });
+      return res.status(404).json({ message: "No courses" });
     }
 
     return res.status(200).json({

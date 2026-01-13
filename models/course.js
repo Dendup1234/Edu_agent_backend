@@ -7,7 +7,7 @@ const CourseSchema = new Schema(
     level: {
       type: String,
       enum: ["Undergraduate", "Graduate", "Diploma", "PhD"],
-	  default: "Undergraduate"
+      default: "Undergraduate",
     },
     //About field
     about: {
@@ -18,14 +18,7 @@ const CourseSchema = new Schema(
       default: "",
     },
     tuitionFee: {
-      totalfee: {
-        type: String,
-        deafult: "",
-      },
-      currency: {
-        type: String,
-        default: "",
-      },
+      type: String,
     },
     description: {
       type: String,

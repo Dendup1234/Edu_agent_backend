@@ -98,38 +98,13 @@ const StudentSchema = new Schema(
     },
     onlineStatus: {
       type: String,
-      enum: ["Active", "inActive"],
-      default: "Active",
+      enum: ["active", "inactive"],
+      default: "active"
     },
-    joinDate: {
-      type: Date,
-    },
-    statusHistory: [
-      {
-        stage: {
-          type: String,
-        },
-        status_name: {
-          type: String,
-          enum: [
-            "new",
-            "contacted",
-            "qualified",
-            "negotiated",
-            "applied",
-            "converted",
-            "lost",
-          ],
-        },
-        status_date: {
-          type: Date,
-          default: Date.now,
-        },
-        remarks: {
-          type: String,
-        },
-      },
-    ],
+
+    profilePicture: {
+      type: String
+    }
   },
   { timestamps: true }
 );

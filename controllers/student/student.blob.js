@@ -72,7 +72,7 @@ export const generateSAS = async (req, res) => {
 
 export const confirmUpload = async (req, res) => {
   try {
-    const { blobName, agencyId, mimeType, size } = req.body;
+    const { blobName, agencyId, mimeType, size, documentType } = req.body;
     const studentId = req.user.sub;
 
     if (!blobName || !studentId || !mimeType || !size) {
@@ -99,10 +99,12 @@ export const confirmUpload = async (req, res) => {
       const document = await Document.create({
         uploadBy: studentId,
         agency: agencyId,
+        documentType: documentType,
         fileName: blobName,
         fileType: mimeType,
         fileSize: size,
-        fileURL: blobClient.url
+        fileURL: blobClient.url,
+        uploadedAt: Date.now,
       });
 
       const application = await Application.create({

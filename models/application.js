@@ -10,16 +10,15 @@ const ApplicationSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [
-        "draft",
-        "submitted",
-        "university_review",
-        "offer_received",
-        "offer_accepted",
-        "visa_applied",
-        "visa_approved",
-        "enrolled",
-        "rejected",
-        "withdrawn",
+        document_review,
+        documents_requested,
+        offer_letter_sent,
+        offer_rejected,
+        COE_received,
+        visa_applied,
+        visa_refused,
+        visa_approved,
+        withdrawn
       ],
       default: "draft"
     },

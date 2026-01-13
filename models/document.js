@@ -6,10 +6,12 @@ const documentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student"
     },
+
     agency: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Agency",
     },
+
     documentType: {
       type: String
     },
@@ -23,16 +25,18 @@ const documentSchema = new mongoose.Schema(
     type: Date,
     default: Date.now
     },
-    status: {
-      type: String,
-      enum: ["pending", "approved", "rejected", "needs_revision"],
-      default: "pending",
-    },
+
     reviewStatus: {
-      verified: { type: Boolean, default: false },
-      verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Agent" },
-      verifiedAt: Date,
+      type: String,
+      enum: ["under_review", "approved", "needs_revision"],
+      default: "under_review",
     },
+
+    verifiedBy: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "Agent" 
+    },
+
     isResubmitted: { type: Boolean, default: false },
   },
   { timestamps: true }

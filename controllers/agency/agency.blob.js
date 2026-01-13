@@ -70,8 +70,8 @@ export const generateSAS = async (req, res) => {
 
 export const confirmUpload = async (req, res) => {
   try {
-    const { blobName } = req.body;
-    const { agencyId } = req.user.sub
+    const { blobName, universityId } = req.body;
+    const agencyId = req.user.sub
 
     if (!blobName) {
       return res.status(400).json({ error: "Missing blobName or originalName" });
@@ -88,6 +88,12 @@ export const confirmUpload = async (req, res) => {
       { logo: blobClient.url },
       { new: true }
     );
+
+    const university = await Agency.findByIdAndDelete(
+      universityId,
+      { logo : blobClient.url },
+      { new: true }
+    )
 
     res.json({
       message: "Upload confuirmed"

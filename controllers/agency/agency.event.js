@@ -1,4 +1,4 @@
-import { Event } from "../../models/event.js";
+import Event from "../../models/event.js";
 import mongoose from "mongoose";
 
 // creation of events

@@ -80,4 +80,4 @@ const eventSchema = new mongoose.Schema(
 );
 
 ///Exporting the event model
-export const Event = mongoose.model("Event", eventSchema);
+export default mongoose.model("Event", eventSchema);

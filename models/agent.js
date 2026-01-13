@@ -22,7 +22,6 @@ const agentSchema = new Schema(
       default: false,
     },
 
-
     agency: {
       type: Types.ObjectId,
       ref: "Agency",

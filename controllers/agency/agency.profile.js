@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import Agent from "../../models/agent.js";
 import { generatePassword } from "../../utils/password.js";
 import { sendAccountEmail } from "../../utils/sendEmail.js";
+import bcrypt from "bcryptjs";
 // Getting profile
 export const getProfile = async (req, res) => {
   try {
@@ -305,12 +306,14 @@ export const createAgent = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
     // Generating a new password
     const plainPassword = generatePassword(10);
+    //encrypting the password
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
     // Creating a new agent
     const agent = await Agent.create({
       name,
       email,
       phone,
-      password: plainPassword,
+      password: hashedPassword,
       agency: userId,
       role,
     });

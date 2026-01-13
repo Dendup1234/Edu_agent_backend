@@ -14,7 +14,30 @@ export const protect = async (req, res, next) => {
     req.user = payload;
     next();
   } catch (err) {
-    console.log(err)
+    console.log(err);
     res.status(401).json({ message: "Invalid or expired token" });
   }
+};
+
+//Only the verfied agent can access the page
+
+export const requireVerifiedAgent = (req, res, next) => {
+  // verifying the agent
+  if (!req.user.isVerified) {
+    return res.status(403).json({
+      message:
+        "Account not verified. Please change password / verify your account first.",
+    });
+  }
+  next();
+};
+
+//Role based middleware
+export const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden: role not found" });
+    }
+    next();
+  };
 };

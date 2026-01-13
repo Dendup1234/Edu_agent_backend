@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
 dotenv.config();
 import Agency from "../../models/agency.js";
+import University from "../../models/university.js";
+import Event from "../../models/event.js";
 
 import {
   StorageSharedKeyCredential,
@@ -70,7 +72,7 @@ export const generateSAS = async (req, res) => {
 
 export const confirmUpload = async (req, res) => {
   try {
-    const { blobName, universityId } = req.body;
+    const { blobName, universityId, eventId, imageType } = req.body;
     const agencyId = req.user.sub
 
     if (!blobName) {
@@ -83,21 +85,32 @@ export const confirmUpload = async (req, res) => {
       return res.status(400).json({ error: "Upload not found" });
     }
 
-    const agency = await Agency.findByIdAndUpdate(
+    if( type == "agency"){
+      const agency = await Agency.findByIdAndUpdate(
       agencyId,
       { logo: blobClient.url },
       { new: true }
     );
+    res.json({ message: "Upload confuirmed" });
+    }
 
-    const university = await Agency.findByIdAndDelete(
+    if ( type == "university"){
+      const university = await University.findByIdAndDelete(
       universityId,
       { logo : blobClient.url },
       { new: true }
-    )
-
-    res.json({
-      message: "Upload confuirmed"
-    });
+    );
+    res.json({ message: "Upload confuirmed" });
+    }
+       
+    if ( type == "event"){
+      const university = await Event.findByIdAndDelete(
+      universityId,
+      { logo : blobClient.url },
+      { new: true }
+    );
+    res.json({ message: "Upload confuirmed" });
+    }
 
   } catch (err) {
     console.error(err);

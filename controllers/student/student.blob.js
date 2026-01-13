@@ -1,9 +1,8 @@
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
-dotenv.config();
 import Student from "../../models/student.js";
 import Document from "../../models/document.js";
-import Application from "../../models/application.js"
+import Application from "../../models/application.js";
 
 import {
   StorageSharedKeyCredential,
@@ -12,11 +11,18 @@ import {
   BlobSASPermissions
 } from "@azure/storage-blob";
 
+dotenv.config();
 
-const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME;
-const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
-const containerName = process.env.AZURE_CONTAINER_NAME;
-const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
+const {
+  AZURE_STORAGE_ACCOUNT_NAME: accountName,
+  AZURE_STORAGE_ACCOUNT_KEY: accountKey,
+  AZURE_CONTAINER_NAME: containerName
+} = process.env;
+
+const sharedKeyCredential = new StorageSharedKeyCredential(
+  accountName,
+  accountKey
+);
 
 const blobServiceClient = new BlobServiceClient(
   `https://${accountName}.blob.core.windows.net`,
@@ -25,8 +31,16 @@ const blobServiceClient = new BlobServiceClient(
 
 const containerClient = blobServiceClient.getContainerClient(containerName);
 
-const ALLOWED_TYPES = ["image/png", "image/jpeg", "application/pdf"];
+const ALLOWED_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "application/pdf"
+];
+
 const MAX_SIZE = 50 * 1024 * 1024; 
+
+const REQUIRED_DOC_TYPES = ["passport", "academic_result"];
+
 
 export const generateSAS = async (req, res) => {
   try {
@@ -40,8 +54,13 @@ export const generateSAS = async (req, res) => {
       return res.status(400).json({ error: "File too large" });
     }
 
-    const ext = mimeType.split("/")[1] || "bin";
-    const blobName = `${uuidv4()}.${ext}`;
+    const extMap = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "application/pdf": "pdf"
+    };
+
+    const blobName = `${uuidv4()}.${extMap[mimeType]}`;
 
     const startsOn = new Date(Date.now() - 5 * 60 * 1000);
     const expiresOn = new Date(Date.now() + 15 * 60 * 1000);
@@ -49,13 +68,12 @@ export const generateSAS = async (req, res) => {
     const sasToken = generateBlobSASQueryParameters(
       {
         containerName,
-        blobName: blobName,
+        blobName,
         permissions: BlobSASPermissions.parse("cw"),
         startsOn,
-        expiresOn,
-        contentType: mimeType
+        expiresOn
       },
-      blobServiceClient.credential
+      sharedKeyCredential
     ).toString();
 
     const blobClient = containerClient.getBlockBlobClient(blobName);
@@ -72,10 +90,17 @@ export const generateSAS = async (req, res) => {
 
 export const confirmUpload = async (req, res) => {
   try {
-    const { blobName, agencyId, mimeType, size, documentType } = req.body;
+    const {
+      blobName,
+      agencyId,
+      mimeType,
+      size,
+      documentType
+    } = req.body;
+
     const studentId = req.user.sub;
 
-    if (!blobName || !studentId || !mimeType || !size) {
+    if (!blobName || !mimeType || !size) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -85,43 +110,58 @@ export const confirmUpload = async (req, res) => {
       return res.status(400).json({ error: "Upload not found" });
     }
 
-    const student = await Student.findByIdAndUpdate(
-      studentId,
-      { profileURL: blobClient.url },
-      { new: true }
-    );
+    if (documentType === "profile") {
+      const student = await Student.findByIdAndUpdate(
+        studentId,
+        { profileURL: blobClient.url },
+        { new: true }
+      );
 
-    if (!student) {
-      return res.status(404).json({ error: "Student not found" });
+      if (!student) {
+        return res.status(404).json({ error: "Student not found" });
+      }
+
+      return res.json({ message: "Profile picture uploaded" });
     }
 
-    if (agencyId) {
-      const document = await Document.create({
+    if (!REQUIRED_DOC_TYPES.includes(documentType)) {
+      return res.status(400).json({ error: "Invalid document type" });
+    }
+
+    const document = await Document.create({
+      uploadBy: studentId,
+      agency: agencyId,
+      documentType,
+      fileName: blobName,
+      fileType: mimeType,
+      fileSize: size,
+      fileURL: blobClient.url
+    });
+
+    const uploadedTypes = await Document.distinct("documentType", {
+      uploadBy: studentId
+    });
+
+    const isComplete = REQUIRED_DOC_TYPES.every(type =>
+      uploadedTypes.includes(type)
+    );
+
+    if (isComplete) {
+      const documents = await Document.find({
         uploadBy: studentId,
-        agency: agencyId,
-        documentType: documentType,
-        fileName: blobName,
-        fileType: mimeType,
-        fileSize: size,
-        fileURL: blobClient.url
-      });
+        documentType: { $in: REQUIRED_DOC_TYPES }
+      }).select("_id");
 
       const application = await Application.create({
         applicationFor: studentId,
-        documents: [document._id],
+        documents: documents.map(d => d._id),
         status: "document_review"
       });
 
-      return res.json({
-        message: "Upload confirmed",
-        status: application.status
-      });
+      return res.json({ status: application.status });
     }
 
-    return res.json({
-      message: "Upload confirmed",
-      fileURL: blobClient.url
-    });
+    return res.json({ message: "Upload confirmed" });
 
   } catch (error) {
     console.error(error);

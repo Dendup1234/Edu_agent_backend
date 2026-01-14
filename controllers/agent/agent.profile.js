@@ -1,5 +1,25 @@
 import Agent from "../../models/agent.js";
 
+// Custom role apis
+export const getAgentinformation = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    //fetching the information about the agent with its role and permission
+    const agent = await Agent.findById(userId)
+      .select("_id name roleId systemRole")
+      .populate({
+        path: "roleId",
+        select: "name permissions",
+      })
+      .lean();
+    // returing a status
+    return res.status(200).json({ message: "Success", agent: agent });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 //admission officers
 export const getAllStudent = async (req, res) => {
   try {

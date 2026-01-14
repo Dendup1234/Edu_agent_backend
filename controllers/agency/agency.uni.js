@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 // Creating university
 export const createUni = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     const { name, logo, websiteURL, country, about, mission, status } =
       req.body;
     // Checking if the userid exist
@@ -52,7 +52,7 @@ export const createUni = async (req, res) => {
 // Getting the university with count of student and course with each uni
 export const getUni = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -227,7 +227,7 @@ export const getUniById = async (req, res) => {
 // Search query in the uni for the agency
 export const searchUniByName = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(401).json({ message: "Invalid token" });
     }
@@ -303,7 +303,7 @@ export const searchUniByName = async (req, res) => {
 // Dashboard for the uni
 export const getUniDashboard = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(401).json({ message: "token invalid" });
     }

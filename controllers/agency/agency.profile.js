@@ -1,14 +1,11 @@
 import Agency from "../../models/agency.js";
 import Student from "../../models/student.js";
 import mongoose from "mongoose";
-import Agent from "../../models/agent.js";
-import { generatePassword } from "../../utils/password.js";
-import { sendAccountEmail } from "../../utils/sendEmail.js";
-import bcrypt from "bcryptjs";
+
 // Getting profile
 export const getProfile = async (req, res) => {
   try {
-    const user_id = req.user.sub;
+    const user_id = req.user.agencyId;
     //Hides password and return plain json format
     const agency = await Agency.findById(user_id).select("-password").lean();
     if (!agency) {
@@ -26,7 +23,7 @@ export const getProfile = async (req, res) => {
 //Updating a profile
 export const updateProfile = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     const update = req.body;
     // forbidden fields to be updated
     const forbidden = ["_id", "password"];
@@ -92,7 +89,7 @@ export const getAgencybyId = async (req, res) => {
 // Lead profile dashboard
 export const getLeadDashboard = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(401).json({ message: "Invalid token" });
     }
@@ -138,7 +135,7 @@ export const getLeadDashboard = async (req, res) => {
 //Getting the list of students in the lead table and the student table
 export const getStudentLead = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(401).json({ message: "token not found" });
     }
@@ -178,7 +175,7 @@ export const getStudentLead = async (req, res) => {
 // Getting the student list if they have a selected course and uni
 export const getStudentList = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(401).json({ message: "token not found" });
     }
@@ -229,7 +226,7 @@ export const getStudentList = async (req, res) => {
 // checking the status history of the particular student
 export const getStudentAppStatus = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     const { studentId } = req.params;
     if (!userId) {
       return res.status(401).json({ message: "Token not valid" });
@@ -249,7 +246,7 @@ export const getStudentAppStatus = async (req, res) => {
 // Searching student by their name
 export const searchLeadByName = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     const q = (req.query.q || "").trim();
     if (!q) {
       return res.status(400).json({ message: "q (search term) is required" });
@@ -283,118 +280,5 @@ export const searchLeadByName = async (req, res) => {
   } catch (e) {
     console.log(e);
     return res.status(500).json({ message: "Server error" });
-  }
-};
-//Creating an account of the employee under the agency
-export const createAgent = async (req, res) => {
-  try {
-    const userId = req.user.sub;
-    if (!userId) {
-      return res.status(401).json({ message: "Token invalid " });
-    }
-    const { name, email, phone, role } = req.body;
-
-    //check if agent already exists
-    const existingAgent = await Agent.findOne({ email });
-    if (existingAgent) {
-      return res
-        .status(409)
-        .json({ message: "Agent with this email already exists" });
-    }
-
-    //Triming the email
-    const normalizedEmail = email.toLowerCase().trim();
-    // Generating a new password
-    const plainPassword = generatePassword(10);
-    //encrypting the password
-    const hashedPassword = await bcrypt.hash(plainPassword, 10);
-    // Creating a new agent
-    const agent = await Agent.create({
-      name,
-      email,
-      phone,
-      password: hashedPassword,
-      agency: userId,
-      role,
-    });
-    //Sending the email to the particular agent
-    // Sending the email to the particular user
-    await sendAccountEmail(normalizedEmail, {
-      subject: "Your Agent Account is Ready",
-      title: "Welcome to EduAgent",
-      body: "Your agent account has been created by your agency admin.",
-      password: plainPassword,
-    });
-
-    //Success
-    return res.status(201).json({
-      message: "Agent created successfully",
-      agent: {
-        id: agent._id,
-        name: agent.name,
-        email: agent.email,
-        phone: agent.phone,
-        role: agent.role,
-        password: agent.password,
-      },
-    });
-  } catch (e) {
-    console.log(e);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
-
-//Getting all the agent in the employee dashboard
-export const getAllAgent = async (req, res) => {
-  try {
-    const userId = req.user.sub;
-    if (!userId) {
-      return res.status(401).json({ message: "Token invalid " });
-    }
-    // finding all the agent inside the organization
-    const agent = await Agent.find({
-      agency: userId,
-    });
-    return res.status(200).json({ message: "Success", agents: agent });
-  } catch (e) {
-    console.log(e);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
-
-// Getting the agent profile
-export const getAgentById = async (req, res) => {
-  try {
-    const { agentId } = req.params;
-    // Finding the agent by their id
-    const agent = await Agent.findById(agentId)
-      .select("-password")
-      .populate({
-        path: "assignedStudents",
-        select:
-          "name email phone status nationality selectedUniversity selectedCourse",
-        populate: [
-          {
-            path: "selectedUniversity",
-            select: "name country logo",
-          },
-          {
-            path: "selectedCourse",
-            select: "title",
-          },
-        ],
-      })
-      .lean();
-    if (!agent) {
-      return res.status(404).json({ message: "Agent not found" });
-    }
-    // Success message
-    return res.status(200).json({
-      message: "Success",
-      agent: agent,
-    });
-  } catch (e) {
-    console.log(e);
-    return res.status(500).json({ message: "Server error " });
   }
 };

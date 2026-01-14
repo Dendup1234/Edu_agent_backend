@@ -1,5 +1,5 @@
 import express from "express";
-import { protect } from "../middlewares/auth.middleware.js";
+import { protect, requirePermission } from "../middlewares/auth.middleware.js";
 import {
   sendOtp,
   resendOtp,
@@ -29,9 +29,6 @@ import {
   getStudentAppStatus,
   getStudentList,
   searchLeadByName,
-  createAgent,
-  getAllAgent,
-  getAgentById,
 } from "../controllers/agency/agency.profile.js";
 
 import {
@@ -71,7 +68,15 @@ import {
   searchScholarshipByName,
   getScholarshipDashboard,
 } from "../controllers/agency/agency.scholarship.js";
-
+import {
+  createAgent,
+  getAllAgent,
+  getAgentById,
+  createRole,
+  getAllRole,
+  updateRole,
+  deactivateRole,
+} from "../controllers/agency/agent.employee.js";
 //Router import
 const router = express.Router();
 
@@ -93,36 +98,93 @@ router.get("/profile/students/leads/", protect, getStudentLead);
 router.get("/profile/students/leads/:studentId", protect, getStudentAppStatus);
 router.get("/profile/students/leads/query/search", protect, searchLeadByName);
 router.get("/profile/students/studentlist", protect, getStudentList);
-router.post("/profile/employee/agents", protect, createAgent);
-router.get("/profile/employee/agents", protect, getAllAgent);
-router.get("/profile/employee/agents/:agentId", protect, getAgentById);
 
 //University apis
-router.post("/universities", protect, createUni);
-router.get("/universities", protect, getUni);
-router.patch("/universities/:universityId", protect, updateUni);
-router.delete("/universities/:universityId", protect, deactivateUni);
-router.get("/universities/:universityId", protect, getUniById);
+router.post(
+  "/universities",
+  protect,
+  requirePermission("university:create"),
+  createUni
+);
+router.get(
+  "/universities",
+  protect,
+  requirePermission("university:read"),
+  getUni
+);
+router.patch(
+  "/universities/:universityId",
+  protect,
+  requirePermission("university:update"),
+  updateUni
+);
+router.delete(
+  "/universities/:universityId",
+  protect,
+  requirePermission("university:delete"),
+  deactivateUni
+);
+router.get(
+  "/universities/:universityId",
+  protect,
+  requirePermission("university:readById"),
+  getUniById
+);
 router.get("/universities/agency/:agencyId", protect, getUniStudent);
-router.get("/universities/query/search", protect, searchUniByName);
-router.get("/universities/dashboard/unipage", protect, getUniDashboard);
+router.get(
+  "/universities/query/search",
+  protect,
+  requirePermission("university:search"),
+  searchUniByName
+);
+router.get(
+  "/universities/dashboard/unipage",
+  protect,
+  requirePermission("university:dashboard"),
+  getUniDashboard
+);
 
 //Courses apis
-router.post("/universities/:universityId/courses", protect, createCourse);
-router.get("/universities/:universityId/courses", protect, getCourse);
+router.post(
+  "/universities/:universityId/courses",
+  protect,
+  requirePermission("course:create"),
+  createCourse
+);
+
+router.get(
+  "/universities/:universityId/courses",
+  protect,
+  requirePermission("course:read"),
+  getCourse
+);
+
 router.patch(
   "/universities/:universityId/courses/:courseId",
   protect,
+  requirePermission("course:update"),
   updateCourse
 );
+
 router.delete(
   "/universities/:universityId/courses/:courseId",
   protect,
+  requirePermission("course:delete"),
   deactivateCourse
 );
-router.get("/courses/:courseId", protect, getCourseById);
+
+router.get(
+  "/courses/:courseId",
+  protect,
+  requirePermission("course:readById"),
+  getCourseById
+);
+
+//Student api to get the course
 router.get("/courses/agency/:agencyId", protect, getCourseByAgency);
+
 //All agency
+//Student api
 router.get("/", protect, getAllAgency);
 
 //Profile upload
@@ -130,27 +192,92 @@ router.post("/uploads/sas", protect, generateSAS);
 router.post("/uploads/confirm", protect, confirmUpload);
 
 //Event apis
-router.post("/events", protect, createEvent);
-router.get("/events", protect, getAllEvents);
-router.get("/events/profile/:eventId", protect, getEventById);
+router.post("/events", protect, requirePermission("event:create"), createEvent);
+router.get("/events", protect, requirePermission("event:read"), getAllEvents);
+router.get(
+  "/events/profile/:eventId",
+  protect,
+  requirePermission("event:readById"),
+  getEventById
+);
 router.get("/events/student/:agencyId", protect, getAllEventsStudent);
-router.patch("/events/profile/:eventId", protect, updateEvent);
-router.delete("/events/profile/:eventId", protect, deleteEvent);
-router.get("/events/profile/query/search", protect, searchEventsByName);
+router.patch(
+  "/events/profile/:eventId",
+  protect,
+  requirePermission("event:update"),
+  updateEvent
+);
+router.delete(
+  "/events/profile/:eventId",
+  protect,
+  requirePermission("event:delete"),
+  deleteEvent
+);
+router.get(
+  "/events/profile/query/search",
+  protect,
+  requirePermission("event:search"),
+  searchEventsByName
+);
 
 // Scholarships apis
-router.post("/scholarships", protect, createScholarship);
-router.get("/scholarships", protect, getAllScholarship);
-router.get("/scholarships/:scholarshipId", protect, getScholarshipById);
-router.get("/scholarships/agency/:agencyId", protect, getAllScholarshipStudent);
-router.get("/scholarships/landing/", protect, getAllScholarshipLanding);
-router.patch("/scholarships/:scholarshipId", protect, updateScholarship);
-router.delete("/scholarships/:scholarshipId", protect, deactivateScholarship);
-router.get("/scholarships/query/search", protect, searchScholarshipByName);
+router.post(
+  "/scholarships",
+  protect,
+  requirePermission("scholarship:create"),
+  createScholarship
+);
+router.get(
+  "/scholarships",
+  protect,
+  requirePermission("scholarship:read"),
+  getAllScholarship
+);
+router.get(
+  "/scholarships/:scholarshipId",
+  protect,
+  requirePermission("scholarship:readById"),
+  getScholarshipById
+);
+router.get(
+  "/scholarships/agency/:agencyId",
+  protect,
+  requirePermission("scholarship:byAgency"),
+  getAllScholarshipStudent
+);
+router.get("/scholarships/landing/scholarships/", getAllScholarshipLanding);
+router.patch(
+  "/scholarships/:scholarshipId",
+  protect,
+  requirePermission("scholarship:update"),
+  updateScholarship
+);
+router.delete(
+  "/scholarships/:scholarshipId",
+  protect,
+  requirePermission("scholarship:delete"),
+  deactivateScholarship
+);
+router.get(
+  "/scholarships/query/search",
+  protect,
+  requirePermission("scholarship:search"),
+  searchScholarshipByName
+);
 router.get(
   "/scholarships/dashboard/scholarships",
   protect,
+  requirePermission("scholarship:dashboard"),
   getScholarshipDashboard
 );
+
+//Employees apis
+router.post("/profile/employee/agents", protect, createAgent);
+router.get("/profile/employee/agents", protect, getAllAgent);
+router.get("/profile/employee/agents/:agentId", protect, getAgentById);
+router.post("/profile/role/agents", protect, createRole);
+router.get("/profile/role/agents", protect, getAllRole);
+router.patch("/profile/role/agents/:roleId", protect, updateRole);
+router.delete("/profile/role/agents/:roleId", protect, deactivateRole);
 
 export default router;

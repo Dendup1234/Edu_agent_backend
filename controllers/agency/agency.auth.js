@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { sendOtpEmail } from "../../utils/sendEmail.js";
 import { signToken, verifyToken } from "../../utils/jwt.js";
 import PendingSignup from "../../models/pendingSignup.js";
-import Agency from "../../models/agency.js"
+import Agency from "../../models/agency.js";
 
 // Variables for the resend otp
 const OTP_EXP_MIN = 5; // expires in 5 mins
@@ -180,8 +180,9 @@ export const verifyOtp = async (req, res) => {
 
     // token
     const token = await signToken({
-      sub: user._id.toString(),
+      agencyId: user._id.toString(),
       email: user.email,
+      actor: "agency",
     });
 
     return res.status(201).json({
@@ -223,8 +224,9 @@ export const login = async (req, res) => {
   }
 
   const token = await signToken({
-    sub: user._id.toString(),
+    agencyId: user._id.toString(),
     email: user.email,
+    actor: "agency",
   });
 
   return res.json({

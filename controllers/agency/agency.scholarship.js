@@ -5,7 +5,7 @@ import Agency from "../../models/agency.js";
 // Create a scholarship
 export const createScholarship = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(404).json({ message: "Token expired" });
     }
@@ -50,7 +50,7 @@ export const createScholarship = async (req, res) => {
 // Getting all the Scholarship for agency
 export const getAllScholarship = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(401).json({ message: "Token expired" });
     }
@@ -191,7 +191,7 @@ export const deactivateScholarship = async (req, res) => {
 // Scholarship search
 export const searchScholarshipByName = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(401).json({ message: "Invalid token" });
     }
@@ -220,7 +220,7 @@ export const searchScholarshipByName = async (req, res) => {
 //Scholarship dashboard to show active and inactive count
 export const getScholarshipDashboard = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(404).json({
         message: "No token found",

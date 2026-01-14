@@ -7,7 +7,7 @@ import Course from "../../models/course.js";
 export const createCourse = async (req, res) => {
   try {
     const { universityId } = req.params;
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     const {
       title,
       level,
@@ -74,7 +74,7 @@ export const createCourse = async (req, res) => {
 export const updateCourse = async (req, res) => {
   try {
     const { universityId, courseId } = req.params;
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(404).json({ message: "No token" });
     }
@@ -107,7 +107,7 @@ export const updateCourse = async (req, res) => {
 //Getting the course from particular uni
 export const getCourse = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(404).json({ message: "No token" });
     }
@@ -192,7 +192,7 @@ export const getCourseByAgency = async (req, res) => {
 //Getting the course by the id
 export const getCourseById = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(404).json({ message: "Unauthorized token" });
     }

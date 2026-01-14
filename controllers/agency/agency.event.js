@@ -1,10 +1,9 @@
 import Event from "../../models/event.js";
-import mongoose from "mongoose";
 
 // creation of events
 export const createEvent = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(401).json({ message: "Invalid token" });
     }
@@ -53,7 +52,7 @@ export const createEvent = async (req, res) => {
 // Getting all the events in the agency page
 export const getAllEvents = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(401).json({ message: "Invalid token" });
     }
@@ -136,7 +135,7 @@ export const deleteEvent = async (req, res) => {
 //Searching the events
 export const searchEventsByName = async (req, res) => {
   try {
-    const userId = req.user.sub;
+    const userId = req.user.agencyId;
     if (!userId) {
       return res.status(401).json({ message: "Invalid token" });
     }

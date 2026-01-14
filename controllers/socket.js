@@ -37,10 +37,26 @@ export const initializeWebSocket = (server) => {
         const { conversationId, sender, receiver, content, senderModel, receiverModel } = data;
 
         // Validate required fields
-        if (!conversationId || !sender || !receiver || !content) {
+        if ( !sender || !receiver || !content) {
           socket.emit("error", "Missing required fields");
           return;
         }
+
+        if (!conversationId) {
+          let conversation = await Conversation.findOne({
+            participants: { $all: [sender, receiver] },
+            models: [senderModel || "User", receiverModel || "User"],
+          });
+
+        if (!conversation) {
+          conversation = await Conversation.create({
+            participants: [sender, receiver],
+            models: [senderModel || "User", receiverModel || "User"],
+          });
+        }
+
+        conversationId = conversation._id;
+      }
 
         // Create and save message to database
         const newMessage = new Message({

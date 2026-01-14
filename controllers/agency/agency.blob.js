@@ -104,7 +104,7 @@ export const confirmUpload = async (req, res) => {
     }
        
     if ( imageType == "event"){
-      const event = await Event.findByIdAndUpadate(
+      const event = await Event.findByIdAndUpdate(
       eventId,
       {  bannerImageUrl : blobClient.url },
       { new: true }

@@ -1,65 +1,73 @@
-import { io } from "socket.io-client";
+import {io} from "socket.io-client"
 
-// Connect to your Socket.IO server
-const socket = io("http://localhost:5000");
+// Use actual ObjectIds from your database
+const user1Id = '696397cff72a315772c30f3f'; // First student ID
+const user2Id = '6963990f1ae3adf960b745dd'; // Second student ID
 
-// Replace this with dynamic user ID in real use
-const userId = "";  
-const receiverId = ""; 
-const conversationId = "";
+// Create two clients
+const user1 = io('http://localhost:8000');
+const user2 = io('http://localhost:8000');
 
-// 1️⃣ Connection
-socket.on("connect", () => {
-  console.log("Connected to server with socket id:", socket.id);
-
-  // Identify the user to server
-  socket.emit("user_connected", userId);
+// User 1 setup
+user1.on('connect', () => {
+    console.log('Student 1 connected');
+    user1.emit('user_connected', user1Id);
 });
 
-// 2️⃣ Server confirms user connection
-socket.on("connected", ({ socketId, userId }) => {
-  console.log(`Server acknowledged connection: userId=${userId}, socketId=${socketId}`);
-
-  // Optional: Join a conversation room
-  socket.emit("join_conversation", conversationId);
-
-  // 3️⃣ Send a test message to another user
-  socket.emit("send_message", {
-    conversationId,
-    sender: userId,
-    receiver: receiverId,
-    content: "Hello from client!",
-    senderModel: "User",
-    receiverModel: "User"
-  });
+user1.on('new_message', (data) => {
+    console.log('📨 Student 1 received:', data.message.content);
+    console.log('From:', data.message.sender);
 });
 
-// 4️⃣ Listen for messages sent to you
-socket.on("new_message", ({ message }) => {
-  console.log("New message received:", message);
+user1.on('message_sent', (data) => {
+    console.log('Student 1: Message sent successfully');
+    console.log('Conversation ID:', data.conversationId);
 });
 
-// 5️⃣ Listen for confirmation of sent message
-socket.on("message_sent", ({ message, success }) => {
-  console.log("Message sent confirmation:", message, "Success:", success);
+user1.on('error', (error) => {
+    console.log('Student 1 error:', error);
 });
 
-// 6️⃣ Listen for delivery updates
-socket.on("message_delivered", ({ messageId }) => {
-  console.log(`Message ${messageId} delivered to receiver`);
+// User 2 setup
+user2.on('connect', () => {
+    console.log('Student 2 connected');
+    user2.emit('user_connected', user2Id);
 });
 
-// 7️⃣ Listen for read confirmations
-socket.on("messages_read_confirmed", ({ messageIds, conversationId }) => {
-  console.log(`Messages marked as read in conversation ${conversationId}:`, messageIds);
+user2.on('new_message', (data) => {
+    console.log('📨 Student 2 received:', data.message.content);
+    console.log('From:', data.message.sender);
 });
 
-// 8️⃣ Error handling
-socket.on("error", (errMsg) => {
-  console.error("Socket error:", errMsg);
+user2.on('error', (error) => {
+    console.log('Student 2 error:', error);
 });
 
-// 9️⃣ Disconnect
-socket.on("disconnect", () => {
-  console.log("Disconnected from server");
-});
+// Start chatting after both connect
+setTimeout(() => {
+    console.log('\n--- Starting chat test ---\n');
+    
+    // Student 1 sends to Student 2
+    console.log('Student 1 → Student 2: Hello!');
+    user1.emit('send_message', {
+        sender: user1Id,
+        receiver: user2Id,
+        content: 'Hello from Student 1!',
+        senderModel: 'Student',
+        receiverModel: 'Student'
+    });
+    
+    // Student 2 replies after 2 seconds
+    setTimeout(() => {
+        console.log('\nStudent 2 → Student 1: Hi there!');
+        user2.emit('send_message', {
+            sender: user2Id,
+            receiver: user1Id,
+            content: 'Hello back from Student 2!',
+            senderModel: 'Student',
+            receiverModel: 'Student'
+        });
+    }, 2000);
+}, 1000);
+
+process.stdin.resume();

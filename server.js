@@ -30,16 +30,16 @@ app.use(oAuthRoute);
 // Server setup
 const PORT = process.env.PORT || 8000;
 
-// 1️⃣ Create HTTP server from Express
+// Create HTTP server from Express
 const server = http.createServer(app);
 
-// 2️⃣ Initialize Socket.IO
+// Initialize Socket.IO
 const io = initializeWebSocket(server);
 
-// 3️⃣ Connect to database
+// Connect to database
 await connectDB();
 
-// 4️⃣ Start server
+// Start server
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

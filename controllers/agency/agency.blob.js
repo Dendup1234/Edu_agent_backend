@@ -106,7 +106,7 @@ export const confirmUpload = async (req, res) => {
     if ( imageType == "event"){
       const event = await Event.findByIdAndUpadate(
       eventId,
-      { logo : blobClient.url },
+      {  bannerImageUrl : blobClient.url },
       { new: true }
     );
     res.json({ message: "Upload confuirmed" });

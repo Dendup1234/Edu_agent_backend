@@ -28,12 +28,17 @@ const agentSchema = new Schema(
       required: true,
     },
 
-    role: {
+    // fixed roles
+    systemRole: {
       type: String,
-      enum: ["visa_officer", "admission_officer", "no-role"],
-      default: "no-role",
+      enum: ["visa_officer", "admission_officer", "none"],
+      default: "none",
     },
-
+    roleId: {
+      type: Types.ObjectId,
+      ref: "Role",
+      default: null,
+    },
     status: {
       type: String,
       enum: ["active", "inactive"],

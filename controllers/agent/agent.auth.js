@@ -9,7 +9,6 @@ const OTP_EXP_MIN = 5; // expires in 5 mins
 const RESEND_COOLDOWN_SEC = 60; // wait 60 sec between resends
 const MAX_RESENDS = 5; // max 5 resends per OTP window
 
-// Login api
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -20,23 +19,23 @@ export const login = async (req, res) => {
         .json({ message: "email and password are required" });
     }
 
-    // password is select:false so we must explicitly select it
     const user = await Agent.findOne({ email }).select(
-      "password role isVerified name email"
+      "password agency systemRole roleId isVerified name email"
     );
+
     if (!user) {
       return res.status(401).json({ message: "Invalid email" });
     }
-    // Password comparing
+
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) {
       return res.status(401).json({ message: "Invalid password" });
     }
 
     const token = await signToken({
-      sub: user._id.toString(),
+      id: user._id.toString(), // agent id
+      agencyId: user.agency.toString(), // agency id
       email: user.email,
-      role: user.role,
       isVerified: user.isVerified,
     });
 
@@ -46,7 +45,8 @@ export const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        systemRole: user.systemRole,
+        roleId: user.roleId,
         isVerified: user.isVerified,
       },
       accessToken: token,
@@ -56,6 +56,7 @@ export const login = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 // change password similar as the previous ones
 // RESET PASSWORD FLOW
 

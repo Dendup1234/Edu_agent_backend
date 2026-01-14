@@ -1,8 +1,8 @@
 import { Server } from "socket.io";
-import Message from "./models/Message.js";
+import Message from "../models/message.js";
 
 // Initialize WebSocket server
-const initializeWebSocket = (server) => {
+export const initializeWebSocket = (server) => {
   const io = new Server(server, {
     cors: {
       origin: "http://localhost:3000", // Your frontend URL

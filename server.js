@@ -1,34 +1,45 @@
-//Imports
 import express from "express";
+import http from "http";
 import dotenv from "dotenv";
+import cors from "cors";
 import connectDB from "./config/db.js";
+
 import studentRoute from "./routes/student.js";
 import agencyRoute from "./routes/agency.js";
 import oAuthRoute from "./routes/oAuth.js";
 import adminRoute from "./routes/admin.js";
 import agentRoute from "./routes/agent.js";
-import cors from "cors";
 
-//config
+import {initializeWebSocket} from "./controllers/socket.js";
+
+// Config
 dotenv.config();
 
-// app config
+// Express app
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-//routes
+// REST routes
 app.use("/api/v1/students", studentRoute);
 app.use("/api/v1/agency", agencyRoute);
 app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1/agent", agentRoute);
 app.use(oAuthRoute);
 
-// Listening to the port 8000
+// Server setup
 const PORT = process.env.PORT || 8000;
 
+// 1️⃣ Create HTTP server from Express
+const server = http.createServer(app);
+
+// 2️⃣ Initialize Socket.IO
+const io = initializeWebSocket(server);
+
+// 3️⃣ Connect to database
 await connectDB();
 
-app.listen(PORT, () => {
+// 4️⃣ Start server
+server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

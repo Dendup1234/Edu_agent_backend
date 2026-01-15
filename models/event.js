@@ -1,7 +1,7 @@
 import mongoose, { Schema, Types } from "mongoose";
 
 //Event schema
-const eventSchema = new mongoose.Schema(
+const eventSchema = new Schema(
   {
     // Basic info
     title: {
@@ -13,18 +13,38 @@ const eventSchema = new mongoose.Schema(
     bannerImageUrl: {
       type: String,
     },
+    //Ticket types
+    ticketTypes: [
+      {
+        types: {
+          type: String,
+        },
+        description: {
+          type: [String],
+        },
+        price: {
+          type: String,
+        },
+      },
+    ],
     description: {
       type: String,
     },
-	// Organized by
-	organizerId:{
-		type: Types.ObjectId,
-		ref: 'Agency'
-	},
-	//Capacity
+    // Organized by
+    organizerId: {
+      type: Types.ObjectId,
+      ref: "Agency",
+    },
+    //Capacity
     totalTickets: {
       type: Number,
       min: 0,
+      default: 0,
+    },
+    // Total ticket sold
+    ticketSolds: {
+      type: Number,
+      default: 0,
     },
     // Date & time
     startAt: {
@@ -37,7 +57,8 @@ const eventSchema = new mongoose.Schema(
       type: String,
       default: "Asia/Thimphu",
     },
-	// Meeting informations
+
+    // Meeting informations
     meetings: [
       {
         mode: {
@@ -46,6 +67,9 @@ const eventSchema = new mongoose.Schema(
           default: "onsite",
         },
         meetingUrl: {
+          type: String,
+        },
+        meetingPass: {
           type: String,
         },
       },
@@ -69,12 +93,6 @@ const eventSchema = new mongoose.Schema(
     agendaItems: {
       type: [String],
     },
-     status: {
-      type: String,
-      enum: ["Active", "Inactive"],
-      default: "Active",
-    },
-
   },
   { timestamps: true }
 );

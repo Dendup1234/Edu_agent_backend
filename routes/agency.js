@@ -76,6 +76,7 @@ import {
   getAllRole,
   updateRole,
   deactivateRole,
+  searchEmployee,
 } from "../controllers/agency/agent.employee.js";
 //Router import
 const router = express.Router();
@@ -274,10 +275,11 @@ router.get(
 //Employees apis
 router.post("/profile/employee/agents", protect, createAgent);
 router.get("/profile/employee/agents", protect, getAllAgent);
-router.get("/profile/employee/agents/:agentId", protect, getAgentById);
+router.get("/profile/employee/agents/:agentId/agents", protect, getAgentById);
 router.post("/profile/role/agents", protect, createRole);
 router.get("/profile/role/agents", protect, getAllRole);
 router.patch("/profile/role/agents/:roleId", protect, updateRole);
 router.delete("/profile/role/agents/:roleId", protect, deactivateRole);
+router.get("/profile/employee/agents/search/", protect, searchEmployee);
 
 export default router;

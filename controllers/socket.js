@@ -19,59 +19,69 @@ export const initializeWebSocket = (server) => {
       socket.emit('connected', { userId });
     });
 
-    // Handle sending messages
     socket.on('send_message', async (data) => {
-      try {
-        const { sender, receiver, content, senderModel, receiverModel, conversationId } = data;
+    try {
+      const { sender, receiver, content, senderModel, receiverModel } = data;
 
-        if (!sender || !receiver || !content) {
-          socket.emit('error', { message: 'missing required field' });
-          return;
-        }
-
-        let convId = conversationId;
-
-        if (!convId) {
-          // Create new conversation if it doesn't exist
-          const conversation = await Conversation.create({
-            participants: [
-              { sender, senderModel },
-              { receiver, receiverModel }
-            ]
-          });
-          convId = conversation._id;
-        } else {
-          // Verify conversation exists
-          const conversation = await Conversation.findById(convId);
-          if (!conversation) {
-            socket.emit('error', { message: 'Conversation not found' });
-            return;
-          }
-        }
-
-        // Create message
-        const message = await Message.create({
-          conversationId: convId, // Use convId, not conversationId
-          senderModel,
-          sender,
-          receiverModel,
-          receiver,
-          content
-        });
-
-        // Emit back to sender
-        socket.emit('sent_message', { message });
-
-        // Emit to receiver(s)
-        io.to(receiver).emit('receive_message', { message });
-
-      } catch (error) {
-        console.error(error);
-        socket.emit('error', { message: 'something went wrong' });
+      if (!sender || !receiver || !content || !senderModel || !receiverModel) {
+        socket.emit('error', { message: 'missing required field' });
+        return;
       }
-    });
 
-    socket.on('disconnect', () => {
+      // normalize participants
+      const participants = [
+        { user: sender, model: senderModel },
+        { user: receiver, model: receiverModel }
+      ].sort((a, b) =>
+        a.user.toString().localeCompare(b.user.toString())
+      );
+
+      // find or create conversation
+      let conversation = await Conversation.findOne({
+        participants: {
+          $all: [
+            { $elemMatch: participants[0] },
+            { $elemMatch: participants[1] }
+          ]
+        }
+      });
+
+      if (!conversation) {
+        conversation = await Conversation.create({ participants });
+      }
+
+      // create message
+      const message = await Message.create({
+        conversationId: conversation._id,
+        sender,
+        senderModel,
+        receiver,
+        receiverModel,
+        content
+      });
+
+      // update conversation metadata
+      await Conversation.findByIdAndUpdate(
+        conversation._id,
+        { lastMessage: message._id }
+      );
+
+      // emit
+      socket.emit('sent_message', { message });
+      io.to(receiver.toString()).emit('receive_message', { message });
+
+      // update message status
+      setTimeout(async () => {
+            await Message.findByIdAndUpdate(message._id, { status: "delivered" });
+       })
+
+    } catch (error) {
+      console.error(error);
+      socket.emit('error', { message: 'something went wrong' });
+    }
+  });
+
+  socket.on('disconnect', () => {
       console.log(`socket ${socket.id} removed from all rooms automatically`);
     });
   });

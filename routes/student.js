@@ -23,6 +23,8 @@ import { searchScholarshipByName } from "../controllers/student/student.scholars
 
 import { generateSAS, confirmUpload } from "../controllers/student/student.blob.js";
 
+import { loadALLMessage } from "../controllers/socketController.js";
+
 const router = express.Router();
 
 //For authentication
@@ -58,4 +60,8 @@ router.get(
   protect,
   searchScholarshipByName
 );
+
+//messages
+router.get("/conversation/:ConversationId/messages", loadALLMessage)
+
 export default router;

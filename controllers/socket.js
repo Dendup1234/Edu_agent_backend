@@ -71,9 +71,7 @@ export const initializeWebSocket = (server) => {
       io.to(receiver.toString()).emit('receive_message', { message });
 
       // update message status
-      setTimeout(async () => {
-            await Message.findByIdAndUpdate(message._id, { status: "delivered" });
-       })
+      await Message.findByIdAndUpdate(message._id, { status: "delivered" });
 
     } catch (error) {
       console.error(error);

@@ -224,7 +224,7 @@ export const login = async (req, res) => {
   const token = await signToken({
     sub: user._id.toString(),
     email: user.email,
-    actor: "student",
+    actor: "Student",
   });
 
   return res.json({

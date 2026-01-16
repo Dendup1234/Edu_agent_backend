@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 const SOCKET_URL = "http://localhost:8000";
-const JWT = "";
+const JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTZhMGM4OGRhOTMxZjI2YmFlNzZhZDciLCJlbWFpbCI6InByYWRlZXBwb2tocmVsMjAyMkBnbWFpbC5jb20iLCJhY3RvciI6InN0dWRlbnQiLCJpYXQiOjE3Njg1NTgwNjF9.0oMUyDtgMG2vo_fQZtMrYSXVlCv8nhEE2xrgAagof9Y";
 const RECEIVER_ID = "696397cff72a315772c30f3f";
 const RECEIVER_MODEL = "Student"; 
 

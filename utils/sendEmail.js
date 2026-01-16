@@ -8,7 +8,7 @@ export const sendOtpEmail = async (email, otp) => {
       pass: process.env.EMAIL_PASS,
     },
   });
-
+ // send email
   await transporter.sendMail({
     from: `"OTP Service" <${process.env.EMAIL_USER}>`,
     to: email,

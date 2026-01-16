@@ -84,7 +84,7 @@ export const authController = {
       }
 
       const jwtToken = jwt.sign(
-        { sub: user._id.toString() },
+        { sub: user._id.toString(), actor: "student" },
         process.env.JWT_SECRET
       );
 

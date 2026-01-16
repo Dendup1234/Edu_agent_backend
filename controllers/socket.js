@@ -38,6 +38,7 @@ export const initializeWebSocket = (server) => {
       }
 
       const senderExists = await mongoose.model(senderModel).exists({ _id: sender });
+      
       const receiverExists = await mongoose.model(receiverModel).exists({ _id: receiver });
 
       if (!senderExists || !receiverExists) {

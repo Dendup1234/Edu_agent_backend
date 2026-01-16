@@ -1,18 +1,37 @@
 import mongoose, { Schema, Types } from "mongoose";
 
 const ticketSchema = new Schema({
-  eventid: {
+  eventId: {
     type: Types.ObjectId,
     ref: "Event",
   },
-  Studentid: {
+  studentId: {
     type: Types.ObjectId,
     ref: "Student",
   },
-  // Ticket information
+
+  // Snapshot of event to be sended to the student when registered
+  eventSnapshot: {
+    title: String,
+    meetingUrl: String,
+    startAt: Date,
+    endAt: Date,
+    timezone: String,
+    meetingPass: String,
+  },
+
+  studentSnapshot: {
+    name: String,
+    email: String,
+    phone: String,
+  },
+  // Ticket information for the seated one
   ticketInfo: {
     ticketNumber: {
       type: Number,
+    },
+    ticketType: {
+      type: String,
     },
     seatNumber: {
       row: {
@@ -42,4 +61,4 @@ const ticketSchema = new Schema({
   },
 });
 
-export default Ticket = mongoose.model("Ticket", ticketSchema);
+export default mongoose.model("Ticket", ticketSchema);

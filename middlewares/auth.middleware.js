@@ -55,13 +55,16 @@ export const requirePermission = (permission) => {
       if (req.user.actor === "agency") {
         return next();
       }
-      console.log(req.user.id);
+      if (req.user.actor === "student") {
+        return next();
+      }
+      //console.log(req.user.id);
       const agent = await Agent.findById(req.user.id)
         .select("status isVerified agency systemRole roleId")
         .populate({ path: "roleId", select: "permissions isActive agencyId" })
         .lean();
       // printing the agent
-      console.log(agent);
+      //console.log(agent);
       if (!agent) return res.status(401).json({ message: "Unauthorized" });
       if (agent.status !== "active")
         return res.status(403).json({ message: "Inactive account" });

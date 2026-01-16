@@ -2,6 +2,8 @@ import { Server } from "socket.io";
 import Message from "../models/message.js";
 import Conversation from "../models/conversation.js";
 
+const onlineUsers = new Map()
+
 export const initializeWebSocket = (server) => {
   const io = new Server(server, {
     cors: {
@@ -16,6 +18,7 @@ export const initializeWebSocket = (server) => {
     socket.on('user_connected', (userId) => {
       socket.join(userId);
       console.log(`socket ${socket.id} joined room ${userId}`);
+      
       socket.emit('connected', { userId });
     });
 

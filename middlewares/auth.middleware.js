@@ -55,6 +55,9 @@ export const requirePermission = (permission) => {
       if (req.user.actor === "agency") {
         return next();
       }
+      if (req.user.actor === "student") {
+        return next();
+      }
       //console.log(req.user.id);
       const agent = await Agent.findById(req.user.id)
         .select("status isVerified agency systemRole roleId")

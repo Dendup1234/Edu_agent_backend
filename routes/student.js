@@ -20,8 +20,12 @@ import {
 import { searchUniByName } from "../controllers/student/student.uni.js";
 import { searchCourseByName } from "../controllers/student/student.course.js";
 import { searchScholarshipByName } from "../controllers/student/student.scholarship.js";
+import { registerOnlineMeeting } from "../controllers/student/student.event.js";
 
-import { generateSAS, confirmUpload } from "../controllers/student/student.blob.js";
+import {
+  generateSAS,
+  confirmUpload,
+} from "../controllers/student/student.blob.js";
 
 const router = express.Router();
 
@@ -51,6 +55,13 @@ router.get("/courses/query/:agencyId/search", protect, searchCourseByName);
 
 //University api
 router.get("/universities/query/:agencyId/search", protect, searchUniByName);
+
+//Event apis
+router.post(
+  "/events/registration/online/:eventId",
+  protect,
+  registerOnlineMeeting
+);
 
 //Scholarship
 router.get(

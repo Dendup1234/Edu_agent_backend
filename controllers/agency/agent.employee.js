@@ -57,6 +57,7 @@ export const createAgent = async (req, res) => {
         email: agent.email,
         phone: agent.phone,
         role: agent.roleId,
+        systemRole: agent.systemRole,
       },
     });
   } catch (e) {
@@ -75,6 +76,9 @@ export const getAllAgent = async (req, res) => {
     // finding all the agent inside the organization
     const agent = await Agent.find({
       agency: userId,
+    }).populate({
+      path: "roleId",
+      select: "name permissions",
     });
     return res.status(200).json({ message: "Success", agents: agent });
   } catch (e) {
@@ -90,21 +94,27 @@ export const getAgentById = async (req, res) => {
     // Finding the agent by their id
     const agent = await Agent.findById(agentId)
       .select("-password")
-      .populate({
-        path: "assignedStudents",
-        select:
-          "name email phone status nationality selectedUniversity selectedCourse",
-        populate: [
-          {
-            path: "selectedUniversity",
-            select: "name country logo",
-          },
-          {
-            path: "selectedCourse",
-            select: "title",
-          },
-        ],
-      })
+      .populate([
+        {
+          path: "assignedStudents",
+          select:
+            "name email phone status nationality selectedUniversity selectedCourse",
+          populate: [
+            {
+              path: "selectedUniversity",
+              select: "name country logo",
+            },
+            {
+              path: "selectedCourse",
+              select: "title",
+            },
+          ],
+        },
+        {
+          path: "roleId",
+          select: "name permissions",
+        },
+      ])
       .lean();
     if (!agent) {
       return res.status(404).json({ message: "Agent not found" });
@@ -196,6 +206,39 @@ export const deactivateRole = async (req, res) => {
     return res
       .status(200)
       .json({ message: "role dactivated successfully", role: deactivateRole });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error " });
+  }
+};
+
+// Search employee
+export const searchEmployee = async (req, res) => {
+  try {
+    const userId = req.user.agencyId;
+    if (!userId) {
+      return res.status(401).json({ message: "Token not found" });
+    }
+    const q = (req.query.q || "").trim();
+    if (!q) {
+      return res.status(400).json({ message: "q (search term) is required" });
+    }
+
+    // Employee search through query
+    const agent = await Agent.find({
+      agency: userId,
+      name: { $regex: q, $options: "i" },
+    })
+      .populate({
+        path: "roleId",
+        select: "name permissions",
+      })
+      .lean();
+
+    return res.status(200).json({
+      message: "Successful",
+      Agent: agent,
+    });
   } catch (e) {
     console.log(e);
     return res.status(500).json({ message: "Server error " });

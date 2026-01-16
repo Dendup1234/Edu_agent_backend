@@ -95,7 +95,7 @@ export const confirmUpload = async (req, res) => {
     }
 
     if ( imageType == "university"){
-      const university = await University.findByIdAndDelete(
+      const university = await University.findByIdAndUpdate(
       universityId,
       { logo : blobClient.url },
       { new: true }
@@ -104,9 +104,9 @@ export const confirmUpload = async (req, res) => {
     }
        
     if ( imageType == "event"){
-      const event = await Event.findByIdAndDelete(
+      const event = await Event.findByIdAndUpdate(
       eventId,
-      { logo : blobClient.url },
+      {  bannerImageUrl : blobClient.url },
       { new: true }
     );
     res.json({ message: "Upload confuirmed" });

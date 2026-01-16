@@ -56,3 +56,40 @@ ${password ? `Temporary Password: ${password}` : ""}
     html: htmlTemplate,
   });
 };
+
+export const sendEventSuccessEmail = async (email, message) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const { subject, title, startTime, timeZone, body, link, password } = message;
+
+  const htmlTemplate = `
+    <div style="font-family: Arial, sans-serif; line-height:1.5;">
+      <h2>${title}</h2>
+      <p>${body}</p>
+	  <p> Start at:${startTime}</p>
+	  <p>Time Zone: ${timeZone}</p>
+      ${link ? `<p><strong>Meeting Link:</strong> ${link}</p>` : ""}
+	  <p>Meeting Password:${password}</p>
+      <p style="color:gray;font-size:12px;">
+        Please click the meeting link to join the event.
+      </p>
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from: `"EduAgent Support" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: subject || "Account Information",
+    text: `
+${title}
+${body}
+`,
+    html: htmlTemplate,
+  });
+};

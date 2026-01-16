@@ -107,10 +107,6 @@ export const updateCourse = async (req, res) => {
 //Getting the course from particular uni
 export const getCourse = async (req, res) => {
   try {
-    const userId = req.user.agencyId;
-    if (!userId) {
-      return res.status(404).json({ message: "No token" });
-    }
     const { universityId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(universityId)) {
       return res.status(400).json({ message: "Invalid id" });
@@ -192,10 +188,6 @@ export const getCourseByAgency = async (req, res) => {
 //Getting the course by the id
 export const getCourseById = async (req, res) => {
   try {
-    const userId = req.user.agencyId;
-    if (!userId) {
-      return res.status(404).json({ message: "Unauthorized token" });
-    }
     const { courseId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(courseId)) {
       return res.status(400).json({ message: "Invalid Id" });

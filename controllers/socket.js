@@ -19,6 +19,10 @@ export const initializeWebSocket = (server) => {
       socket.join(userId);
       console.log(`socket ${socket.id} joined room ${userId}`);
       
+      if(!onlineUsers.has(userId)){
+        onlineUsers.set(userId, new Set())
+      }
+      onlineUsers.get(userId).add(socket.id)
       socket.emit('connected', { userId });
     });
 

@@ -52,11 +52,11 @@ export const requirePermission = (permission) => {
   return async (req, res, next) => {
     try {
       // for the agency without any restriction
-      if (req.user.actor === "agency") {
+      if (req.user.actor === "Agency") {
         return next();
       }
       // for the student without any restriction
-      if (req.user.actor === "student") {
+      if (req.user.actor === "Student") {
         return next();
       }
       //console.log(req.user.id);

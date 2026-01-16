@@ -14,7 +14,6 @@ export const initializeWebSocket = (server) => {
   io.on('connection', (socket) => {
     console.log(`user connected ${socket.id}`);
 
-    // Join user-specific room
     socket.on('user_connected', (userId) => {
       socket.join(userId);
       console.log(`socket ${socket.id} joined room ${userId}`);
@@ -22,7 +21,10 @@ export const initializeWebSocket = (server) => {
       if(!onlineUsers.has(userId)){
         onlineUsers.set(userId, new Set())
       }
+
       onlineUsers.get(userId).add(socket.id)
+      socket.data.userId = userId
+
       socket.emit('connected', { userId });
     });
 
@@ -35,29 +37,24 @@ export const initializeWebSocket = (server) => {
         return;
       }
 
-      // normalize participants
+      const senderExists = await mongoose.model(senderModel).exists({ _id: sender });
+      const receiverExists = await mongoose.model(receiverModel).exists({ _id: receiver });
+
+      if (!senderExists || !receiverExists) {
+        return socket.emit("error", { message: "Invalid sender or receiver ID" });
+      }
+
       const participants = [
         { user: sender, model: senderModel },
         { user: receiver, model: receiverModel }
-      ].sort((a, b) =>
-        a.user.toString().localeCompare(b.user.toString())
-      );
+      ].sort((a, b) => a.user.toString().localeCompare(b.user.toString()));
 
-      // find or create conversation
-      let conversation = await Conversation.findOne({
-        participants: {
-          $all: [
-            { $elemMatch: participants[0] },
-            { $elemMatch: participants[1] }
-          ]
-        }
-      });
+      let conversation = await Conversation.findOne(participants);
 
       if (!conversation) {
         conversation = await Conversation.create({ participants });
       }
 
-      // create message
       const message = await Message.create({
         conversationId: conversation._id,
         sender,
@@ -67,19 +64,18 @@ export const initializeWebSocket = (server) => {
         content
       });
 
-      // update conversation metadata
       await Conversation.findByIdAndUpdate(
         conversation._id,
         { lastMessage: message._id }
       );
 
-      // emit
       socket.emit('sent_message', { message });
-      io.to(receiver.toString()).emit('receive_message', { message });
+      io.to(receiver.toString()).emit('receive_message', { message })
 
-      // update message status
-      await Message.findByIdAndUpdate(message._id, { status: "delivered" });
-
+      const isReceiverOnline = onlineUsers.has(receiver.toString())
+      if(isReceiverOnline){
+         await Message.findByIdAndUpdate(message._id, { status: "delivered" });
+      }
     } catch (error) {
       console.error(error);
       socket.emit('error', { message: 'something went wrong' });
@@ -87,6 +83,17 @@ export const initializeWebSocket = (server) => {
   });
 
   socket.on('disconnect', () => {
+      const userId = socket.data.userId
+      if(!userId) return
+
+      const sockets = onlineUsers.get(userId);
+
+      if(sockets) { 
+      sockets.delete(socket.id);
+
+      if(sockets.size === 0){
+        onlineUsers.delete(userId);
+      }}
       console.log(`socket ${socket.id} removed from all rooms automatically`);
     });
   });

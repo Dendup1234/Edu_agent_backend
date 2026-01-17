@@ -37,7 +37,7 @@ const ticketSchema = new Schema({
       row: {
         type: String,
       },
-      column: {
+      columns: {
         type: String,
       },
     },

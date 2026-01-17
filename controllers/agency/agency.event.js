@@ -1,4 +1,5 @@
 import Event from "../../models/event.js";
+import TicketType from "../../models/ticketType.js";
 
 // creation of events
 export const createEvent = async (req, res) => {
@@ -23,7 +24,7 @@ export const createEvent = async (req, res) => {
       agendaItems,
     } = req.body;
 
-    const event = await Event.create({
+    let event = await Event.create({
       title,
       subtitle,
       bannerImageUrl,
@@ -39,13 +40,23 @@ export const createEvent = async (req, res) => {
       agendaItems,
       organizerId: userId,
     });
+    // if event is seated type then status is false until seat is created
+    if (event.meetings[0].mode === "seated") {
+      event = await Event.findByIdAndUpdate(
+        event._id,
+        {
+          status: false,
+        },
+        { new: true }
+      );
+    }
     res.status(201).json({
       message: "Event created successfully",
       event: event,
     });
   } catch (e) {
     console.log(e);
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: e.message });
   }
 };
 
@@ -153,6 +164,114 @@ export const searchEventsByName = async (req, res) => {
     return res.status(200).json({
       message: "Successful",
       event: event,
+    });
+  } catch (e) {
+    cosole.log(e);
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// Creating a ticket type for the event
+export const createTicketType = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { name, description, price } = req.body;
+    // creating a ticket types
+    const ticketType = await TicketType.create({
+      name,
+      description,
+      price,
+      eventId: eventId,
+    });
+    return res
+      .status(200)
+      .json({ message: "Created successfully", ticketType: ticketType });
+  } catch (e) {
+    cosole.log(e);
+    res.status(500).json({ message: e.message });
+  }
+};
+
+//Getting all the ticket type
+export const getAllTicket = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    // getting all the ticket
+    const ticketTypes = await TicketType.find({
+      eventId: eventId,
+    });
+    return res.status(200).json({
+      message: "Extracted successfully",
+      ticketType: ticketTypes,
+    });
+  } catch (e) {
+    cosole.log(e);
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// updating the ticket type
+export const updateTicketType = async (req, res) => {
+  try {
+    const { eventId, ticketId } = req.params;
+    const update = req.body;
+    const updatedTicketType = await TicketType.findByIdAndUpdate(
+      ticketId,
+      update,
+      { new: true },
+      { runValidater: true }
+    );
+    return res
+      .status(200)
+      .json({ message: "Updated successfully", ticketType: updatedTicketType });
+  } catch (e) {
+    cosole.log(e);
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// Assiging the seats with their respective ticket types
+export const assigningSeatTypes = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const update = req.body;
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      update,
+      {
+        status: true,
+      },
+      { new: true },
+      { runValidater: true }
+    );
+    return res
+      .status(200)
+      .json({ message: "Success", updateEvent: updatedEvent });
+  } catch (e) {
+    cosole.log(e);
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// Getting the seat information
+export const getSeatInformation = async (req, res) => {
+  try {
+    const { seatId } = req.params;
+
+    const event = await Event.findOne({ "seats._id": seatId }, { "seats.$": 1 })
+      .populate({
+        path: "seats.ticketTypes",
+        select: "name description price",
+      })
+      .lean();
+
+    if (!event || !event.seats.length) {
+      return res.status(404).json({ message: "Seat not found" });
+    }
+
+    res.json({
+      message: "Success",
+      seat: event.seats[0],
     });
   } catch (e) {
     cosole.log(e);

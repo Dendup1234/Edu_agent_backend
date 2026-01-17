@@ -129,7 +129,26 @@ export const getAgentById = async (req, res) => {
     return res.status(500).json({ message: "Server error " });
   }
 };
-
+//Updating the agent
+export const updateAgent = async (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const update = req.body;
+    // updating the agent
+    const updatedAgent = await Agent.findByIdAndUpdate(
+      agentId,
+      update,
+      { new: true },
+      { runValidators: true }
+    );
+    return res
+      .status(200)
+      .json({ message: "Agent updated successfully", agent: updatedAgent });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error " });
+  }
+};
 //Creating a role by the agency
 export const createRole = async (req, res) => {
   try {

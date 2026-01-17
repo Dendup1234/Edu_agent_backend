@@ -20,7 +20,7 @@ import {
 import { searchUniByName } from "../controllers/student/student.uni.js";
 import { searchCourseByName } from "../controllers/student/student.course.js";
 import { searchScholarshipByName } from "../controllers/student/student.scholarship.js";
-import { registerOnlineMeeting } from "../controllers/student/student.event.js";
+import { registerMeeting } from "../controllers/student/student.event.js";
 
 import {
   generateSAS,
@@ -62,7 +62,7 @@ router.get("/universities/query/:agencyId/search", protect, searchUniByName);
 router.post(
   "/events/registration/online/:eventId",
   protect,
-  registerOnlineMeeting
+  registerMeeting
 );
 
 //Scholarship

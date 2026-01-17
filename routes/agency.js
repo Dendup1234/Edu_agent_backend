@@ -55,6 +55,11 @@ import {
   deleteEvent,
   getAllEventsStudent,
   searchEventsByName,
+  assigningSeatTypes,
+  createTicketType,
+  updateTicketType,
+  getAllTicket,
+  getSeatInformation,
 } from "../controllers/agency/agency.event.js";
 
 import {
@@ -77,6 +82,7 @@ import {
   updateRole,
   deactivateRole,
   searchEmployee,
+  updateAgent,
 } from "../controllers/agency/agent.employee.js";
 //Router import
 const router = express.Router();
@@ -220,6 +226,32 @@ router.get(
   requirePermission("event:search"),
   searchEventsByName
 );
+// new permission not assigned
+router.patch(
+  "/events/profile/:eventId/seats",
+  protect,
+  requirePermission("event:seat"),
+  assigningSeatTypes
+);
+router.post(
+  "/events/profile/:eventId/tickets",
+  protect,
+  requirePermission("event:createTicket"),
+  createTicketType
+);
+router.patch(
+  "/events/profile/:eventId/tickets/:ticketId",
+  protect,
+  requirePermission("event:updateTicket"),
+  updateTicketType
+);
+router.get(
+  "/events/profile/:eventId/tickets/",
+  protect,
+  requirePermission("event:readTicket"),
+  getAllTicket
+);
+router.get("/events/profile/:seatId/seats/info", protect, getSeatInformation);
 
 // Scholarships apis
 router.post(
@@ -276,6 +308,7 @@ router.get(
 router.post("/profile/employee/agents", protect, createAgent);
 router.get("/profile/employee/agents", protect, getAllAgent);
 router.get("/profile/employee/agents/:agentId/agents", protect, getAgentById);
+router.patch("/profile/employee/agents/:agentId/agents", protect, updateAgent);
 router.post("/profile/role/agents", protect, createRole);
 router.get("/profile/role/agents", protect, getAllRole);
 router.patch("/profile/role/agents/:roleId", protect, updateRole);

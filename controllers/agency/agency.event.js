@@ -1,6 +1,6 @@
 import Event from "../../models/event.js";
 import TicketType from "../../models/ticketType.js";
-
+import Ticket from "../../models/ticket.js";
 // creation of events
 export const createEvent = async (req, res) => {
   try {
@@ -47,7 +47,7 @@ export const createEvent = async (req, res) => {
         {
           status: false,
         },
-        { new: true }
+        { new: true },
       );
     }
     res.status(201).json({
@@ -134,7 +134,7 @@ export const deleteEvent = async (req, res) => {
     const event = await Event.findByIdAndUpdate(
       eventId,
       { status: "inactive" },
-      { new: true }
+      { new: true },
     );
     return res.status(200).json({ message: "event deactivated", event: event });
   } catch (e) {
@@ -219,7 +219,7 @@ export const updateTicketType = async (req, res) => {
       ticketId,
       update,
       { new: true },
-      { runValidater: true }
+      { runValidater: true },
     );
     return res
       .status(200)
@@ -234,22 +234,92 @@ export const updateTicketType = async (req, res) => {
 export const assigningSeatTypes = async (req, res) => {
   try {
     const { eventId } = req.params;
-    const update = req.body;
+    const { seats } = req.body;
+
+    if (!Array.isArray(seats) || seats.length === 0) {
+      return res.status(400).json({ message: "seats array is required" });
+    }
+
+    // basic validation
+    for (const s of seats) {
+      if (!s.row || !s.columns || !s.ticketTypes) {
+        return res.status(400).json({
+          message: "Each seat must have row, columns, and ticketTypes",
+        });
+      }
+    }
+
+    // Load existing seats just to prevent duplicates
+    const event = await Event.findById(eventId).select("seats").lean();
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    const existingSet = new Set(
+      (event.seats || []).map((s) => `${s.row}:${s.columns}`),
+    );
+
+    // keep only new seats
+    const newSeats = seats.filter(
+      (s) => !existingSet.has(`${s.row}:${s.columns}`),
+    );
+
+    if (newSeats.length === 0) {
+      return res
+        .status(409)
+        .json({ message: "All provided seats already exist" });
+    }
+
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      update,
       {
-        status: true,
+        $push: { seats: { $each: newSeats } },
+        $set: { status: true },
       },
-      { new: true },
-      { runValidater: true }
-    );
-    return res
-      .status(200)
-      .json({ message: "Success", updateEvent: updatedEvent });
+      { new: true, runValidators: true },
+    ).lean();
+
+    return res.status(200).json({
+      message: "Seats added successfully",
+      addedCount: newSeats.length,
+      event: updatedEvent,
+    });
   } catch (e) {
-    cosole.log(e);
-    res.status(500).json({ message: e.message });
+    console.log(e);
+    return res.status(500).json({ message: e.message });
+  }
+};
+
+//Updating the seats with ticketTypeId
+export const updateSeatType = async (req, res) => {
+  try {
+    const { eventId, seatId } = req.params;
+    const { ticketTypeId } = req.body;
+
+    if (!ticketTypeId) {
+      return res.status(400).json({ message: "ticketTypeId is required" });
+    }
+
+    const updated = await Event.updateOne(
+      {
+        _id: eventId,
+        "seats._id": seatId,
+      },
+      {
+        $set: {
+          "seats.$.ticketTypes": ticketTypeId,
+        },
+      },
+    );
+
+    if (updated.modifiedCount === 0) {
+      return res.status(404).json({ message: "Seat not found or not updated" });
+    }
+
+    return res.status(200).json({
+      message: "Seat updated successfully",
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: e.message });
   }
 };
 
@@ -272,6 +342,48 @@ export const getSeatInformation = async (req, res) => {
     res.json({
       message: "Success",
       seat: event.seats[0],
+    });
+  } catch (e) {
+    cosole.log(e);
+    res.status(500).json({ message: e.message });
+  }
+};
+
+//Getting the ticket organized by the agency
+export const getTickets = async (req, res) => {
+  try {
+    const userId = req.user.agencyId;
+    // Getting all the events from the agency id
+    const events = await Event.find({ organizerId: userId }).select(
+      "_id title startAt endAt timezone",
+    );
+    // if there is no events then
+    if (!events.length) {
+      return res.json({
+        eventsCount: 0,
+        ticketsCount: 0,
+        tickets: [],
+      });
+    }
+    const eventIds = events.map((e) => e._id);
+
+    // getting all tickets for those events
+    const tickets = await Ticket.find({ eventId: { $in: eventIds } })
+      .sort({ createdAt: -1 }) // retrives the most lastest ticket
+      .populate({
+        path: "eventId",
+        select: "title startAt endAt timezone organizerId meetings",
+      })
+      .populate({ path: "studentId", select: "name email phone" })
+      .populate({
+        path: "ticketInfo.ticketType",
+        select: "name price description",
+      });
+
+    return res.json({
+      eventsCount: events.length,
+      ticketsCount: tickets.length,
+      tickets,
     });
   } catch (e) {
     cosole.log(e);

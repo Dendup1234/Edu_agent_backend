@@ -60,7 +60,7 @@ router.get("/universities/query/:agencyId/search", protect, searchUniByName);
 
 //Event apis
 router.post(
-  "/events/registration/online/:eventId",
+  "/events/registration/:eventId",
   protect,
   registerMeeting
 );

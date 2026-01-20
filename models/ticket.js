@@ -31,13 +31,14 @@ const ticketSchema = new Schema({
       type: Number,
     },
     ticketType: {
-      type: String,
+      type: Types.ObjectId,
+      ref: "TicketType",
     },
     seatNumber: {
       row: {
         type: String,
       },
-      column: {
+      columns: {
         type: String,
       },
     },

@@ -55,6 +55,15 @@ import {
   deleteEvent,
   getAllEventsStudent,
   searchEventsByName,
+  assigningSeatTypes,
+  createTicketType,
+  updateTicketType,
+  getAllTicket,
+  getSeatInformation,
+  updateSeatType,
+  getTickets,
+  confirmTicketStatus,
+  canceledTicketStatus,
 } from "../controllers/agency/agency.event.js";
 
 import {
@@ -77,6 +86,7 @@ import {
   updateRole,
   deactivateRole,
   searchEmployee,
+  updateAgent,
 } from "../controllers/agency/agent.employee.js";
 //Router import
 const router = express.Router();
@@ -105,44 +115,44 @@ router.post(
   "/universities",
   protect,
   requirePermission("university:create"),
-  createUni
+  createUni,
 );
 router.get(
   "/universities",
   protect,
   requirePermission("university:read"),
-  getUni
+  getUni,
 );
 router.patch(
   "/universities/:universityId",
   protect,
   requirePermission("university:update"),
-  updateUni
+  updateUni,
 );
 router.delete(
   "/universities/:universityId",
   protect,
   requirePermission("university:delete"),
-  deactivateUni
+  deactivateUni,
 );
 router.get(
   "/universities/:universityId",
   protect,
   requirePermission("university:readById"),
-  getUniById
+  getUniById,
 );
 router.get("/universities/agency/:agencyId", protect, getUniStudent);
 router.get(
   "/universities/query/search",
   protect,
   requirePermission("university:search"),
-  searchUniByName
+  searchUniByName,
 );
 router.get(
   "/universities/dashboard/unipage",
   protect,
   requirePermission("university:dashboard"),
-  getUniDashboard
+  getUniDashboard,
 );
 
 //Courses apis
@@ -150,35 +160,35 @@ router.post(
   "/universities/:universityId/courses",
   protect,
   requirePermission("course:create"),
-  createCourse
+  createCourse,
 );
 
 router.get(
   "/universities/:universityId/courses",
   protect,
   requirePermission("course:read"),
-  getCourse
+  getCourse,
 );
 
 router.patch(
   "/universities/:universityId/courses/:courseId",
   protect,
   requirePermission("course:update"),
-  updateCourse
+  updateCourse,
 );
 
 router.delete(
   "/universities/:universityId/courses/:courseId",
   protect,
   requirePermission("course:delete"),
-  deactivateCourse
+  deactivateCourse,
 );
 
 router.get(
   "/courses/:courseId",
   protect,
   requirePermission("course:readById"),
-  getCourseById
+  getCourseById,
 );
 
 //Student api to get the course
@@ -199,26 +209,68 @@ router.get(
   "/events/profile/:eventId",
   protect,
   requirePermission("event:readById"),
-  getEventById
+  getEventById,
 );
 router.get("/events/student/:agencyId", protect, getAllEventsStudent);
 router.patch(
   "/events/profile/:eventId",
   protect,
   requirePermission("event:update"),
-  updateEvent
+  updateEvent,
 );
 router.delete(
   "/events/profile/:eventId",
   protect,
   requirePermission("event:delete"),
-  deleteEvent
+  deleteEvent,
 );
 router.get(
   "/events/profile/query/search",
   protect,
   requirePermission("event:search"),
-  searchEventsByName
+  searchEventsByName,
+);
+// new permission not assigned
+router.post(
+  "/events/profile/:eventId/seats",
+  protect,
+  requirePermission("event:seat"),
+  assigningSeatTypes,
+);
+router.patch(
+  "/events/profile/:eventId/seats/:seatId/update",
+  protect,
+  updateSeatType,
+);
+router.post(
+  "/events/profile/:eventId/tickets",
+  protect,
+  requirePermission("event:createTicket"),
+  createTicketType,
+);
+router.patch(
+  "/events/profile/:eventId/tickets/:ticketId",
+  protect,
+  requirePermission("event:updateTicket"),
+  updateTicketType,
+);
+router.get(
+  "/events/profile/:eventId/tickets/",
+  protect,
+  requirePermission("event:readTicket"),
+  getAllTicket,
+);
+router.get("/events/profile/:seatId/seats/info", protect, getSeatInformation);
+router.get("/events/tickets/", protect, getTickets);
+router.patch(
+  "/events/tickets/:ticketId/confirmed",
+  protect,
+  confirmTicketStatus,
+);
+router.patch(
+  "/events/tickets/:ticketId/cancelled",
+  protect,
+  canceledTicketStatus,
 );
 
 // Scholarships apis
@@ -226,56 +278,57 @@ router.post(
   "/scholarships",
   protect,
   requirePermission("scholarship:create"),
-  createScholarship
+  createScholarship,
 );
 router.get(
   "/scholarships",
   protect,
   requirePermission("scholarship:read"),
-  getAllScholarship
+  getAllScholarship,
 );
 router.get(
   "/scholarships/:scholarshipId",
   protect,
   requirePermission("scholarship:readById"),
-  getScholarshipById
+  getScholarshipById,
 );
 router.get(
   "/scholarships/agency/:agencyId",
   protect,
   requirePermission("scholarship:byAgency"),
-  getAllScholarshipStudent
+  getAllScholarshipStudent,
 );
 router.get("/scholarships/landing/scholarships/", getAllScholarshipLanding);
 router.patch(
   "/scholarships/:scholarshipId",
   protect,
   requirePermission("scholarship:update"),
-  updateScholarship
+  updateScholarship,
 );
 router.delete(
   "/scholarships/:scholarshipId",
   protect,
   requirePermission("scholarship:delete"),
-  deactivateScholarship
+  deactivateScholarship,
 );
 router.get(
   "/scholarships/query/search",
   protect,
   requirePermission("scholarship:search"),
-  searchScholarshipByName
+  searchScholarshipByName,
 );
 router.get(
   "/scholarships/dashboard/scholarships",
   protect,
   requirePermission("scholarship:dashboard"),
-  getScholarshipDashboard
+  getScholarshipDashboard,
 );
 
 //Employees apis
 router.post("/profile/employee/agents", protect, createAgent);
 router.get("/profile/employee/agents", protect, getAllAgent);
 router.get("/profile/employee/agents/:agentId/agents", protect, getAgentById);
+router.patch("/profile/employee/agents/:agentId/agents", protect, updateAgent);
 router.post("/profile/role/agents", protect, createRole);
 router.get("/profile/role/agents", protect, getAllRole);
 router.patch("/profile/role/agents/:roleId", protect, updateRole);

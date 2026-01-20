@@ -180,7 +180,7 @@ export const verifyOtp = async (req, res) => {
     const token = await signToken({
       sub: user._id.toString(),
       email: user.email,
-      actor: "Student",
+      actor: 'Student'
     });
 
     return res.status(201).json({

@@ -27,7 +27,7 @@ import {
   confirmUpload,
 } from "../controllers/student/student.blob.js";
 
-import { loadALLMessage } from "../controllers/socketController.js";
+import { getConversationMessages } from "../controllers/socketController.js";
 
 const router = express.Router();
 
@@ -73,6 +73,6 @@ router.get(
 );
 
 //messages
-router.get("/conversation/:conversationId/messages", loadALLMessage)
+router.get("/conversation/:conversationId/messages", getConversationMessages)
 
 export default router;

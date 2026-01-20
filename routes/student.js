@@ -73,6 +73,6 @@ router.get(
 );
 
 //messages
-router.get("/conversation/:ConversationId/messages", loadALLMessage)
+router.get("/conversation/:conversationId/messages", loadALLMessage)
 
 export default router;

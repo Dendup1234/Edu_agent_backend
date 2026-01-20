@@ -3,11 +3,11 @@ import jwt from "jsonwebtoken";
 import Message from "../models/message.js";
 import Conversation from "../models/conversation.js";
 
-const onlineUsers = new Map();
-
 export const initializeWebSocket = (server) => {
   const io = new Server(server, {
-    cors: { origin: "*" }
+    cors: {
+      origin: "*"
+    }
   });
 
   io.use((socket, next) => {
@@ -19,42 +19,37 @@ export const initializeWebSocket = (server) => {
       socket.userId = decoded.sub || decoded.agencyId;
       socket.userModel = decoded.actor;
       next();
-    } catch {
+    } catch (err) {
       next(new Error("Authentication error"));
+      
     }
   });
 
-  io.on("connection", (socket) => {
-    const userId = socket.userId;
+  io.on('connection', (socket) => {
+    console.log(`User connected: ${socket.userId}`);
+    socket.join(socket.userId);
+    socket.emit('connected');
 
-    socket.join(userId.toString());
-
-    if (!onlineUsers.has(userId)) {
-      onlineUsers.set(userId, new Set());
-    }
-    onlineUsers.get(userId).add(socket.id);
-    socket.data.userId = userId;
-
-    socket.emit("connected", { userId });
-
-    socket.on("send_message", async ({ receiver, receiverModel, content }) => {
+    socket.on('send_message', async (data) => {
       try {
-        if (!receiver || !receiverModel || !content) {
-          return socket.emit("error", { message: "Missing fields" });
-        }
-
+        const { receiver, content, receiverModel } = data;
         const sender = socket.userId;
         const senderModel = socket.userModel;
 
-        let conversation = await Conversation.findOne({participants: {}});
+        const isReceiverOnline = io.sockets.adapter.rooms.has(receiver);
 
+        const participants = [
+          { user: sender, model: senderModel },
+          { user: receiver, model: receiverModel }
+        ].sort((a, b) => a.user.toString().localeCompare(b.user.toString()));
+
+        let conversation = await Conversation.findOne({
+          'participants.user': { $all: [sender, receiver] },
+          'participants': { $size: 2 }
+        });
+        
         if (!conversation) {
-          conversation = await Conversation.create({
-            participants: [
-              { user: sender, model: senderModel },
-              { user: receiver, model: receiverModel }
-            ]
-          });
+          conversation = await Conversation.create({ participants });
         }
 
         const message = await Message.create({
@@ -64,28 +59,26 @@ export const initializeWebSocket = (server) => {
           receiver,
           receiverModel,
           content,
-          status: onlineUsers.has(receiver.toString()) ? "delivered" : "sent"
+          status: isReceiverOnline ? 'delivered' : 'sent'
         });
 
-        await Conversation.findByIdAndUpdate(conversation._id, {
-          lastMessage: message._id
-        });
+        conversation.lastMessage = message._id;
+        await conversation.save();
 
-        socket.emit("sent_message", { message });
-        io.to(receiver.toString()).emit("receive_message", { message });
+        if (isReceiverOnline) {
+          io.to(receiver).emit('receive_message', { message });
+        }
 
-      } catch (err) {
-        console.error(err);
-        socket.emit("error", { message: "Internal error" });
+        socket.emit('sent_message', { message });
+
+      } catch (error) {
+        console.error(error);
+        socket.emit('error', { message: 'Failed to send message' });
       }
     });
 
-    socket.on("disconnect", () => {
-      const sockets = onlineUsers.get(userId);
-      if (!sockets) return;
-
-      sockets.delete(socket.id);
-      if (sockets.size === 0) onlineUsers.delete(userId);
+    socket.on('disconnect', () => {
+      console.log(`User disconnected: ${socket.userId}`);
     });
   });
 

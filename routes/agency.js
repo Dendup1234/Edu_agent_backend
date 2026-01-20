@@ -62,6 +62,8 @@ import {
   getSeatInformation,
   updateSeatType,
   getTickets,
+  confirmTicketStatus,
+  canceledTicketStatus,
 } from "../controllers/agency/agency.event.js";
 
 import {
@@ -260,6 +262,16 @@ router.get(
 );
 router.get("/events/profile/:seatId/seats/info", protect, getSeatInformation);
 router.get("/events/tickets/", protect, getTickets);
+router.patch(
+  "/events/tickets/:ticketId/confirmed",
+  protect,
+  confirmTicketStatus,
+);
+router.patch(
+  "/events/tickets/:ticketId/cancelled",
+  protect,
+  canceledTicketStatus,
+);
 
 // Scholarships apis
 router.post(

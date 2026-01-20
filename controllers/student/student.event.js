@@ -156,7 +156,7 @@ export const registerMeeting = async (req, res) => {
           .json({ message: "Invalid ticket type for this event" });
       }
 
-      //Atomically book seat by seatId
+      //Atomically book seat by seatId and booking is false
       const seatBooked = await Event.updateOne(
         {
           _id: eventId,

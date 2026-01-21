@@ -1,12 +1,5 @@
 import Message from "../models/message.js";
 
-/**
- * @param {string} conversationId
- * @param {Object} options
- * @param {string|null} options.cursorCreatedAt ISO string
- * @param {string|null} options.cursorId Mongo ObjectId string
- * @param {number} options.limit
- */
 export const loadMessagesCursor = async (
   conversationId,
   {
@@ -20,7 +13,6 @@ export const loadMessagesCursor = async (
 
   const query = { conversationId };
 
-  // Cursor condition (fetch older messages)
   if (cursorCreatedAt && cursorId) {
     query.$or = [
       { createdAt: { $lt: new Date(cursorCreatedAt) } },
@@ -34,8 +26,6 @@ export const loadMessagesCursor = async (
   const messages = await Message.find(query)
     .sort({ createdAt: -1, _id: -1 }) 
     .limit(limit + 1) 
-    .populate("sender")
-    .populate("receiver")
     .lean();
 
   const hasNextPage = messages.length > limit;

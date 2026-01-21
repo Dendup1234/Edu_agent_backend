@@ -34,8 +34,8 @@ export const loadMessagesCursor = async (
   const messages = await Message.find(query)
     .sort({ createdAt: -1, _id: -1 }) 
     .limit(limit + 1) 
-    .populate("sender", "name email")
-    .populate("receiver", "name email")
+    .populate("sender")
+    .populate("receiver")
     .lean();
 
   const hasNextPage = messages.length > limit;
@@ -44,7 +44,7 @@ export const loadMessagesCursor = async (
   const lastMessage = messages[messages.length - 1];
 
   return {
-    messages: messages.reverse(), // oldest → newest for UI
+    messages: messages.reverse(), 
     nextCursor: hasNextPage
       ? {
           cursorCreatedAt: lastMessage.createdAt,

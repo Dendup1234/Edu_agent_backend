@@ -87,7 +87,14 @@ import {
   deactivateRole,
   searchEmployee,
   updateAgent,
-} from "../controllers/agency/agent.employee.js";
+  createMentor,
+} from "../controllers/agency/agency.employee.js";
+
+import {
+  getAllMentor,
+  getMentorById,
+  deactivateMentor,
+} from "../controllers/agency/agency.mentor.js";
 //Router import
 const router = express.Router();
 
@@ -334,5 +341,11 @@ router.get("/profile/role/agents", protect, getAllRole);
 router.patch("/profile/role/agents/:roleId", protect, updateRole);
 router.delete("/profile/role/agents/:roleId", protect, deactivateRole);
 router.get("/profile/employee/agents/search/", protect, searchEmployee);
+router.post("/profile/employee/mentors", protect, createMentor);
+
+// Mentor apis
+router.get("/mentors/", protect, getAllMentor);
+router.get("/mentors/:mentorId", protect, getMentorById);
+router.delete("/mentors/:mentorId", protect, deactivateMentor);
 
 export default router;

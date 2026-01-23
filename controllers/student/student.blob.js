@@ -151,7 +151,7 @@ export const confirmUpload = async (req, res) => {
     });
 
     const uploadedTypes = await Document.distinct("documentType", {
-      uploadBy: studentId
+      uploadedBy: studentId
     });
 
     const isComplete = REQUIRED_DOC_TYPES.every(type =>
@@ -160,7 +160,7 @@ export const confirmUpload = async (req, res) => {
 
     if (isComplete) {
       const documents = await Document.find({
-        uploadBy: studentId,
+        uploadedBy: studentId,
         documentType: { $in: REQUIRED_DOC_TYPES }
       }).select("_id");
 

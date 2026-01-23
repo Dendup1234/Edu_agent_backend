@@ -1,4 +1,4 @@
-import { loadMessagesCursor } from "../controllers/messageController.js";
+import { loadMessagesCursor } from "../utils/cursor.js";
 
 export const getConversationMessages = async (req, res, next) => {
   try {

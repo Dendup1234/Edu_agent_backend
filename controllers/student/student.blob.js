@@ -42,17 +42,10 @@ const MAX_SIZE = 50 * 1024 * 1024;
 const REQUIRED_DOC_TYPES = [
   'passport',
   'academic_results',
-  'latest_transcript',
   'english_test',
   'cv',
-  'marriage_cert',
   'sop',
-  'employment_proof',
-  'lor',
-  'study_leave',
-  'spouse_docs',
-  'visa_history',
-  'passport_photo'
+  'bank_statement'
 ];
 
 export const generateSAS = async (req, res) => {
@@ -142,7 +135,7 @@ export const confirmUpload = async (req, res) => {
     }
 
     const document = await Document.create({
-      uploadBy: studentId,
+      uploadedBy: studentId,
       agency: agencyId,
       documentType,
       fileName: blobName,
@@ -152,7 +145,7 @@ export const confirmUpload = async (req, res) => {
     });
 
     const uploadedTypes = await Document.distinct("documentType", {
-      uploadBy: studentId
+      uploadedBy: studentId
     });
 
     const isComplete = REQUIRED_DOC_TYPES.every(type =>
@@ -160,22 +153,28 @@ export const confirmUpload = async (req, res) => {
     );
 
     if (isComplete) {
-      const documents = await Document.find({
-        uploadBy: studentId,
-        documentType: { $in: REQUIRED_DOC_TYPES }
-      }).select("_id");
+    const documents = await Document.find({
+      uploadedBy: studentId,
+      documentType: { $in: REQUIRED_DOC_TYPES }
+    }).select("_id");
 
-      const application = await Application.create({
-        applicationFor: studentId,
-        documents: documents.map(d => d._id),
-        status: "document_review"
-      });
-
-      return res.json({ status: application.status });
+    const application = await Application.findOneAndUpdate(
+      { applicationFor: studentId },
+      {
+        $set: { status: "document_review" },
+        $addToSet: {
+          documents: { $each: documents.map(d => d._id) }
+        }
+      },
+      {
+        new: true,
+        upsert: true
+      }
+    );
+    return res.json({ status: application.status });
     }
-
     return res.json({ message: "Upload confirmed" });
-
+    
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Confirmation failed" });

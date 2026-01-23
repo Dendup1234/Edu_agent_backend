@@ -77,6 +77,7 @@ import {
   searchScholarshipByName,
   getScholarshipDashboard,
 } from "../controllers/agency/agency.scholarship.js";
+
 import {
   createAgent,
   getAllAgent,
@@ -95,6 +96,12 @@ import {
   getMentorById,
   deactivateMentor,
 } from "../controllers/agency/agency.mentor.js";
+} from "../controllers/agency/agent.employee.js";
+
+import {
+  getDocumentsByStudent
+} from "../controllers/agency/agency.document.js"
+
 //Router import
 const router = express.Router();
 
@@ -347,5 +354,8 @@ router.post("/profile/employee/mentors", protect, createMentor);
 router.get("/mentors/", protect, getAllMentor);
 router.get("/mentors/:mentorId", protect, getMentorById);
 router.delete("/mentors/:mentorId", protect, deactivateMentor);
+
+// Document
+router.get("/documents/:studentId", getDocumentsByStudent)
 
 export default router;

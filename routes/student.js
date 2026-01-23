@@ -31,6 +31,8 @@ import {
   confirmUpload,
 } from "../controllers/student/student.blob.js";
 
+import { getConversationMessages } from "../controllers/message.js";
+
 const router = express.Router();
 
 //For authentication

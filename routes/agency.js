@@ -101,6 +101,12 @@ import {
   updateApplicationStatus 
 } from "../controllers/agency/agency.application.js";
 
+import {
+  getAllMentor,
+  getMentorById,
+  deactivateMentor
+} from "../controllers/agency/agency.mentor.js"
+
 //Router import
 const router = express.Router();
 

@@ -91,8 +91,14 @@ import {
 } from "../controllers/agency/agent.employee.js";
 
 import {
-  getDocumentsByStudent
+  getDocumentsByStudent,
+  updateDocumentReviewStatus
 } from "../controllers/agency/agency.document.js"
+
+import {
+  getStudentApplication,
+  updateApplicationStatus
+} from "../controllers/agency/agency.application.js"
 
 //Router import
 const router = express.Router();
@@ -341,7 +347,12 @@ router.patch("/profile/role/agents/:roleId", protect, updateRole);
 router.delete("/profile/role/agents/:roleId", protect, deactivateRole);
 router.get("/profile/employee/agents/search/", protect, searchEmployee);
 
-// Document
+//Document
 router.get("/documents/:studentId", getDocumentsByStudent)
+router.patch("/documents/:id/review-status", protect, updateDocumentReviewStatus)
+
+//Application
+router.get("/application/:studentId", getStudentApplication)
+router.get("/application/:applicationId/status", updateApplicationStatus)
 
 export default router;

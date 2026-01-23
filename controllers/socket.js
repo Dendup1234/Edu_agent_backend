@@ -37,10 +37,7 @@ export const initializeWebSocket = (server) => {
       "participants.user": socket.userId
     })
       .populate("participants.user")
-      .populate({
-        path: "lastMessage",
-        populate: { path: "sender", select: "name email" }
-      })
+      .populate({path: "lastMessage"})
       .sort({ updatedAt: -1 })
       .lean();
 

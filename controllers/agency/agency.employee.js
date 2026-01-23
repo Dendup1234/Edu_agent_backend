@@ -1,8 +1,8 @@
-import agency from "../../models/agency.js";
 import Agent from "../../models/agent.js";
 import Role from "../../models/role.js";
 import { generatePassword } from "../../utils/password.js";
 import { sendAccountEmail } from "../../utils/sendEmail.js";
+import Mentor from "../../models/mentor.js";
 import bcrypt from "bcryptjs";
 
 //Creating an account of the employee under the agency
@@ -139,7 +139,7 @@ export const updateAgent = async (req, res) => {
       agentId,
       update,
       { new: true },
-      { runValidators: true }
+      { runValidators: true },
     );
     return res
       .status(200)
@@ -261,5 +261,63 @@ export const searchEmployee = async (req, res) => {
   } catch (e) {
     console.log(e);
     return res.status(500).json({ message: "Server error " });
+  }
+};
+
+//Creating an account of the mentor under the agency
+export const createMentor = async (req, res) => {
+  try {
+    const userId = req.user.agencyId;
+    if (!userId) {
+      return res.status(401).json({ message: "Token invalid " });
+    }
+
+    const { name, email, phone } = req.body;
+
+    //check if agent already exists
+    const existingMentor = await Mentor.findOne({ email });
+    if (existingMentor) {
+      return res
+        .status(409)
+        .json({ message: "Agent with this email already exists" });
+    }
+    // Getting the day that the mentor is created for join date
+    const joinDate = new Date();
+    //Trim ing the email
+    const normalizedEmail = email.toLowerCase().trim();
+    // Generating a new password
+    const plainPassword = generatePassword(10);
+    //encrypting the password
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+    // Creating a new agent
+    const mentor = await Mentor.create({
+      name,
+      email,
+      phone,
+      password: hashedPassword,
+      joinDate: joinDate,
+      partnerAgency: userId,
+    });
+    //Sending the email to the particular mentor
+    await sendAccountEmail(normalizedEmail, {
+      subject: "Your Mentor Account is Ready",
+      title: "Welcome to EduAgent",
+      body: "Your mentor account has been created by your agency admin.",
+      password: plainPassword,
+    });
+
+    //Success
+    return res.status(201).json({
+      message: "Mentor created successfully",
+      mentor: {
+        id: mentor._id,
+        name: mentor.name,
+        email: mentor.email,
+        phone: mentor.phone,
+      },
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
   }
 };

@@ -77,6 +77,7 @@ import {
   searchScholarshipByName,
   getScholarshipDashboard,
 } from "../controllers/agency/agency.scholarship.js";
+
 import {
   createAgent,
   getAllAgent,
@@ -88,6 +89,11 @@ import {
   searchEmployee,
   updateAgent,
 } from "../controllers/agency/agent.employee.js";
+
+import {
+  getDocument
+} from "../controllers/agency/agency.document.js"
+
 //Router import
 const router = express.Router();
 
@@ -334,5 +340,8 @@ router.get("/profile/role/agents", protect, getAllRole);
 router.patch("/profile/role/agents/:roleId", protect, updateRole);
 router.delete("/profile/role/agents/:roleId", protect, deactivateRole);
 router.get("/profile/employee/agents/search/", protect, searchEmployee);
+
+// Document
+router.get("/documents/:studentId", getDocument)
 
 export default router;

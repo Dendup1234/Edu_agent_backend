@@ -51,8 +51,7 @@ const REQUIRED_DOC_TYPES = [
   'lor',
   'study_leave',
   'spouse_docs',
-  'visa_history',
-  'passport_photo'
+  'visa_history'
 ];
 
 export const generateSAS = async (req, res) => {
@@ -142,7 +141,7 @@ export const confirmUpload = async (req, res) => {
     }
 
     const document = await Document.create({
-      uploadBy: studentId,
+      uploadedBy: studentId,
       agency: agencyId,
       documentType,
       fileName: blobName,

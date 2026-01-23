@@ -91,7 +91,7 @@ import {
 } from "../controllers/agency/agent.employee.js";
 
 import {
-  getDocument
+  getDocumentsByStudent
 } from "../controllers/agency/agency.document.js"
 
 //Router import
@@ -342,6 +342,6 @@ router.delete("/profile/role/agents/:roleId", protect, deactivateRole);
 router.get("/profile/employee/agents/search/", protect, searchEmployee);
 
 // Document
-router.get("/documents/:studentId", getDocument)
+router.get("/documents/:studentId", getDocumentsByStudent)
 
 export default router;

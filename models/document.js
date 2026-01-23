@@ -21,11 +21,6 @@ const documentSchema = new mongoose.Schema(
     fileSize: Number,
     fileURL: String,
 
-    uploadedAt: {
-    type: Date,
-    default: Date.now
-    },
-
     reviewStatus: {
       type: String,
       enum: ["under_review", "approved", "needs_revision"],

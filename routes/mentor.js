@@ -13,6 +13,8 @@ import {
 import {
   getProfile,
   updateProfile,
+  getStudentConfirmed,
+  getStudentPending,
 } from "../controllers/mentor/mentor.profile.js";
 
 const router = express.Router();
@@ -27,4 +29,7 @@ router.post("/password-reset/set-new", setNewPassword);
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
 
+//Students apis
+router.get("/mentees/confirmed", protect, getStudentConfirmed);
+router.get("/mentees/pending", protect, getStudentPending);
 export default router;

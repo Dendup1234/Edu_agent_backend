@@ -21,7 +21,10 @@ import { searchUniByName } from "../controllers/student/student.uni.js";
 import { searchCourseByName } from "../controllers/student/student.course.js";
 import { searchScholarshipByName } from "../controllers/student/student.scholarship.js";
 import { registerMeeting } from "../controllers/student/student.event.js";
-import { getAllMentor } from "../controllers/student/student.mentor.js";
+import {
+  getAllMentor,
+  connectMentor,
+} from "../controllers/student/student.mentor.js";
 
 import {
   generateSAS,
@@ -69,5 +72,5 @@ router.get(
 
 //Mentor apis
 router.get("/mentors/:agencyId", protect, getAllMentor);
-
+router.post("/mentors/connect/:mentorId", protect, connectMentor);
 export default router;

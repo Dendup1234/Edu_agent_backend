@@ -17,6 +17,7 @@ const mentorSchema = new Schema(
         status: {
           type: String,
           enum: ["pending", "confirmed", "rejected"],
+          default: "pending",
         },
       },
     ],

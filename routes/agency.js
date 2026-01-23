@@ -92,8 +92,14 @@ import {
 } from "../controllers/agency/agency.employee.js";
 
 import {
-  getDocumentsByStudent
+  getDocumentsByStudent,
+  updateDocumentReviewStatus
 } from "../controllers/agency/agency.document.js"
+
+import { 
+  getStudentApplication, 
+  updateApplicationStatus 
+} from "../controllers/agency/agency.application.js";
 
 //Router import
 const router = express.Router();
@@ -350,5 +356,10 @@ router.delete("/mentors/:mentorId", protect, deactivateMentor);
 
 // Document
 router.get("/documents/:studentId", getDocumentsByStudent)
+router.patch("/documents/:documentId/review-status", updateDocumentReviewStatus)
+
+// Application 
+router.get("/application/:studentId", getStudentApplication)
+router.patch("/application/:applicationId/status", updateApplicationStatus)
 
 export default router;

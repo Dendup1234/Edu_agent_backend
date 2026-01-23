@@ -1,6 +1,6 @@
 import mongoose, { Schema, Types } from "mongoose";
 
-const mentorSchema = mongoose.Schema(
+const mentorSchema = new Schema(
   {
     name: {
       type: String,
@@ -10,14 +10,15 @@ const mentorSchema = mongoose.Schema(
     },
     mentees: [
       {
-        student:{
-			type: Types.ObjectId,
-			ref: 'Student'
-		},
-		status:{
-			type: String,
-			enum:['pending','confirmed','rejected:']
-		}
+        student: {
+          type: Types.ObjectId,
+          ref: "Student",
+        },
+        status: {
+          type: String,
+          enum: ["pending", "confirmed", "rejected"],
+          default: "pending",
+        },
       },
     ],
     email: {
@@ -46,33 +47,24 @@ const mentorSchema = mongoose.Schema(
     availability: {
       type: [String],
     },
-    //Adding the review of the mentor
-    review: [
-      {
-        rating: {
-          type: Number,
-          min: 0,
-          max: 5,
-        },
-        testimonials: {
-          type: String,
-        },
-      },
-    ],
     joinDate: {
       type: Date,
     },
-    lastActivity: {
-      type: Date,
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
-
     isActive: {
       type: Boolean,
       default: true,
     },
+    partnerAgency: {
+      type: Types.ObjectId,
+      ref: "Agency",
+    },
   },
-  { timestamp: true }
+  { timestamp: true },
 );
 
 // exporting the mentor auth model
-export const Mentor = mongoose.model("Mentor", mentorSchema);
+export default mongoose.model("Mentor", mentorSchema);

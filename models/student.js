@@ -6,19 +6,16 @@ const StudentSchema = new Schema(
       type: String,
       trim: true,
     },
-    
-    profileURL: {
+    profileUrl: {
       type: String,
     },
     email: {
       type: String,
     },
-
     phone: {
       type: String,
       trim: true,
     },
-
     password: {
       type: String,
       select: false,
@@ -98,11 +95,45 @@ const StudentSchema = new Schema(
     },
     onlineStatus: {
       type: String,
-      enum: ["active", "inactive"],
-      default: "active"
-    }
+      enum: ["Active", "inActive"],
+      default: "Active",
+    },
+    joinDate: {
+      type: Date,
+    },
+    statusHistory: [
+      {
+        stage: {
+          type: String,
+        },
+        status_name: {
+          type: String,
+          enum: [
+            "new",
+            "contacted",
+            "qualified",
+            "negotiated",
+            "applied",
+            "converted",
+            "lost",
+          ],
+        },
+        status_date: {
+          type: Date,
+          default: Date.now,
+        },
+        remarks: {
+          type: String,
+        },
+      },
+    ],
+    // Connected Mentor
+    connectedMentor: {
+      type: Types.ObjectId,
+      ref: "Mentor",
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Student", StudentSchema);

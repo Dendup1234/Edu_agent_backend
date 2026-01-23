@@ -137,12 +137,12 @@ export const deleteEvent = async (req, res) => {
     const { eventId } = req.params;
     const event = await Event.findByIdAndUpdate(
       eventId,
-      { status: "inactive" },
+      { status: false },
       { new: true },
     );
     return res.status(200).json({ message: "event deactivated", event: event });
   } catch (e) {
-    cosole.log(e);
+    console.log(e);
     res.status(500).json({ message: e.message });
   }
 };
@@ -373,6 +373,7 @@ export const getTickets = async (req, res) => {
 
     // getting all tickets for those events
     const tickets = await Ticket.find({ eventId: { $in: eventIds } })
+      .select("status")
       .sort({ createdAt: -1 }) // retrives the most lastest ticket
       .populate({
         path: "eventId",
@@ -529,7 +530,7 @@ export const canceledTicketStatus = async (req, res) => {
       ticket,
     });
   } catch (e) {
-    console.log(e)
-    return res.status(500).json({message:"Server error"})
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
   }
 };

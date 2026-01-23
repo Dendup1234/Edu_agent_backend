@@ -96,11 +96,8 @@ import {
   getMentorById,
   deactivateMentor,
 } from "../controllers/agency/agency.mentor.js";
-} from "../controllers/agency/agent.employee.js";
 
-import {
-  getDocumentsByStudent
-} from "../controllers/agency/agency.document.js"
+import { getDocumentsByStudent } from "../controllers/agency/agency.document.js";
 
 //Router import
 const router = express.Router();
@@ -356,6 +353,6 @@ router.get("/mentors/:mentorId", protect, getMentorById);
 router.delete("/mentors/:mentorId", protect, deactivateMentor);
 
 // Document
-router.get("/documents/:studentId", getDocumentsByStudent)
+router.get("/documents/:studentId", getDocumentsByStudent);
 
 export default router;

@@ -7,6 +7,7 @@ export const sendOtpEmail = async (email, otp) => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    pool: true,
   });
   // send email
   await transporter.sendMail({
@@ -17,6 +18,43 @@ export const sendOtpEmail = async (email, otp) => {
   });
 };
 
+//Sending the mentor success email
+export const sendMenteeEmail = async (email, mentor) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    pool: true,
+  });
+  // send email
+  await transporter.sendMail({
+    from: `"EduAgent support" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `Your connection with mentor ${mentor} is accepted`,
+    text: `Connection accepted`,
+  });
+};
+
+// Sending the appointment email to the student
+export const sendAppointmentEmail = async (email, mentorName, time, date) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    pool: true,
+  });
+  // send email
+  await transporter.sendMail({
+    from: `"EduAgent support" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `You have an appointment with the ${mentorName}`,
+    text: `You have an appointment at ${time},on ${date}`,
+  });
+};
 // Sending account email
 export const sendAccountEmail = async (email, message) => {
   const transporter = nodemailer.createTransport({
@@ -25,6 +63,7 @@ export const sendAccountEmail = async (email, message) => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    pool: true,
   });
 
   const { subject, title, body, password } = message;
@@ -64,6 +103,7 @@ export const sendEventSuccessEmail = async (email, message) => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    pool: true,
   });
 
   const { subject, title, startTime, timeZone, body, link, password } = message;
@@ -102,6 +142,7 @@ export const sendSeatedEventSuccessEmail = async (email, message) => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    pool: true,
   });
 
   const { subject, title, startTime, timeZone, body, seats, ticketType } =

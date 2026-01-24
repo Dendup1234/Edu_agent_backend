@@ -34,36 +34,42 @@ export const getMentorById = async (req, res) => {
 export const connectMentor = async (req, res) => {
   try {
     const { mentorId } = req.params;
-    const userId = req.user.sub;
-    // Connecting the student with the mentor
-    const student = await Student.findByIdAndUpdate(
-      userId,
-      {
-        connectedMentor: mentorId,
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
+    const userId = req.user.sub; // student id
+    console.log(userId);
+
+    // Only allow if student is not already connected to a mentor
+    const student = await Student.findOneAndUpdate(
+      { _id: userId, connectedMentor: { $exists: false } }, // or null if you set it
+      { $set: { connectedMentor: mentorId } },
+      { new: true, runValidators: true },
     );
-    // mentor connect with the student
-    const mentor = await Mentor.findByIdAndUpdate(
-      mentorId,
-      {
-        $addToSet: {
-          mentees: {
-            student: userId,
-          },
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
+
+    // If student was already connected, student will be null
+    if (!student) {
+      return res.status(400).json({
+        message: "You are already connected to a mentor",
+      });
+    }
+
+    // Add mentee only if this student isn't already in mentees array
+    const mentor = await Mentor.findOneAndUpdate(
+      { _id: mentorId, "mentees.student": { $ne: userId } },
+      { $push: { mentees: { student: userId, status: "pending" } } },
+      { new: true, runValidators: true },
     );
-    return res
-      .status(200)
-      .json({ message: "Success", student: student, mentor: mentor });
+
+    // If mentor not found (or student already existed)
+    if (!mentor) {
+      return res.status(404).json({
+        message: "Mentor not found or request already exists",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Success",
+      student,
+      mentor,
+    });
   } catch (e) {
     console.log(e);
     return res.status(500).json({ message: "Server error" });

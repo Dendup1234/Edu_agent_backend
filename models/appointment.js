@@ -1,14 +1,13 @@
+import mongoose, { Schema, Types } from "mongoose";
 //Mentor Appointment Schema
-const appointmentSchema = mongoose.Schema({
+const appointmentSchema = new Schema({
   mentorId: {
-    type: Schema.Types.ObjectId,
+    type: Types.ObjectId,
     ref: "Mentor",
-    required: true,
   },
   studentId: {
-    type: Schema.Types.ObjectId,
+    type: Types.ObjectId,
     ref: "Student",
-    required: true,
   },
   time: {
     type: Date,
@@ -22,18 +21,16 @@ const appointmentSchema = mongoose.Schema({
         type: String,
         enum: ["Online", "In-person"],
       },
-      meeting_url: {
-        type: String,
-      },
     },
   ],
   status: {
     type: String,
-    enum: ["Scheduled", "Tentative"],
+    enum: ["Scheduled", "Completed", "Cancelled"],
+    default: "Scheduled",
   },
   purpose: {
     type: String,
   },
 });
 
-export const Appointment = mongoose.model("Appointment", appointmentSchema);
+export default mongoose.model("Appointment", appointmentSchema);

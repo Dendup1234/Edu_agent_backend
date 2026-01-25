@@ -52,7 +52,7 @@ router.patch(
 );
 router.patch("/appointments/:appointmentId/cancel", protect, cancelAppointment);
 router.patch(
-  "/appointments/:appointmentId/confirmed",
+  "/appointments/:appointmentId/complete",
   protect,
   confirmedAppointment,
 );

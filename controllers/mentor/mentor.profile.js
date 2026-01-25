@@ -135,6 +135,8 @@ export const confirmMenteeStatus = async (req, res) => {
       mentee: mentor,
     });
   } catch (e) {
+    // Find the confirmed mentee entry
+    con;
     console.log(e);
     return res.status(500).json({ message: "Server Error" });
   }
@@ -329,7 +331,7 @@ export const confirmedAppointment = async (req, res) => {
         status: "Scheduled",
       },
       {
-        $set: { status: "Confirmed" },
+        $set: { status: "Completed" },
       },
       { new: true },
     );

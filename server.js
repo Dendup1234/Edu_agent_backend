@@ -11,7 +11,6 @@ import adminRoute from "./routes/admin.js";
 import agentRoute from "./routes/agent.js";
 import mentorRoute from "./routes/mentor.js";
 import { initializeWebSocket } from "./controllers/socket.js";
-
 // Config
 dotenv.config();
 
@@ -39,7 +38,6 @@ const io = initializeWebSocket(server);
 
 // Connect to database
 await connectDB();
-
 // Start server
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

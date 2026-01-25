@@ -98,8 +98,8 @@ export const initializeWebSocket = (server) => {
 
         socket.emit("sent_message", message);
 
-      } catch (err) {
-        console.error("send_message error:", err);
+      } catch (error) {
+        console.error("send_message error:", error);
         socket.emit("error", { message: "Failed to send message" });
       }
     });

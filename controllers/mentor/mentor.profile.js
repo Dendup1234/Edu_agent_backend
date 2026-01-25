@@ -348,3 +348,65 @@ export const confirmedAppointment = async (req, res) => {
     return res.status(500).json({ message: "Server Error" });
   }
 };
+//Searching appointment by student name
+export const searchAppointmentsByStudentName = async (req, res) => {
+  try {
+    const mentorId = req.user.id;
+    const { name } = req.query; // student name to search
+
+    if (!name) {
+      return res.status(400).json({ message: "Student name is required" });
+    }
+
+    const appointments = await Appointment.find({ mentorId }).populate({
+      path: "studentId",
+      match: { name: { $regex: name, $options: "i" } }, // case-insensitive search
+      select: "name email phone",
+    });
+
+    // populate with match returns null if no match, so filter them out
+    const filteredAppointments = appointments.filter(
+      (a) => a.studentId !== null,
+    );
+
+    return res.status(200).json({
+      message: "Appointments fetched successfully",
+      count: filteredAppointments.length,
+      appointments: filteredAppointments,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+//Getting the student profile by their id
+export const getStudentProfileById = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const student = await Student.findById(studentId)
+      .select("-password") // password is already select:false, but safe
+      .populate({
+        path: "selectedUniversity",
+        select: "name logo", // university name
+      })
+      .populate({
+        path: "selectedCourse",
+        select: "title ", // depending on your Course schema (use what exists)
+      });
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // return a clean response
+    return res.status(200).json({
+      message: "Student profile fetched successfully",
+      student,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};

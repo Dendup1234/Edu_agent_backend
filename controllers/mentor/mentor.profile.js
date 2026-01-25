@@ -107,6 +107,13 @@ export const confirmMenteeStatus = async (req, res) => {
         message: "Already confirmed or mentor not found",
       });
     }
+    // Having to connect the student to the mentor
+    const updatedStudent = await Student.findByIdAndUpdate(
+      studentId,
+      { $set: { connectedMentor: userId } },
+      { new: true },
+    ).select("_id name email");
+
     // Find the confirmed mentee entry
     const confirmedMentee = mentor.mentees.find(
       (m) => m.student._id.toString() === studentId,
@@ -153,7 +160,7 @@ export const cancelMenteeStatus = async (req, res) => {
     // if null
     if (!mentor) {
       return res.status(404).json({
-        message: "Already confirmed or mentor not found",
+        message: "Already confirmed or rejected",
       });
     }
     return res

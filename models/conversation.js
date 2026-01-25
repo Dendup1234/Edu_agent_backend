@@ -5,15 +5,17 @@ const conversationSchema = new mongoose.Schema({
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      refPath: 'participants.model'
+      refPath: 'model'
     },
     model: {
       type: String,
       enum: ['Student', 'Agency', 'Mentor', 'Agent']
     }
   }],
-  lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
-  updatedAt: { type: Date, default: Date.now },
+
+  participantsHash: { type: String, unique: true },
+
+  lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: "Message" }
 }, { timestamps: true });
 
 export default mongoose.model("Conversation", conversationSchema);

@@ -182,7 +182,7 @@ export const verifyOtp = async (req, res) => {
     const token = await signToken({
       agencyId: user._id.toString(),
       email: user.email,
-      actor: "agency",
+      actor: "Agency",
     });
 
     return res.status(201).json({
@@ -226,7 +226,7 @@ export const login = async (req, res) => {
   const token = await signToken({
     agencyId: user._id.toString(),
     email: user.email,
-    actor: "agency",
+    actor: "Agency",
   });
 
   return res.json({

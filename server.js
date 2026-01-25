@@ -9,9 +9,8 @@ import agencyRoute from "./routes/agency.js";
 import oAuthRoute from "./routes/oAuth.js";
 import adminRoute from "./routes/admin.js";
 import agentRoute from "./routes/agent.js";
-
-import {initializeWebSocket} from "./controllers/socket.js";
-
+import mentorRoute from "./routes/mentor.js";
+import { initializeWebSocket } from "./controllers/socket.js";
 // Config
 dotenv.config();
 
@@ -25,6 +24,7 @@ app.use("/api/v1/students", studentRoute);
 app.use("/api/v1/agency", agencyRoute);
 app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1/agent", agentRoute);
+app.use("/api/v1/mentor", mentorRoute);
 app.use(oAuthRoute);
 
 // Server setup
@@ -38,7 +38,6 @@ const io = initializeWebSocket(server);
 
 // Connect to database
 await connectDB();
-
 // Start server
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

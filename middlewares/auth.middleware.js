@@ -51,11 +51,12 @@ export const authorizeRoles = (...roles) => {
 export const requirePermission = (permission) => {
   return async (req, res, next) => {
     try {
-      // for the agency fullby of the retriction
-      if (req.user.actor === "agency") {
+      // for the agency without any restriction
+      if (req.user.actor === "Agency") {
         return next();
       }
-      if (req.user.actor === "student") {
+      // for the student without any restriction
+      if (req.user.actor === "Student") {
         return next();
       }
       //console.log(req.user.id);

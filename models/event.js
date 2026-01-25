@@ -13,23 +13,27 @@ const eventSchema = new Schema(
     bannerImageUrl: {
       type: String,
     },
-    //Ticket types
-    ticketTypes: [
-      {
-        types: {
-          type: String,
-        },
-        description: {
-          type: [String],
-        },
-        price: {
-          type: String,
-        },
-      },
-    ],
     description: {
       type: String,
     },
+    seats: [
+      {
+        row: {
+          type: String,
+        },
+        columns: {
+          type: String,
+        },
+        ticketTypes: {
+          type: Types.ObjectId,
+          ref: "TicketType",
+        },
+        isBooked: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
     // Organized by
     organizerId: {
       type: Types.ObjectId,
@@ -63,8 +67,8 @@ const eventSchema = new Schema(
       {
         mode: {
           type: String,
-          enum: ["onsite", "online", "hybrid"],
-          default: "onsite",
+          enum: ["seated", "online", "open-space"],
+          default: "online",
         },
         meetingUrl: {
           type: String,
@@ -88,6 +92,10 @@ const eventSchema = new Schema(
     },
     whoShouldAttend: {
       type: String,
+    },
+    status: {
+      type: Boolean,
+      default: true,
     },
     // Agenda as a list (bullet points)
     agendaItems: {

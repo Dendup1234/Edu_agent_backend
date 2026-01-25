@@ -6,19 +6,16 @@ const StudentSchema = new Schema(
       type: String,
       trim: true,
     },
-    
-    profileURL: {
+    profileUrl: {
       type: String,
     },
     email: {
       type: String,
     },
-
     phone: {
       type: String,
       trim: true,
     },
-
     password: {
       type: String,
       select: false,
@@ -102,7 +99,7 @@ const StudentSchema = new Schema(
       default: "active"
     }
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Student", StudentSchema);

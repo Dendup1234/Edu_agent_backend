@@ -1,78 +1,111 @@
 import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
 import Message from "../models/message.js";
 import Conversation from "../models/conversation.js";
 
 export const initializeWebSocket = (server) => {
   const io = new Server(server, {
-    cors: {
-      origin: "*"
+    cors: { origin: "*" } 
+  });
+
+  io.use((socket, next) => {
+    try {
+      const token = socket.handshake.auth?.token;
+      if (!token) throw new Error("Missing token");
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      socket.userId = decoded.sub?.toString() || decoded.agencyId?.toString();
+      socket.userModel = decoded.actor;
+
+      if (!socket.userId || !socket.userModel) {
+        throw new Error("Invalid token payload");
+      }
+
+      next();
+    } catch {
+      next(new Error("Authentication error"));
     }
   });
 
-  io.on('connection', (socket) => {
-    console.log(`user connected ${socket.id}`);
+  io.on("connection", async (socket) => {
+    const userRoom = socket.userId;
+    socket.join(userRoom);
+    console.log(`user connected ${userRoom}`)
 
-    // Join user-specific room
-    socket.on('user_connected', (userId) => {
-      socket.join(userId);
-      console.log(`socket ${socket.id} joined room ${userId}`);
-      socket.emit('connected', { userId });
-    });
+    const conversations = await Conversation.find({
+      "participants.user": socket.userId
+    })
+      .populate("participants.user")
+      .populate({path: "lastMessage"})
+      .sort({ updatedAt: -1 })
+      .lean();
 
-    // Handle sending messages
-    socket.on('send_message', async (data) => {
+    socket.emit("conversation_list", conversations);
+
+    socket.on("send_message", async (data) => {
       try {
-        const { sender, receiver, content, senderModel, receiverModel, conversationId } = data;
+        const { receiver, receiverModel, content } = data;
 
-        if (!sender || !receiver || !content) {
-          socket.emit('error', { message: 'missing required field' });
-          return;
+        if (!receiver || !content) return;
+
+        const sender = socket.userId;
+        const receiverId = receiver.toString();
+
+        if (sender === receiverId) {
+          return socket.emit("error", { message: "Cannot message yourself" });
         }
 
-        let convId = conversationId;
+        const room = io.sockets.adapter.rooms.get(receiverId);
+        const isReceiverOnline = !!room && room.size > 0;
 
-        if (!convId) {
-          // Create new conversation if it doesn't exist
-          const conversation = await Conversation.create({
-            participants: [
-              { sender, senderModel },
-              { receiver, receiverModel }
-            ]
-          });
-          convId = conversation._id;
-        } else {
-          // Verify conversation exists
-          const conversation = await Conversation.findById(convId);
-          if (!conversation) {
-            socket.emit('error', { message: 'Conversation not found' });
-            return;
+        const participants = [
+          { user: sender, model: socket.userModel },
+          { user: receiverId, model: receiverModel }
+        ];
+
+        const participantsHash = [sender, receiverId].sort().join("_");
+
+        let conversation = await Conversation.findOne({ participantsHash });
+
+        if (!conversation) {
+          try {
+            conversation = await Conversation.create({
+              participants,
+              participantsHash
+            });
+          } catch (err) {
+            conversation = await Conversation.findOne({ participantsHash });
           }
         }
 
-        // Create message
         const message = await Message.create({
-          conversationId: convId, // Use convId, not conversationId
-          senderModel,
+          conversationId: conversation._id,
           sender,
+          senderModel: socket.userModel,
+          receiver: receiverId,
           receiverModel,
-          receiver,
-          content
+          content,
+          status: isReceiverOnline ? "delivered" : "sent"
         });
 
-        // Emit back to sender
-        socket.emit('sent_message', { message });
+        conversation.lastMessage = message._id;
+        await conversation.save();
 
-        // Emit to receiver(s)
-        io.to(receiver).emit('receive_message', { message });
+        if (isReceiverOnline) {
+          io.to(receiverId).emit("receive_message", message);
+        }
 
-      } catch (error) {
-        console.error(error);
-        socket.emit('error', { message: 'something went wrong' });
+        socket.emit("sent_message", message);
+
+      } catch (err) {
+        console.error("send_message error:", err);
+        socket.emit("error", { message: "Failed to send message" });
       }
     });
 
-    socket.on('disconnect', () => {
-      console.log(`socket ${socket.id} removed from all rooms automatically`);
+    socket.on("disconnect", () => {
+      console.log(`user disconnected ${userRoom}`)
     });
   });
 

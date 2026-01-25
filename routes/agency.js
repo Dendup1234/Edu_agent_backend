@@ -91,6 +91,8 @@ import {
   createMentor,
 } from "../controllers/agency/agency.employee.js";
 
+import { getConversationMessages } from "../controllers/message.js";
+
 import {
   getDocumentsByStudent,
   updateDocumentReviewStatus
@@ -354,6 +356,9 @@ router.patch("/profile/role/agents/:roleId", protect, updateRole);
 router.delete("/profile/role/agents/:roleId", protect, deactivateRole);
 router.get("/profile/employee/agents/search/", protect, searchEmployee);
 router.post("/profile/employee/mentors", protect, createMentor);
+
+// Message
+router.get('/conversation/:conversationId/messages', getConversationMessages)
 
 // Mentor apis
 router.get("/mentors/", protect, getAllMentor);

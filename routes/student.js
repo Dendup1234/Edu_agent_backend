@@ -72,7 +72,11 @@ router.get(
   searchScholarshipByName,
 );
 
-//Mentor apis
+// Message
+router.get('/conversation/:conversationId/messages', getConversationMessages)
+
+// Mentor apis
 router.get("/mentors/:agencyId", protect, getAllMentor);
 router.post("/mentors/connect/:mentorId", protect, connectMentor);
 export default router;
+

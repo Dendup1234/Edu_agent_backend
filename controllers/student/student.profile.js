@@ -51,7 +51,7 @@ export const updateProfile = async (req, res) => {
 };
 
 //When student selects particular agency
-export const selectAgency = async (req, res) => {
+export const selectAgency = (io) => async (req, res) => {
   try {
     const userId = req.user.sub;
     const { agencyId } = req.body;

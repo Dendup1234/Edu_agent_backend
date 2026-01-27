@@ -1,10 +1,13 @@
 import Agent from "../../models/agent.js";
 import Role from "../../models/role.js";
 import { generatePassword } from "../../utils/password.js";
-import { sendAccountEmail } from "../../utils/sendEmail.js";
+import {
+  sendAccountEmail,
+  sendAgentAssignmentEmail,
+} from "../../utils/sendEmail.js";
 import Mentor from "../../models/mentor.js";
 import bcrypt from "bcryptjs";
-
+import Student from "../../models/student.js";
 //Creating an account of the employee under the agency
 export const createAgent = async (req, res) => {
   try {
@@ -231,6 +234,36 @@ export const deactivateRole = async (req, res) => {
   }
 };
 
+// Search role by name (within the agency)
+export const searchRoleByName = async (req, res) => {
+  try {
+    const agencyId = req.user.agencyId;
+    const { name } = req.query;
+
+    if (!agencyId) {
+      return res.status(401).json({ message: "Token not found" });
+    }
+
+    if (!name) {
+      return res.status(400).json({ message: "Role name is required" });
+    }
+
+    const roles = await Role.find({
+      agencyId: agencyId,
+      name: { $regex: name, $options: "i" },
+    });
+
+    return res.status(200).json({
+      message: "Search successful",
+      total: roles.length,
+      roles: roles,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 // Search employee
 export const searchEmployee = async (req, res) => {
   try {
@@ -315,6 +348,134 @@ export const createMentor = async (req, res) => {
         email: mentor.email,
         phone: mentor.phone,
       },
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Getting admission officers from the agent
+export const getAllAdmissionOfficer = async (req, res) => {
+  try {
+    const userId = req.user.agencyId;
+    // Getting all the admission officers
+    const admissionOfficer = await Agent.find({
+      agency: userId,
+      systemRole: "admission_officer",
+    });
+    // Success message
+    return res
+      .status(200)
+      .json({ message: "Success", officers: admissionOfficer });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Assigning the student to the admission officer
+export const assignAdmission = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { agentId } = req.body;
+
+    // Find the student first
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // Check if already assigned
+    if (student.assignedAgent) {
+      return res.status(409).json({
+        message: "Student is already assigned to an agent",
+        assignedAgent: student.assignedAgent,
+      });
+    }
+
+    // Assign only if not assigned before
+    student.assignedAgent = agentId;
+    await student.save();
+
+    // Find agent details
+    const agent = await Agent.findById(agentId);
+    if (!agent) {
+      return res.status(404).json({ message: "Agent not found" });
+    }
+
+    // Send success email
+    await sendAgentAssignmentEmail({
+      studentEmail: student.email,
+      agentEmail: agent.email,
+      agentName: agent.name,
+      studentName: student.name,
+    });
+
+    return res.status(200).json({
+      message: "Student successfully assigned to agent",
+      student,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Change assigned agent for a student (re-assign)
+export const changeAssignedAgent = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { agentId } = req.body;
+
+    if (!agentId) {
+      return res.status(400).json({ message: "newAgentId is required" });
+    }
+
+    const student = await Student.findById(studentId).select(
+      "name email assignedAgent",
+    );
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    if (!student.assignedAgent) {
+      return res.status(409).json({
+        message:
+          "Student has no agent assigned yet. Use assignAdmission first.",
+      });
+    }
+
+    if (String(student.assignedAgent) === String(agentId)) {
+      return res.status(409).json({
+        message: "Student is already assigned to this agent",
+      });
+    }
+
+    const oldAgentId = student.assignedAgent;
+
+    const newAgent = await Agent.findById(agentId).select("name email");
+    if (!newAgent) {
+      return res.status(404).json({ message: "New agent not found" });
+    }
+
+    const oldAgent = await Agent.findById(oldAgentId).select("name email");
+
+    student.assignedAgent = agentId;
+    await student.save();
+
+    await sendAgentAssignmentEmail({
+      studentEmail: student.email,
+      agentEmail: newAgent.email,
+      agentName: newAgent.name,
+      studentName: student.name,
+    });
+
+    return res.status(200).json({
+      message: "Agent changed successfully",
+      studentId: student._id,
+      oldAgent: oldAgent,
+      newAgent: newAgent,
     });
   } catch (e) {
     console.log(e);

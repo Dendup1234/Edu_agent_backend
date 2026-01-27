@@ -395,139 +395,57 @@ export const getTickets = async (req, res) => {
     res.status(500).json({ message: e.message });
   }
 };
-
-// confirming the ticket status
-export const confirmTicketStatus = async (req, res) => {
+// Searching ticket by their name
+export const searchTickets = async (req, res) => {
   try {
-    const { ticketId } = req.params;
-    console.log(ticketId);
-    // Updating the status to confirm and checking if the status is pending
-    const updatedTicket = await Ticket.findOneAndUpdate(
-      {
-        _id: ticketId,
-        status: "pending",
-      },
-      { $set: { status: "confirmed", purchasedDate: new Date() } },
-      { new: true },
-    )
-      .populate({ path: "studentId", select: "name email phone" })
-      .populate({ path: "ticketInfo.ticketType", select: "name price" });
-    // updateTicket is null
-    if (!updatedTicket) {
-      return res.status(404).json({
-        message: "Ticket not found OR already processed (not pending).",
-      });
-    }
-    // Fetching the student
-    const studentId = updatedTicket.studentId._id;
+    const agencyId = req.user.agencyId;
+    const { eventName } = req.query;
 
-    if (!studentId) {
-      return res.status(404).json({ message: "Student id not found" });
+    const eventFilter = {
+      organizerId: agencyId,
+    };
+
+    // If searching by event name
+    if (eventName) {
+      eventFilter.title = { $regex: eventName, $options: "i" };
     }
-    // updating the student model
-    const student = await Student.findByIdAndUpdate(
-      studentId,
-      {
-        $addToSet: { ticket: ticketId }, // prevents duplicate ticket IDs
-      },
-      { new: true },
+
+    // Get all matching events
+    const events = await Event.find(eventFilter).select(
+      "_id title startAt endAt timezone",
     );
-    const studentEmail =
-      updatedTicket.studentId?.email || updatedTicket.studentSnapshot?.email;
 
-    const studentName =
-      updatedTicket.studentId?.name ||
-      updatedTicket.studentSnapshot?.name ||
-      "Student";
-
-    if (!studentEmail) {
-      return res.status(400).json({
-        message:
-          "Student email not found (studentId or studentSnapshot missing email).",
+    if (!events.length) {
+      return res.json({
+        eventsCount: 0,
+        ticketsCount: 0,
+        tickets: [],
       });
     }
-    // Getting the ticket informaition
-    const ev = updatedTicket.eventSnapshot || {};
-    const title = ev.title || "Your Event";
-    const startAt = ev.startAt ? new Date(ev.startAt) : null;
-    const endAt = ev.endAt ? new Date(ev.endAt) : null;
-    const timezone =
-      ev.timezone || updatedTicket.eventSnapshot?.timezone || "Asia/Thimphu";
 
-    // 4) Seat info from ticket
-    const seatRow = updatedTicket.ticketInfo?.seatNumber?.row;
-    const seatCol = updatedTicket.ticketInfo?.seatNumber?.columns;
-    const ticketTypeName = updatedTicket.ticketInfo?.ticketType?.name;
-    const seatText =
-      seatRow && seatCol
-        ? `Row: ${seatRow}, Seat: ${seatCol}`
-        : "Not applicable (online/open event)";
+    const eventIds = events.map((e) => e._id);
 
-    await sendSeatedEventSuccessEmail(studentEmail, {
-      subject: `Registration Confirmed: ${title}`,
-      title: "Your Event Ticket",
-      startTime: startAt,
-      timeZone: timezone,
-      body: `You are registered for ${title}. This is your ticket information:`,
-      seats: seatText,
-      ticketType: ticketTypeName,
-    });
+    // Get all tickets for those events
+    const tickets = await Ticket.find({ eventId: { $in: eventIds } })
+      .select("status createdAt ticketInfo")
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "eventId",
+        select: "title startAt endAt timezone organizerId meetings",
+      })
+      .populate({
+        path: "studentId",
+        select: "name email phone",
+      })
+      .populate({
+        path: "ticketInfo.ticketType",
+        select: "name price description",
+      });
 
     return res.json({
-      message: "Ticket confirmed and email sent.",
-      ticket: updatedTicket,
-    });
-  } catch (e) {
-    console.log(e);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
-
-// Canceling the ticket status
-
-export const canceledTicketStatus = async (req, res) => {
-  try {
-    const { ticketId } = req.params;
-    // canceling the ticket
-    // Find ticket (only cancel if still pending or confirmed)
-    const ticket = await Ticket.findById(ticketId);
-
-    if (!ticket) {
-      return res.status(404).json({ message: "Ticket not found" });
-    }
-
-    if (ticket.status === "cancelled") {
-      return res.status(400).json({ message: "Ticket already cancelled" });
-    }
-
-    // Find the related event
-    const event = await Event.findById(ticket.eventId);
-    if (!event) {
-      return res.status(404).json({ message: "Event not found" });
-    }
-
-    // Release the seat
-    const row = ticket.ticketInfo?.seatNumber?.row;
-    const columns = ticket.ticketInfo?.seatNumber?.columns;
-
-    if (row && columns) {
-      const seatIndex = event.seats.findIndex(
-        (s) => s.row === row && s.columns === columns,
-      );
-
-      if (seatIndex !== -1) {
-        event.seats[seatIndex].isBooked = false;
-        await event.save();
-      }
-    }
-
-    // Update ticket status to cancelled
-    ticket.status = "cancelled";
-    await ticket.save();
-
-    return res.json({
-      message: "Ticket cancelled successfully and seat released",
-      ticket,
+      eventsCount: events.length,
+      ticketsCount: tickets.length,
+      tickets,
     });
   } catch (e) {
     console.log(e);

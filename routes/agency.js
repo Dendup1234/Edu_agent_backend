@@ -62,8 +62,7 @@ import {
   getSeatInformation,
   updateSeatType,
   getTickets,
-  confirmTicketStatus,
-  canceledTicketStatus,
+  searchTickets,
 } from "../controllers/agency/agency.event.js";
 
 import {
@@ -89,25 +88,31 @@ import {
   searchEmployee,
   updateAgent,
   createMentor,
+  searchRoleByName,
+  getAllAdmissionOfficer,
+  assignAdmission,
+  changeAssignedAgent,
 } from "../controllers/agency/agency.employee.js";
 
 import { getConversationMessages } from "../controllers/message.js";
 
 import {
   getDocumentsByStudent,
-  updateDocumentReviewStatus
-} from "../controllers/agency/agency.document.js"
+  updateDocumentReviewStatus,
+} from "../controllers/agency/agency.document.js";
 
-import { 
-  getStudentApplication, 
-  updateApplicationStatus 
+import {
+  getStudentApplication,
+  updateApplicationStatus,
 } from "../controllers/agency/agency.application.js";
 
 import {
   getAllMentor,
   getMentorById,
-  deactivateMentor
-} from "../controllers/agency/agency.mentor.js"
+  deactivateMentor,
+  searchMentorByName,
+  getMentorDashboard,
+} from "../controllers/agency/agency.mentor.js";
 
 //Router import
 const router = express.Router();
@@ -283,16 +288,7 @@ router.get(
 );
 router.get("/events/profile/:seatId/seats/info", protect, getSeatInformation);
 router.get("/events/tickets/", protect, getTickets);
-router.patch(
-  "/events/tickets/:ticketId/confirmed",
-  protect,
-  confirmTicketStatus,
-);
-router.patch(
-  "/events/tickets/:ticketId/cancelled",
-  protect,
-  canceledTicketStatus,
-);
+router.get("/events/tickets/search", protect, searchTickets);
 
 // Scholarships apis
 router.post(
@@ -356,21 +352,34 @@ router.patch("/profile/role/agents/:roleId", protect, updateRole);
 router.delete("/profile/role/agents/:roleId", protect, deactivateRole);
 router.get("/profile/employee/agents/search/", protect, searchEmployee);
 router.post("/profile/employee/mentors", protect, createMentor);
+router.get("/profile/role/search", protect, searchRoleByName);
+router.get(
+  "/profile/employee/admission-officers",
+  protect,
+  getAllAdmissionOfficer,
+);
+router.patch("/profile/assign/:studentId", protect, assignAdmission);
+router.patch("/profile/assign/change/:studentId", protect, changeAssignedAgent);
 
 // Message
-router.get('/conversation/:conversationId/messages', getConversationMessages)
+router.get("/conversation/:conversationId/messages", getConversationMessages);
 
 // Mentor apis
 router.get("/mentors/", protect, getAllMentor);
 router.get("/mentors/:mentorId", protect, getMentorById);
 router.delete("/mentors/:mentorId", protect, deactivateMentor);
+router.get("/mentors/search/query", protect, searchMentorByName);
+router.get("/mentors/dashboard/stats", protect, getMentorDashboard);
 
 // Documents
-router.get("/documents/:studentId", getDocumentsByStudent)
-router.patch("/documents/:documentId/review-status", updateDocumentReviewStatus)
+router.get("/documents/:studentId", getDocumentsByStudent);
+router.patch(
+  "/documents/:documentId/review-status",
+  updateDocumentReviewStatus,
+);
 
-// Application 
-router.get("/application/:studentId", getStudentApplication)
-router.patch("/application/:applicationId/status", updateApplicationStatus)
+// Application
+router.get("/application/:studentId", getStudentApplication);
+router.patch("/application/:applicationId/status", updateApplicationStatus);
 
 export default router;

@@ -64,7 +64,10 @@ const StudentSchema = new Schema(
     dob: {
       type: Date,
     },
-
+    assignedAgent: {
+      type: Types.ObjectId,
+      ref: "Agent",
+    },
     nationality: {
       type: String,
       trim: true,
@@ -94,7 +97,7 @@ const StudentSchema = new Schema(
       default: true,
     },
 
-    isEligible: {type: Boolean, default: false}
+    isEligible: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

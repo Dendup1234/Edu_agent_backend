@@ -24,23 +24,23 @@ export const getMentorDashboard = async (req, res) => {
   try {
     const userId = req.user.agencyId;
 
-    // finding the count of the isActive true
-    const activeMentor = await Mentor.find({
+    // Active mentors = isActive true AND isVerified true
+    const activeMentorCount = await Mentor.countDocuments({
+      partnerAgency: userId,
       isActive: true,
-      partnerAgency: userId,
+      isVerified: true,
     });
-    const activeMentorCount = activeMentor.length;
 
-    // finding the count of the isActive false
-    const InActiveMentor = await Mentor.find({
-      isActive: false,
+    // Inactive mentors = all others that do NOT satisfy both conditions
+    const inActiveMentorCount = await Mentor.countDocuments({
       partnerAgency: userId,
+      $or: [{ isActive: false }, { isVerified: false }],
     });
-    const InActiveMentorCount = InActiveMentor.length;
+    //Success
     return res.status(200).json({
       message: "Success",
       activeMentorCount: activeMentorCount,
-      InActiveMentorCount: InActiveMentorCount,
+      InActiveMentorCount: inActiveMentorCount,
     });
   } catch (e) {
     console.log(e);

@@ -144,35 +144,40 @@ export const confirmUpload = async (req, res) => {
       fileURL: blobClient.url
     });
 
-    const uploadedTypes = await Document.distinct("documentType", {
-      uploadedBy: studentId
-    });
-
-    const isComplete = REQUIRED_DOC_TYPES.every(type =>
-      uploadedTypes.includes(type)
-    );
-
-    if (isComplete) {
-    const documents = await Document.find({
-      uploadedBy: studentId,
-      documentType: { $in: REQUIRED_DOC_TYPES }
-    }).select("_id");
-
-    const application = await Application.findOneAndUpdate(
-      { applicationFor: studentId },
-      {
-        $set: { status: "document_review" },
-        $addToSet: {
-          documents: { $each: documents.map(d => d._id) }
-        }
-      },
-      {
-        new: true,
-        upsert: true
-      }
-    );
-    return res.json({ status: application.status });
+    const student = await Student.findById(studentId).select("isEligible");
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
     }
+
+    const approvedDocs = await Document.find({
+      uploadedBy: studentId,
+      documentType: { $in: REQUIRED_DOC_TYPES },
+      reviewStatus: "approved"
+    }).select("documentType _id");
+
+    const approvedTypes = approvedDocs.map(d => d.documentType);
+    const allApproved = REQUIRED_DOC_TYPES.every(type =>
+      approvedTypes.includes(type)
+    );
+
+    if (allApproved && student.isEligible) {
+      const application = await Application.findOneAndUpdate(
+        { applicationFor: studentId },
+        {
+          $set: { status: "document_review" },
+          $addToSet: {
+            documents: { $each: approvedDocs.map(d => d._id) }
+          }
+        },
+        { new: true, upsert: true }
+      );
+
+      return res.json({
+        message: "All documents approved. Application started.",
+        status: application.status
+      });
+    }
+
     return res.json({ message: "Upload confirmed" });
     
   } catch (error) {

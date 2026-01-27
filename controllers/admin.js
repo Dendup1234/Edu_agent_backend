@@ -1,12 +1,10 @@
 import Agency from "../models/agency.js";
 import Student from "../models/student.js";
 
-//Get all agency
+//Get all agency for admin
 export const getAllAgencies = async (req, res) => {
   try {
-    const agencies = await Agency.find()
-      .select("-password")
-      .lean();
+    const agencies = await Agency.find().select("-password").lean();
 
     return res.json({
       count: agencies.length,
@@ -21,9 +19,7 @@ export const getAllAgencies = async (req, res) => {
 //Get all the students
 export const getAllStudents = async (req, res) => {
   try {
-    const students = await Student.find()
-      .select("-password")
-      .lean();
+    const students = await Student.find().select("-password").lean();
 
     return res.json({
       count: students.length,
@@ -43,7 +39,7 @@ export const deactivateStudent = async (req, res) => {
     const student = await Student.findByIdAndUpdate(
       id,
       { isActive: false },
-      { new: true }
+      { new: true },
     ).select("-password");
 
     if (!student) {

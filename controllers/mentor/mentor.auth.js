@@ -20,7 +20,7 @@ export const login = async (req, res) => {
     }
 
     const user = await Mentor.findOne({ email }).select(
-      "password agency systemRole roleId isVerified name email",
+      "password agency systemRole roleId isVerified isActive name email",
     );
 
     if (!user) {
@@ -47,6 +47,7 @@ export const login = async (req, res) => {
         email: user.email,
         phone: user.phone,
         isVerified: user.isVerified,
+        isActive: user.isActive,
       },
       accessToken: token,
     });

@@ -19,7 +19,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// REST routes
+// REST routes git push
 app.use("/api/v1/students", studentRoute);
 app.use("/api/v1/agency", agencyRoute);
 app.use("/api/v1/admin", adminRoute);

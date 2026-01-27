@@ -1,5 +1,6 @@
 import Student from "../../models/student.js";
 import Agency from "../../models/agency.js";
+import { sendAutoMessage } from "../../client.js";
 import mongoose from "mongoose";
 
 // Getting profile of the student

@@ -336,6 +336,47 @@ ${totalPrice !== undefined ? `Total Price: ${totalPrice} BTN\n` : ""}
   });
 };
 
+// Assign student with agent email
+// Send email to both Student and Agent email
+export const sendAgentAssignmentEmail = async ({
+  studentEmail,
+  agentEmail,
+  agentName,
+  studentName,
+}) => {
+  const htmlContent = buildHtmlTemplate({
+    title: "Agent Assigned Successfully",
+    body: `
+      <p>The agent <strong>${agentName}</strong> has been successfully assigned.</p>
+      <p>
+        <strong>Student:</strong> ${studentName}<br/>
+        <strong>Agent:</strong> ${agentName}
+      </p>
+      <p>You can now begin communication and schedule sessions through the EduAgent platform.</p>
+    `,
+  });
+
+  const subject = `Agent ${agentName} Assigned Successfully`;
+
+  const textContent = `
+Agent Assigned Successfully
+
+Student: ${studentName}
+Agent: ${agentName}
+
+`;
+
+  const recipients = [studentEmail, agentEmail].filter(Boolean);
+
+  await sendEmail({
+    from: `"EduAgent Support" <${process.env.EMAIL_USER}>`,
+    to: recipients, // Send to both student and agency
+    subject,
+    text: textContent,
+    html: htmlContent,
+  });
+};
+
 // Optional: Clean up transporter on app shutdown
 export const closeTransporter = async () => {
   if (transporter) {

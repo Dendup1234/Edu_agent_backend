@@ -11,8 +11,8 @@ import {
   verifyPasswordResetOtp,
 } from "../controllers/agent/agent.auth.js";
 import {
-  getAllStudent,
   getAgentinformation,
+  getStudentList,
 } from "../controllers/agent/agent.profile.js";
 const router = express.Router();
 
@@ -25,13 +25,7 @@ router.post("/password-reset/set-new", setNewPassword);
 //Profile apis
 router.get("/profile/me", protect, getAgentinformation);
 
-//admission officers apis
-router.get(
-  "/students/",
-  protect,
-  requireVerifiedAgent,
-  authorizeRoles("admission_officer"),
-  getAllStudent
-);
+// admission officers apis
+router.get("/students", protect, getStudentList);
 
 export default router;

@@ -1,6 +1,6 @@
 import Student from "../../models/student.js";
 import Agency from "../../models/agency.js";
-
+import {io} from "../../server.js"
 import mongoose from "mongoose";
 
 // Getting profile of the student
@@ -82,6 +82,13 @@ export const selectAgency = async (req, res) => {
       },
       { new: true, runValidators: true }
     );
+
+    await sendAutoMessage(io, 
+    { id: student.registeredAgency.toString(), model: "Agency" },
+    { id: userId.toString(), model: "Student" },
+    `Welcome ${student.name}! We are excited to have you onboard.`
+    );
+
     return res.status(200).json({
       message: "Selection successful",
       student: student,

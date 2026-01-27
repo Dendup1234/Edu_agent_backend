@@ -86,5 +86,5 @@ router.post("/mentors/connect/:mentorId", protect, connectMentor);
 export default router;
 
 // Get Application and Document status
-router.get("/document/status", protect, getDocumentStatus);
-router.get("/application/status", protect,  getApplicationStatus);
+router.get("/document/:studentId/status", protect, getDocumentStatus);
+router.get("/application/:studentId/status", protect,  getApplicationStatus);

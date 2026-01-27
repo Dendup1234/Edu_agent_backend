@@ -31,7 +31,11 @@ export const login = async (req, res) => {
     if (!ok) {
       return res.status(401).json({ message: "Invalid password" });
     }
-
+    if (!user.isActive) {
+      return res
+        .status(403)
+        .json({ message: "Your mentor account deactivate" });
+    }
     const token = await signToken({
       id: user._id, // Mentor id
       agencyId: user.partnerAgency, // agency id

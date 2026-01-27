@@ -50,7 +50,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// select agency
+//When student selects particular agency
 export const selectAgency = (io) => async (req, res) => {
   try {
     const userId = req.user.sub;
@@ -81,21 +81,16 @@ export const selectAgency = (io) => async (req, res) => {
           },
         },
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
-
-    try {
-      await sendAutoMessage(
-        io,
-        agencyId.toString(),
-        "Agency",
-        userId.toString(),
-        "Student",
-        `Welcome ${student.name}! We are excited to have you onboard.`
-      );
-    } catch (e) {
-      console.error("Auto message error:", e.message);
-    }
+    await sendAutoMessage(
+      io,
+      student.registeredAgency.toString(),
+      "Agency",
+      userId.toString(),
+      "Student",
+      `Welcome ${student.name}! We are excited to have you onboard.`
+    );
 
     return res.status(200).json({
       message: "Selection successful",
@@ -119,7 +114,7 @@ export const deactivateStudent = async (req, res) => {
     const student = await Student.findByIdAndUpdate(
       studentId,
       { isValid: false },
-      { new: true }
+      { new: true },
     ).select("-password");
 
     if (!student) {

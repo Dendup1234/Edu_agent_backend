@@ -144,7 +144,7 @@ export const deactivateCourse = async (req, res) => {
       {
         status: "closed",
       },
-      { new: true }
+      { new: true },
     );
     if (!course) {
       return res.status(404).json({ message: "Course is not found" });

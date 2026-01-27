@@ -14,7 +14,7 @@ import { initializeWebSocket } from "./controllers/socket.js";
 // Config
 dotenv.config();
 
-// Express app
+// Express app command
 const app = express();
 app.use(express.json());
 app.use(cors());

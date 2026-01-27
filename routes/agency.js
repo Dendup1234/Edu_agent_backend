@@ -365,7 +365,7 @@ router.get("/mentors/", protect, getAllMentor);
 router.get("/mentors/:mentorId", protect, getMentorById);
 router.delete("/mentors/:mentorId", protect, deactivateMentor);
 
-// Document
+// Documents
 router.get("/documents/:studentId", getDocumentsByStudent)
 router.patch("/documents/:documentId/review-status", updateDocumentReviewStatus)
 

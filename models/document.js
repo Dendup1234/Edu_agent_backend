@@ -32,7 +32,7 @@ const documentSchema = new mongoose.Schema(
       ref: "Agent" 
     },
 
-    isResubmitted: { type: Boolean, default: false },
+    isResubmitted: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

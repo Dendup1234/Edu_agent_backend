@@ -93,11 +93,8 @@ const StudentSchema = new Schema(
       type: Boolean,
       default: true,
     },
-    onlineStatus: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active"
-    }
+
+    isEligible: {type: Boolean, default: false}
   },
   { timestamps: true },
 );

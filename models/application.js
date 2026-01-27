@@ -7,7 +7,7 @@ const ApplicationSchema = new mongoose.Schema(
       ref: "Student"
     },
 
-    status: {
+    stage: {
       type: String,
       enum: [
         "document_review",
@@ -23,14 +23,18 @@ const ApplicationSchema = new mongoose.Schema(
       default: "document_review"
     },
 
+    status: {
+      type: String,
+      enum: ["in_progress", "completed"],
+      default: "in_progress"
+    },
+
     documents: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Document",
       },
-    ],
-
-    submittedAt: Date
+    ]
   },
   { timestamps: true }
 );

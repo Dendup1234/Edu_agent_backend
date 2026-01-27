@@ -260,21 +260,54 @@ export const sendEventSuccessEmail = async (email, message) => {
   });
 };
 
-// Send Seated Event Success Email
+//Send seated success email
+// Send Seated Event Success Email (Bulk Seats)
 export const sendSeatedEventSuccessEmail = async (email, message) => {
-  const { subject, title, startTime, timeZone, body, seats, ticketType } =
-    message;
+  const {
+    subject,
+    title,
+    startTime,
+    timeZone,
+    body,
+    seats, // "A1, A2, B3"
+    seatIds, // ["65ff..1", "65ff..2"]
+    ticketType, // optional or "Multiple"
+    totalPrice, // 4500
+  } = message;
 
   const htmlContent = buildHtmlTemplate({
     title: title || "Event Registration Confirmed",
-    body: `<p>${body || "Your event registration was successful."}</p>
-           <div class="info-box">
-             <p><strong>Start Time:</strong> ${startTime}</p>
-             <p><strong>Time Zone:</strong> ${timeZone}</p>
-             ${seats ? `<p><strong>Seats:</strong> ${seats}</p>` : ""}
-             ${ticketType ? `<p><strong>Ticket Type:</strong> ${ticketType}</p>` : ""}
-           </div>
-           <p>Please arrive at the venue 15 minutes before the event starts.</p>`,
+    body: `
+      <p>${body || "Your event registration was successful."}</p>
+
+      <div class="info-box">
+        <p><strong>Start Time:</strong> ${startTime}</p>
+        <p><strong>Time Zone:</strong> ${timeZone}</p>
+
+        ${seats ? `<p><strong>Seats:</strong> ${seats}</p>` : ""}
+
+        ${
+          Array.isArray(seatIds) && seatIds.length > 0
+            ? `<p><strong>Seat IDs:</strong></p>
+               <ul>
+                 ${seatIds.map((id) => `<li>${id}</li>`).join("")}
+               </ul>`
+            : ""
+        }
+
+        ${
+          ticketType ? `<p><strong>Ticket Type:</strong> ${ticketType}</p>` : ""
+        }
+
+        ${
+          totalPrice !== undefined
+            ? `<p><strong>Total Price:</strong> ${totalPrice} BTN</p>`
+            : ""
+        }
+      </div>
+
+      <p>Please arrive at the venue 15 minutes before the event starts.</p>
+    `,
     buttonText: "View Event Details",
     buttonUrl: `${process.env.APP_URL}/events`,
   });
@@ -283,9 +316,22 @@ export const sendSeatedEventSuccessEmail = async (email, message) => {
     from: `"EduAgent Support" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: subject || "Event Registration Confirmed",
-    text: `${title || "Event Registration Confirmed"}\n\n${body || ""}\n\nStart Time: ${startTime}\nTime Zone: ${timeZone}${
-      seats ? `\nSeats: ${seats}` : ""
-    }${ticketType ? `\nTicket Type: ${ticketType}` : ""}`,
+    text: `
+${title || "Event Registration Confirmed"}
+
+${body || ""}
+
+Start Time: ${startTime}
+Time Zone: ${timeZone}
+${seats ? `Seats: ${seats}\n` : ""}
+${
+  Array.isArray(seatIds) && seatIds.length > 0
+    ? `Seat IDs:\n${seatIds.join("\n")}\n`
+    : ""
+}
+${ticketType ? `Ticket Type: ${ticketType}\n` : ""}
+${totalPrice !== undefined ? `Total Price: ${totalPrice} BTN\n` : ""}
+    `,
     html: htmlContent,
   });
 };

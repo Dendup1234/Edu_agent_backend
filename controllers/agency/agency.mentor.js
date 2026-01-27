@@ -3,7 +3,7 @@ import Mentor from "../../models/mentor.js";
 export const getAllMentor = async (req, res) => {
   try {
     const userId = req.user.agencyId;
-    //finding mentor connected to the specific mentor
+    //finding mentor connected to the specific mentors
     const mentors = await Mentor.find({ partnerAgency: userId });
     // finding the mentees count
     const mentorsWithMenteeCount = mentors.map((mentor) => ({

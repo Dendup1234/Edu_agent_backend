@@ -32,7 +32,7 @@ import { getDocumentStatus } from "../controllers/student/student.document.js";
 export default function studentRoute(io) {
   const router = express.Router();
 
-  // Authentication
+  // Authentication apis
   router.post("/send-otp", sendOtp);
   router.post("/resend-otp", resendOtp);
   router.post("/verify-otp", verifyOtp);

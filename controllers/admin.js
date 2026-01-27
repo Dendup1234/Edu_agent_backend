@@ -16,7 +16,7 @@ export const getAllAgencies = async (req, res) => {
   }
 };
 
-//Get all the students
+//Get all the students from student
 export const getAllStudents = async (req, res) => {
   try {
     const students = await Student.find().select("-password").lean();

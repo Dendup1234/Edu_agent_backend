@@ -20,7 +20,6 @@ app.use(express.json());
 app.use(cors());
 
 // REST routes git push
-app.use("/api/v1/students", studentRoute);
 app.use("/api/v1/agency", agencyRoute);
 app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1/agent", agentRoute);
@@ -38,6 +37,9 @@ const io = initializeWebSocket(server);
 
 // Connect to database
 await connectDB();
+
+app.use("/api/v1/students", studentRoute(io));
+
 // Start server
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

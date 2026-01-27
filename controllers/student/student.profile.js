@@ -50,24 +50,25 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-//When student selects particular agency
+// select agency
 export const selectAgency = (io) => async (req, res) => {
   try {
     const userId = req.user.sub;
     const { agencyId } = req.body;
-    //Check agency id
+
     if (!agencyId) {
       return res.status(400).json({ message: "agencyId is required" });
     }
-    // Validity of the agency id
+
     if (!mongoose.Types.ObjectId.isValid(agencyId)) {
       return res.status(400).json({ message: "Enter the valid agency id" });
     }
+
     const agency = await Agency.findById(agencyId);
-    // check if the agency exist
     if (!agency) {
-      res.status(404).json({ message: "No agency found" });
+      return res.status(404).json({ message: "No agency found" });
     }
+
     const student = await Student.findByIdAndUpdate(
       userId,
       {
@@ -82,22 +83,27 @@ export const selectAgency = (io) => async (req, res) => {
       },
       { new: true, runValidators: true }
     );
-    await sendAutoMessage(
-      io,
-      student.registeredAgency.toString(),
-      "Agency",
-      userId.toString(),
-      "Student",
-      `Welcome ${student.name}! We are excited to have you onboard.`
-    );
+
+    try {
+      await sendAutoMessage(
+        io,
+        agencyId.toString(),
+        "Agency",
+        userId.toString(),
+        "Student",
+        `Welcome ${student.name}! We are excited to have you onboard.`
+      );
+    } catch (e) {
+      console.error("Auto message error:", e.message);
+    }
 
     return res.status(200).json({
       message: "Selection successful",
-      student: student,
+      student,
     });
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({ message: err.message });
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 

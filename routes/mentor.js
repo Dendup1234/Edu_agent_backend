@@ -22,6 +22,8 @@ import {
   updateAppointments,
   cancelAppointment,
   confirmedAppointment,
+  searchAppointmentsByStudentName,
+  getStudentProfileById,
 } from "../controllers/mentor/mentor.profile.js";
 
 const router = express.Router();
@@ -52,9 +54,11 @@ router.patch(
 );
 router.patch("/appointments/:appointmentId/cancel", protect, cancelAppointment);
 router.patch(
-  "/appointments/:appointmentId/confirmed",
+  "/appointments/:appointmentId/complete",
   protect,
   confirmedAppointment,
 );
+router.get("/appointments/search/", protect, searchAppointmentsByStudentName);
+router.get("/students/:studentId", protect, getStudentProfileById);
 
 export default router;

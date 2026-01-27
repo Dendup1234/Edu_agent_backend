@@ -34,7 +34,7 @@ const PORT = process.env.PORT || 8000;
 const server = http.createServer(app);
 
 // Initialize Socket.IO
-const io = initializeWebSocket(server);
+export const io = initializeWebSocket(server);
 
 // Connect to database
 await connectDB();

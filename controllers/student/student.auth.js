@@ -4,6 +4,9 @@ import PendingSignup from "../../models/pendingSignup.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import Student from "../../models/student.js";
+import { sendAutoMessage } from "../../client.js";
+
+
 
 // Variables for the resend otp
 const OTP_EXP_MIN = 5; // expires in 5 mins

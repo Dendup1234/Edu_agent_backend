@@ -21,6 +21,7 @@ import { searchUniByName } from "../controllers/student/student.uni.js";
 import { searchCourseByName } from "../controllers/student/student.course.js";
 import { searchScholarshipByName } from "../controllers/student/student.scholarship.js";
 import { registerMeeting } from "../controllers/student/student.event.js";
+
 import {
   getAllMentor,
   connectMentor,
@@ -32,6 +33,10 @@ import {
 } from "../controllers/student/student.blob.js";
 
 import { getConversationMessages } from "../controllers/message.js";
+
+import { getApplicationStatus } from "../controllers/student/student.application.js";
+
+import { getDocumentStatus } from "../controllers/student/student.document.js";
 
 const router = express.Router();
 
@@ -80,3 +85,6 @@ router.get("/mentors/:agencyId", protect, getAllMentor);
 router.post("/mentors/connect/:mentorId", protect, connectMentor);
 export default router;
 
+// Get Application and Document status
+router.get("/document/:studentId/status", protect, getDocumentStatus);
+router.get("/application/:studentId/status", protect,  getApplicationStatus);

@@ -83,11 +83,15 @@ export const selectAgency = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    await sendAutoMessage(io, 
-    { id: student.registeredAgency.toString(), model: "Agency" },
-    { id: userId.toString(), model: "Student" },
+    await sendAutoMessage(
+    io,
+    student.registeredAgency.toString(),
+    "Agency",
+    userId.toString(),
+    "Student",
     `Welcome ${student.name}! We are excited to have you onboard.`
-    );
+  );
+
 
     return res.status(200).json({
       message: "Selection successful",

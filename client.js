@@ -1,5 +1,5 @@
 import Message from "./models/message.js";
-import Conversation from "./models/application.js";
+import Conversation from "./models/conversation.js";
 
 export const sendAutoMessage = async (
   io,

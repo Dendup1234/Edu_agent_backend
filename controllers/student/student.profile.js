@@ -97,8 +97,7 @@ export const selectAgency = (io) => async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Selection successful",
-      student,
+      message: "Selection successful"
     });
   } catch (err) {
     console.error(err);

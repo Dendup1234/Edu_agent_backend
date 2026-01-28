@@ -46,7 +46,13 @@ export const getDocumentStatus = async (req, res) => {
     const documents = await Document.find({
       uploadedBy: studentId,
       agency: student.registeredAgency,
-    }).select("name reviewStatus").lean();
+    })
+    .select("documentName reviewStatus")
+    .populate({
+      path: "documentName",
+      select: "name",
+    })
+    .lean();
 
     return res.status(200).json({ data: documents });
   } catch (err) {

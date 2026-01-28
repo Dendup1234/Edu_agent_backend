@@ -186,7 +186,9 @@ export const getStudentList = async (req, res) => {
       selectedCourse: { $ne: null },
       selectedUniversity: { $ne: null },
     })
-      .select("name statusHistory selectedCourse selectedUniversity")
+      .select(
+        "name statusHistory selectedCourse selectedUniversity assignedAgent",
+      )
       .populate({
         path: "selectedCourse",
         select: "title",
@@ -195,7 +197,16 @@ export const getStudentList = async (req, res) => {
         path: "selectedUniversity",
         select: "name country",
       })
+      .populate({
+        path: "assignedAgent",
+        select: "name",
+      })
       .lean();
+
+    console.log(studentList);
+    // Finding the count of student
+    const studentCount = studentList.length;
+
     // Creating the custom map of object
     const student = studentList.map((s) => ({
       student: {
@@ -211,12 +222,17 @@ export const getStudentList = async (req, res) => {
         name: s.selectedUniversity?.name,
         country: s.selectedUniversity?.country,
       },
+      agent: {
+        id: s.assignedAgent?._id,
+        name: s.assignedAgent?.name,
+      },
       statusHistory: s.statusHistory,
     }));
 
     return res.status(200).json({
       message: "Success",
       students: student,
+      studentCount: studentCount,
     });
   } catch (e) {
     console.log(e);
@@ -232,9 +248,8 @@ export const getStudentAppStatus = async (req, res) => {
     if (!userId) {
       return res.status(401).json({ message: "Token not valid" });
     }
-    const studentHistory = await Student.findById(studentId).select(
-      "statusHistory"
-    );
+    const studentHistory =
+      await Student.findById(studentId).select("statusHistory");
     return res
       .status(200)
       .json({ message: "Successful", student: studentHistory });

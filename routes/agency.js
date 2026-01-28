@@ -92,6 +92,7 @@ import {
   getAllAdmissionOfficer,
   assignAdmission,
   changeAssignedAgent,
+  deactivateAgent,
 } from "../controllers/agency/agency.employee.js";
 
 import { getConversationMessages } from "../controllers/message.js";
@@ -344,6 +345,11 @@ router.post("/profile/employee/agents", protect, createAgent);
 router.get("/profile/employee/agents", protect, getAllAgent);
 router.get("/profile/employee/agents/:agentId/agents", protect, getAgentById);
 router.patch("/profile/employee/agents/:agentId/agents", protect, updateAgent);
+router.delete(
+  "/profile/employee/agents/:agentId/agents",
+  protect,
+  deactivateAgent,
+);
 router.post("/profile/role/agents", protect, createRole);
 router.get("/profile/role/agents", protect, getAllRole);
 router.patch("/profile/role/agents/:roleId", protect, updateRole);

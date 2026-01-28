@@ -20,7 +20,7 @@ export const login = async (req, res) => {
     }
 
     const user = await Agent.findOne({ email }).select(
-      "password agency systemRole roleId isVerified name email"
+      "password agency systemRole roleId isVerified name email isActive",
     );
 
     if (!user) {
@@ -38,6 +38,9 @@ export const login = async (req, res) => {
       email: user.email,
       isVerified: user.isVerified,
     });
+    if (!user.isActive) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
 
     return res.json({
       message: "Logged in successfully",
@@ -48,6 +51,7 @@ export const login = async (req, res) => {
         systemRole: user.systemRole,
         roleId: user.roleId,
         isVerified: user.isVerified,
+        isActive: user.isActive,
       },
       accessToken: token,
     });
@@ -84,7 +88,7 @@ export const sendPasswordResetOtp = async (req, res) => {
       if (secondsSinceLast < RESEND_COOLDOWN_SEC) {
         return res.status(429).json({
           message: `Please wait ${Math.ceil(
-            RESEND_COOLDOWN_SEC - secondsSinceLast
+            RESEND_COOLDOWN_SEC - secondsSinceLast,
           )}s before resending OTP.`,
         });
       }
@@ -110,7 +114,7 @@ export const sendPasswordResetOtp = async (req, res) => {
         lastSentAt: new Date(),
         resendCount: existing ? existing.resendCount + 1 : 0,
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
 
     await sendOtpEmail(normalizedEmail, otp, "Password Reset OTP");
@@ -154,7 +158,7 @@ export const verifyPasswordResetOtp = async (req, res) => {
     // issue short-lived reset token
     const resetToken = signToken(
       { sub: normalizedEmail },
-      { expiresIn: "10m" }
+      { expiresIn: "10m" },
     );
 
     return res.json({ message: "OTP verified", resetToken });

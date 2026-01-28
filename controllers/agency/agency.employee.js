@@ -152,6 +152,29 @@ export const updateAgent = async (req, res) => {
     return res.status(500).json({ message: "Server error " });
   }
 };
+
+// Deactivate the agent
+export const deactivateAgent = async (req, res) => {
+  try {
+    const userId = req.user.agencyId;
+    if (!userId) {
+      return res.status(401).json({ message: "Token not found" });
+    }
+    const { agentId } = req.params;
+    // updating the agent
+    const updatedAgent = await Agent.findByIdAndUpdate(
+      agentId,
+      { isActive: false },
+      { new: true, runValidators: true },
+    );
+    return res
+      .status(200)
+      .json({ message: "Agent deactivated successfully", agent: updatedAgent });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error " });
+  }
+};
 //Creating a role by the agency
 export const createRole = async (req, res) => {
   try {
@@ -394,15 +417,21 @@ export const assignAdmission = async (req, res) => {
       });
     }
 
-    // Assign only if not assigned before
-    student.assignedAgent = agentId;
-    await student.save();
-
     // Find agent details
     const agent = await Agent.findById(agentId);
     if (!agent) {
       return res.status(404).json({ message: "Agent not found" });
     }
+
+    // Assign
+    student.assignedAgent = agentId;
+    await student.save();
+
+    // keep agent side in sync (no duplicates)
+    await Agent.updateOne(
+      { _id: agentId },
+      { $addToSet: { assignedStudents: student._id } },
+    );
 
     // Send success email
     await sendAgentAssignmentEmail({
@@ -424,22 +453,29 @@ export const assignAdmission = async (req, res) => {
 
 // Change assigned agent for a student (re-assign)
 export const changeAssignedAgent = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
+    session.startTransaction();
+
     const { studentId } = req.params;
     const { agentId } = req.body;
 
     if (!agentId) {
+      await session.abortTransaction();
       return res.status(400).json({ message: "newAgentId is required" });
     }
 
-    const student = await Student.findById(studentId).select(
-      "name email assignedAgent",
-    );
+    const student = await Student.findById(studentId)
+      .select("name email assignedAgent")
+      .session(session);
+
     if (!student) {
+      await session.abortTransaction();
       return res.status(404).json({ message: "Student not found" });
     }
 
     if (!student.assignedAgent) {
+      await session.abortTransaction();
       return res.status(409).json({
         message:
           "Student has no agent assigned yet. Use assignAdmission first.",
@@ -447,6 +483,7 @@ export const changeAssignedAgent = async (req, res) => {
     }
 
     if (String(student.assignedAgent) === String(agentId)) {
+      await session.abortTransaction();
       return res.status(409).json({
         message: "Student is already assigned to this agent",
       });
@@ -454,16 +491,40 @@ export const changeAssignedAgent = async (req, res) => {
 
     const oldAgentId = student.assignedAgent;
 
-    const newAgent = await Agent.findById(agentId).select("name email");
+    const newAgent = await Agent.findById(agentId)
+      .select("name email")
+      .session(session);
     if (!newAgent) {
+      await session.abortTransaction();
       return res.status(404).json({ message: "New agent not found" });
     }
 
-    const oldAgent = await Agent.findById(oldAgentId).select("name email");
+    const oldAgent = await Agent.findById(oldAgentId)
+      .select("name email")
+      .session(session);
 
+    // remove from old agent list
+    await Agent.updateOne(
+      { _id: oldAgentId },
+      { $pull: { assignedStudents: student._id } },
+      { session },
+    );
+
+    // add to new agent list (no duplicates)
+    await Agent.updateOne(
+      { _id: agentId },
+      { $addToSet: { assignedStudents: student._id } },
+      { session },
+    );
+
+    // update student assigned agent
     student.assignedAgent = agentId;
-    await student.save();
+    await student.save({ session });
 
+    await session.commitTransaction();
+    session.endSession();
+
+    // email AFTER commit (so you don’t email if transaction fails)
     await sendAgentAssignmentEmail({
       studentEmail: student.email,
       agentEmail: newAgent.email,
@@ -474,11 +535,13 @@ export const changeAssignedAgent = async (req, res) => {
     return res.status(200).json({
       message: "Agent changed successfully",
       studentId: student._id,
-      oldAgent: oldAgent,
-      newAgent: newAgent,
+      oldAgent,
+      newAgent,
     });
   } catch (e) {
     console.log(e);
+    await session.abortTransaction();
+    session.endSession();
     return res.status(500).json({ message: "Server error" });
   }
 };

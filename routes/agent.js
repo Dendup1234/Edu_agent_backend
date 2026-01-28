@@ -15,6 +15,12 @@ import {
 import {
   getAgentinformation,
   getStudentList,
+  createAppointment,
+  getAppointments,
+  updateAppointments,
+  cancelAppointment,
+  confirmedAppointment,
+  searchAppointmentsByStudentName,
 } from "../controllers/agent/agent.profile.js";
 const router = express.Router();
 
@@ -41,13 +47,22 @@ router.get("/profile/me", protect, getAgentinformation);
 // admission officers apis
 router.get("/students", protect, getStudentList);
 
-// Document
-router.post("/documents/required", protect, createRequiredDocument);
-router.get("/documents/:studentId", protect, getDocumentsByStudent);
-router.patch("/documents/:documentId/review-status", protect, updateDocumentReviewStatus);
+// visa officers apis
 
-// Application 
-router.get("/application/:studentId", protect, getStudentApplication)
-router.patch("/application/:applicationId/stage", protect, updateStageStatus)
+//appointment apis
+router.post("/appointments", protect, createAppointment);
+router.get("/appointments", protect, getAppointments);
+router.patch(
+  "/appointments/:appointmentId/update",
+  protect,
+  updateAppointments,
+);
+router.patch("/appointments/:appointmentId/cancel", protect, cancelAppointment);
+router.patch(
+  "/appointments/:appointmentId/complete",
+  protect,
+  confirmedAppointment,
+);
+router.get("/appointments/search/", protect, searchAppointmentsByStudentName);
 
 export default router;

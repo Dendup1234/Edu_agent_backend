@@ -20,6 +20,7 @@ export const getProfile = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 //Updating a profile
 export const updateProfile = async (req, res) => {
   try {

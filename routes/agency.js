@@ -100,7 +100,7 @@ import {
 
 import { 
   getStudentApplication, 
-  updateApplicationStatus 
+  updateStageStatus
 } from "../controllers/agency/agency.application.js";
 
 import {
@@ -371,6 +371,6 @@ router.patch("/documents/:documentId/review-status", updateDocumentReviewStatus)
 
 // Application 
 router.get("/application/:studentId", getStudentApplication)
-router.patch("/application/:applicationId/status", updateApplicationStatus)
+router.patch("/application/:applicationId/stage", updateStageStatus)
 
 export default router;

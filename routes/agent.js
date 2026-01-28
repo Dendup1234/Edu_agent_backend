@@ -31,11 +31,6 @@ import {
   getRequiredDocumentsList
 } from "../controllers/agent/agent.document.js";
 
-import { 
-  getStudentApplication, 
-  updateStageStatus
-} from "../controllers/agent/agent.application.js";
-
 // Auth apis
 router.post("/login", login);
 router.post("/password-reset/send-otp", sendPasswordResetOtp);
@@ -53,9 +48,5 @@ router.get("/documents/types", protect, getRequiredDocumentsList)
 router.post("/documents/required", protect, createRequiredDocument);
 router.get("/documents/:studentId", protect, getDocumentsByStudent);
 router.patch("/documents/:documentId/review-status", protect, updateDocumentReviewStatus);
-
-// Application 
-router.get("/application/:studentId", protect, getStudentApplication)
-router.patch("/application/:applicationId/stage", protect, updateStageStatus)
 
 export default router;

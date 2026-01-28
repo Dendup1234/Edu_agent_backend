@@ -101,10 +101,6 @@ import {
   getDocumentsByStudent
 } from "../controllers/agency/agency.document.js";
 
-import { 
-  getStudentApplication
-} from "../controllers/agency/agency.application.js";
-
 import {
   getAllMentor,
   getMentorById,
@@ -377,8 +373,5 @@ router.get("/mentors/dashboard/stats", protect, getMentorDashboard);
 
 // Documents
 router.get("/documents/:studentId", getDocumentsByStudent);
-
-// Application 
-router.get("/application/:studentId", getStudentApplication);
 
 export default router;

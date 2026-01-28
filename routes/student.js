@@ -37,7 +37,6 @@ import {
 
 import { getConversationMessages } from "../controllers/message.js";
 
-import { getApplicationStatus } from "../controllers/student/student.application.js";
 import { getDocumentStatus, getRequiredDocumentsList } from "../controllers/student/student.document.js";
 
 export default function studentRoute(io) {
@@ -87,7 +86,6 @@ export default function studentRoute(io) {
   // Application & Document status
   router.get("/document-list", protect, getRequiredDocumentsList)
   router.get("/documents/status", protect, getDocumentStatus);
-  router.get("/application/status", protect, getApplicationStatus);
 
   return router;
 }

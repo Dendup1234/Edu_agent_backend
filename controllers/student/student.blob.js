@@ -39,15 +39,6 @@ const ALLOWED_TYPES = [
 
 const MAX_SIZE = 50 * 1024 * 1024; 
 
-const REQUIRED_DOC_TYPES = [
-  'passport',
-  'academic_results',
-  'english_test',
-  'cv',
-  'sop',
-  'bank_statement'
-];
-
 export const generateSAS = async (req, res) => {
   try {
     const { mimeType, size } = req.body;
@@ -130,10 +121,6 @@ export const confirmUpload = async (req, res) => {
       return res.json({ message: "Profile picture uploaded" });
     }
 
-    if (!REQUIRED_DOC_TYPES.includes(documentType)) {
-      return res.status(400).json({ error: "Invalid document type" });
-    }
-
     const document = await Document.create({
       uploadedBy: studentId,
       agency: agencyId,
@@ -147,26 +134,15 @@ export const confirmUpload = async (req, res) => {
     const student = await Student.findById(studentId).select("isEligible");
     if (!student) {
       return res.status(404).json({ error: "Student not found" });
-    }
+    }      
 
-    const approvedDocs = await Document.find({
-      uploadedBy: studentId,
-      documentType: { $in: REQUIRED_DOC_TYPES },
-      reviewStatus: "approved"
-    }).select("documentType _id");         
-
-    const approvedTypes = approvedDocs.map(d => d.documentType);
-    const allApproved = REQUIRED_DOC_TYPES.every(type =>
-      approvedTypes.includes(type)
-    );
-
-    if (allApproved && student.isEligible) {
+    if (student.isEligible) {
       const application = await Application.findOneAndUpdate(
         { applicationFor: studentId },
         {
           $set: { status: "document_review" },
           $addToSet: {
-            documents: { $each: approvedDocs.map(d => d._id) }
+            documents: { $each: document.map(d => d._id) }
           }
         },
         { new: true, upsert: true }

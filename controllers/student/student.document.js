@@ -1,11 +1,36 @@
 import Document from "../../models/document.js";
+import DocumentType from "../../models/documentType.js";
+
+export const getDocumentTypes = async (req, res) => {
+  try {
+    const { agencyId } = req.parmas;
+
+    if(!agencyId){
+      return res.status(400).json({ message: "agency ID required"})
+    }
+    const documentTypes = await DocumentType.find({
+      agency: agencyId
+    }).select("type")
+
+    return res.status(200).json(documentTypes)
+  }
+  catch(err) {
+    console.error(err)
+    return res.status(500).json({ message: err.message })
+  }
+}
 
 export const getDocumentStatus = async (req, res) => {
   try {
     const { studentId } = req.params;
+
+    if (!studentId){
+      return res.status(400).json({message: "student ID required"})
+    }
     const documents = await Document.find({
       uploadedBy: studentId
     }).select("reviewStatus");
+
     return res.status(200).json(documents);
   } 
   catch (err) {

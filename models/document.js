@@ -13,7 +13,8 @@ const documentSchema = new mongoose.Schema(
     },
 
     documentType: {
-      type: String
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DocumentType"
     },
 
     fileName: String,

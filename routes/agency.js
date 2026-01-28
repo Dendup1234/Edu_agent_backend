@@ -373,13 +373,8 @@ router.get("/mentors/dashboard/stats", protect, getMentorDashboard);
 
 // Documents
 router.get("/documents/:studentId", getDocumentsByStudent);
-router.patch(
-  "/documents/:documentId/review-status",
-  updateDocumentReviewStatus,
-);
 
 // Application 
 router.get("/application/:studentId", getStudentApplication)
-router.patch("/application/:applicationId/stage", updateStageStatus)
 
 export default router;

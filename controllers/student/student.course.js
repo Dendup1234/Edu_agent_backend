@@ -26,5 +26,46 @@ export const searchCourseByName = async (req, res) => {
   }
 };
 
-//When student select the particular course
-export const selectCourse = async (req, res) => {};
+//When student select the particular course with the uni
+export const selectCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const userId = req.user.sub;
+    
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ message: "Invalid courseId" });
+    }
+
+    // finding the info about the course
+    const course = await Course.findById(courseId)
+      .select("title providedBy")
+      .populate({
+        path: "providedBy",
+        select: "_id name",
+      })
+      .lean();
+
+    if (!course || !course.providedBy?._id) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // updating the student/applicant
+    const student = await Student.findByIdAndUpdate(
+      userId,
+      {
+        selectedUniversity: course.providedBy._id,
+        selectedCourse: courseId,
+      },
+      { new: true, runValidators: true },
+    );
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    return res.status(200).json({ message: "Success", student });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "server error" });
+  }
+};

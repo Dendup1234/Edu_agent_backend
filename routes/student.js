@@ -1,7 +1,5 @@
-// routes/student.js
 import express from "express";
 import { protect } from "../middlewares/auth.middleware.js";
-
 import {
   sendOtp,
   resendOtp,
@@ -20,13 +18,27 @@ import {
 } from "../controllers/student/student.profile.js";
 
 import { searchUniByName } from "../controllers/student/student.uni.js";
-import { searchCourseByName } from "../controllers/student/student.course.js";
+import {
+  searchCourseByName,
+  selectCourse,
+} from "../controllers/student/student.course.js";
 import { searchScholarshipByName } from "../controllers/student/student.scholarship.js";
 import { registerMeeting } from "../controllers/student/student.event.js";
-import { getAllMentor, connectMentor } from "../controllers/student/student.mentor.js";
-import { generateSAS, confirmUpload } from "../controllers/student/student.blob.js";
+
+import {
+  getAllMentor,
+  connectMentor,
+} from "../controllers/student/student.mentor.js";
+
+import {
+  generateSAS,
+  confirmUpload,
+} from "../controllers/student/student.blob.js";
+
 import { getConversationMessages } from "../controllers/message.js";
+
 import { getApplicationStatus } from "../controllers/student/student.application.js";
+
 import { getDocumentStatus } from "../controllers/student/student.document.js";
 
 export default function studentRoute(io) {
@@ -55,8 +67,13 @@ export default function studentRoute(io) {
 
   // Courses / Universities / Scholarships
   router.get("/courses/query/:agencyId/search", protect, searchCourseByName);
+  router.patch("/courses/select/:courseId", protect, selectCourse);
   router.get("/universities/query/:agencyId/search", protect, searchUniByName);
-  router.get("/scholarships/query/:agencyId/search", protect, searchScholarshipByName);
+  router.get(
+    "/scholarships/query/:agencyId/search",
+    protect,
+    searchScholarshipByName,
+  );
 
   // Events
   router.post("/events/registration/:eventId", protect, registerMeeting);

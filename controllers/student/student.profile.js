@@ -95,8 +95,9 @@ export const selectAgency = (io) => async (req, res) => {
     // } catch (e) {
     //   console.error("Auto message error:", e.message);
     // }
+    
     return res.status(200).json({
-      message: "Selection successful"
+      message: "Selection successful",
     });
   } catch (err) {
     console.error(err);

@@ -121,14 +121,21 @@ export const confirmUpload = async (req, res) => {
       return res.json({ message: "Profile picture uploaded" });
     }
 
+    const existingDoc = await Document.findOne({
+      uploadedBy: studentId,
+      agency: agencyId,
+      documentName: documentType
+    });
+
     const document = await Document.create({
       uploadedBy: studentId,
       agency: agencyId,
-      documentType,
+      documentName: documentType,
       fileName: blobName,
       fileType: mimeType,
       fileSize: size,
-      fileURL: blobClient.url
+      fileURL: blobClient.url,
+      isResubmitted: !!existingDoc
     });
 
     const student = await Student.findById(studentId).select("isEligible");

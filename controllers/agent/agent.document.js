@@ -1,6 +1,7 @@
 import Document from "../../models/document.js";
 import RequiredDocument from "../../models/requiredDocument.js";
-// document api
+import Student from "../../models/student.js";
+
 export const createRequiredDocument = async (req, res) => {
   try {
     const agency = req.user.agencyId;
@@ -8,6 +9,11 @@ export const createRequiredDocument = async (req, res) => {
 
     if (!name) {
       return res.status(400).json({ message: "name is required" });
+    }
+
+    const exists = await RequiredDocument.findOne({ name, agency });
+    if (exists) {
+      return res.status(409).json({ message: "Document already exists" });
     }
 
     const requiredDocument = await RequiredDocument.create({
@@ -21,25 +27,22 @@ export const createRequiredDocument = async (req, res) => {
       data: requiredDocument,
     });
   } catch (err) {
-    console.error(err);
+    console.error("createRequiredDocument:", err);
     return res.status(500).json({ message: err.message });
   }
 };
 
-export const getDocumentName = async (req, res) => {
+export const getRequiredDocumentsList = async (req, res) => {
   try {
-    const agencyId = req.user.agencyId;
+    const agency = req.user.agencyId;
 
-    if (!agencyId) {
-      return res.status(400).json({ message: "agency ID required" });
-    }
-    const documentTypes = await RequiredDocument.find({
-      agency: agencyId,
-    }).select("name description");
+    const documentTypes = await RequiredDocument.find({ agency })
+      .select("name description")
+      .lean();
 
-    return res.status(200).json(documentTypes);
+    return res.status(200).json({ data: documentTypes });
   } catch (err) {
-    console.error(err);
+    console.error("getRequiredDocuments:", err);
     return res.status(500).json({ message: err.message });
   }
 };
@@ -47,49 +50,112 @@ export const getDocumentName = async (req, res) => {
 export const getDocumentsByStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
+    const agency = req.user.agencyId;
 
     if (!studentId) {
       return res.status(400).json({ message: "student ID required" });
     }
+
     const documents = await Document.find({
       uploadedBy: studentId,
-    });
+      agency,
+    }).lean();
 
-    return res.status(200).json(documents);
+    return res.status(200).json({ data: documents });
   } catch (err) {
-    console.error(err);
+    console.error("getDocumentsByStudent:", err);
     return res.status(500).json({ message: err.message });
   }
 };
 
-const ALLOWED_STATUSES = ["under_review", "approved", "needs_revision"];
+const ALLOWED_STATUSES = ["under_review", "approved", "reupload"];
 
 export const updateDocumentReviewStatus = async (req, res) => {
   try {
     const { documentId } = req.params;
     const { reviewStatus } = req.body;
     const agentId = req.user.id;
+    const agency = req.user.agencyId;
 
     if (!ALLOWED_STATUSES.includes(reviewStatus)) {
       return res.status(400).json({ message: "Invalid review status" });
     }
 
-    const document = await Document.findByIdAndUpdate(
-      documentId,
-      {
-        reviewStatus,
-        verifiedBy: agentId,
-      },
-      { new: true },
+    const update = { reviewStatus };
+
+    if (reviewStatus === "approved") {
+      update.verifiedBy = agentId;
+    }
+
+    const document = await Document.findOneAndUpdate(
+      { _id: documentId, agency },
+      update,
+      { new: true, runValidators: true }
     );
 
     if (!document) {
       return res.status(404).json({ message: "Document not found" });
     }
 
-    return res.status(200).json(document);
+    return res.status(200).json({
+      message: "Update successful",
+      data: document,
+    });
   } catch (err) {
-    console.error(err);
+    console.error("updateDocumentReviewStatus:", err);
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+export const updateStudentEligibility = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { isEligible } = req.body;
+    const agency = req.user.agencyId;
+
+    if (typeof isEligible !== "boolean") {
+      return res.status(400).json({
+        message: "isEligible must be a boolean",
+      });
+    }
+
+    const documents = await Document.find({
+      uploadedBy: studentId,
+      agency,
+    }).select("reviewStatus");
+
+    if (!documents || documents.length === 0) {
+      return res.status(400).json({
+        message: "Student has not uploaded any documents yet",
+      });
+    }
+
+    const isRejected = documents.some(
+      (doc) => doc.reviewStatus !== "approved"
+    );
+
+    if (isRejected && isEligible) {
+      return res.status(400).json({
+        message: "Cannot mark student as eligible until all documents are approved",
+      });
+    }
+
+    const student = await Student.findOneAndUpdate(
+      { _id: studentId, registeredAgency: agency },
+      { isEligible },
+      { new: true, runValidators: true }
+    );
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    return res.status(200).json({
+      message: "Update successful",
+      data: student,
+    });
+  } catch (err) {
+    console.error("updateStudentEligibility:", err);
     return res.status(500).json({ message: err.message });
   }
 };

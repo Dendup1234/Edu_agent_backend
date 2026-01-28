@@ -1,6 +1,5 @@
 import Application from "../../models/application.js";
 
-// Get all applications for a student
 export const getStudentApplication = async (req, res) => {
   try {
     const { studentId } = req.params;

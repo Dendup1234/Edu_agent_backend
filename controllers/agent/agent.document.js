@@ -1,4 +1,31 @@
 import Document from "../../models/document.js";
+import RequiredDocument from "../../models/requiredDocument.js"
+
+export const createRequiredDocument = async (req, res) => {
+  try {
+    const agency = req.user.agencyId;
+    const { name, description } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ message: "name is required" });
+    }
+
+    const requiredDocument = await RequiredDocument.create({
+      name,
+      description,
+      agency
+    });
+
+    return res.status(201).json({
+      message: "Created successfully",
+      data: requiredDocument
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: err.message });
+  }
+};
+
 
 export const getDocumentsByStudent = async (req, res) => {
   try {

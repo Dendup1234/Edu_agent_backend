@@ -27,7 +27,7 @@ import { getAllMentor, connectMentor } from "../controllers/student/student.ment
 import { generateSAS, confirmUpload } from "../controllers/student/student.blob.js";
 import { getConversationMessages } from "../controllers/message.js";
 import { getApplicationStatus } from "../controllers/student/student.application.js";
-import { getDocumentStatus } from "../controllers/student/student.document.js";
+import { getDocumentStatus, getDocumentName } from "../controllers/student/student.document.js";
 
 export default function studentRoute(io) {
   const router = express.Router();
@@ -69,6 +69,7 @@ export default function studentRoute(io) {
   router.post("/mentors/connect/:mentorId", protect, connectMentor);
 
   // Application & Document status
+  router.get("/document/:agencyId", protect, getDocumentName)
   router.get("/document/status", protect, getDocumentStatus);
   router.get("/application/status", protect, getApplicationStatus);
 

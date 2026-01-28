@@ -1,16 +1,16 @@
 import Document from "../../models/document.js";
-import DocumentType from "../../models/documentType.js";
+import DocumentType from "../../models/requiredDocument.js";
 
-export const getDocumentTypes = async (req, res) => {
+export const getDocumentName = async (req, res) => {
   try {
-    const { agencyId } = req.parmas;
+    const { agencyId } = req.params;
 
     if(!agencyId){
       return res.status(400).json({ message: "agency ID required"})
     }
     const documentTypes = await DocumentType.find({
       agency: agencyId
-    }).select("type")
+    }).select("name description")
 
     return res.status(200).json(documentTypes)
   }

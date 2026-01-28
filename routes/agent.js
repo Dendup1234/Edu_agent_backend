@@ -21,12 +21,13 @@ const router = express.Router();
 import {
   getDocumentsByStudent,
   updateDocumentReviewStatus,
-} from "../controllers/agency/agency.document.js";
+  createRequiredDocument
+} from "../controllers/agent/agent.document.js";
 
 import { 
   getStudentApplication, 
   updateStageStatus
-} from "../controllers/agency/agency.application.js";
+} from "../controllers/agent/agent.application.js";
 
 // Auth apis
 router.post("/login", login);
@@ -41,6 +42,7 @@ router.get("/profile/me", protect, getAgentinformation);
 router.get("/students", protect, getStudentList);
 
 // Document
+router.post("/documents/required", protect, createRequiredDocument);
 router.get("/documents/:studentId", protect, getDocumentsByStudent);
 router.patch("/documents/:documentId/review-status", protect, updateDocumentReviewStatus);
 

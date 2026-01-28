@@ -5,7 +5,7 @@ import Course from "../../models/course.js";
 import mongoose from "mongoose";
 import { selectAgency } from "./student.profile.js";
 
-// Searching a particular course
+// Searching a particular course by name
 export const searchCourseByName = async (req, res) => {
   try {
     const { agencyId } = req.params;

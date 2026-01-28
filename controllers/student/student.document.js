@@ -12,13 +12,13 @@ export const getRequiredDocumentsList = async (req, res) => {
       return res.status(404).json({ message: "Student or agency not found" });
     }
 
-    const documentTypes = await RequiredDocument.find({
+    const requiredDocument = await RequiredDocument.find({
       agency: student.registeredAgency,
     })
       .select("name description") 
       .lean();
 
-    return res.status(200).json({ data: documentTypes });
+    return res.status(200).json({ data: requiredDocument });
   } catch (err) {
     console.error("getRequiredDocumentsForStudent:", err);
     return res.status(500).json({ message: err.message });
@@ -49,7 +49,7 @@ export const getDocumentStatus = async (req, res) => {
     })
     .select("documentName reviewStatus")
     .populate({
-      path: "documentName",
+      path: "requiredDocument",
       select: "name",
     })
     .lean();

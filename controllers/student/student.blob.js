@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
 import Student from "../../models/student.js";
 import Document from "../../models/document.js";
-import Application from "../../models/application.js";
+import RequiredDocument from "../../models/requiredDocument.js";
 
 import {
   StorageSharedKeyCredential,
@@ -92,17 +92,16 @@ export const confirmUpload = async (req, res) => {
       mimeType,
       size,
       agencyId,
-      documentType
+      documentType 
     } = req.body;
 
     const studentId = req.user.sub;
 
-    if (!blobName || !mimeType || !size || !documentType) {
+    if (!blobName || !mimeType || !size || !documentType || !agencyId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     const blobClient = containerClient.getBlobClient(blobName);
-
     if (!(await blobClient.exists())) {
       return res.status(400).json({ error: "Upload not found" });
     }
@@ -118,63 +117,44 @@ export const confirmUpload = async (req, res) => {
         return res.status(404).json({ error: "Student not found" });
       }
 
-      return res.json({ message: "Profile picture uploaded" });
+      return res.json({ message: "Profile picture uploaded successfully", student });
+    }
+
+    const requiredDoc = await RequiredDocument.findOne({
+      name: documentType,
+      agency: agencyId
+    });
+
+    if (!requiredDoc) {
+      return res.status(404).json({ error: "Required document not found for this agency" });
     }
 
     const existingDoc = await Document.findOne({
       uploadedBy: studentId,
       agency: agencyId,
-      documentName: documentType
+      requiredDocument: requiredDoc._id
     });
 
-    const newDoc = await Document.create({
+    const documentData = {
       uploadedBy: studentId,
       agency: agencyId,
-      documentName: documentType,
+      requiredDocument: requiredDoc._id,
       fileName: blobName,
       fileType: mimeType,
       fileSize: size,
       fileURL: blobClient.url,
       reviewStatus: "under_review",
       isResubmitted: !!existingDoc
-    });
+    };
 
-    const allDocs = await Document.find({
-      uploadedBy: studentId,
-      agency: agencyId
-    }).select("reviewStatus");
-
-    const hasRejected = allDocs.some(
-      d => d.reviewStatus === "rejected"
-    );
-
-    const hasPending = allDocs.some(
-      d =>
-        d.reviewStatus === "under_review" ||
-        d.reviewStatus === "needs_revision"
-    );
-
-    if (!hasRejected && !hasPending) {
-      const application = await Application.findOneAndUpdate(
-        { applicationFor: studentId },
-        {
-          $set: { status: "document_review" },
-          $addToSet: { documents: newDoc._id }
-        },
-        { new: true, upsert: true }
-      );
-
-      return res.json({
-        message: "All documents approved. Application started.",
-        status: application.status
-      });
+    let newDoc;
+    if (existingDoc) {
+      newDoc = await Document.findByIdAndUpdate(existingDoc._id, documentData, { new: true });
+    } else {
+      newDoc = await Document.create(documentData);
     }
 
-    return res.json({
-      message: existingDoc
-        ? "Document resubmitted successfully"
-        : "Document uploaded successfully"
-    });
+    return res.json({ message: "Document uploaded successfully", document: newDoc });
 
   } catch (error) {
     console.error(error);

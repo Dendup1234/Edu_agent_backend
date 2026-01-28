@@ -12,7 +12,7 @@ const documentSchema = new mongoose.Schema(
       ref: "Agency",
     },
 
-    documentName: {
+    requiredDocument: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "RequiredDocument"
     },

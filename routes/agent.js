@@ -15,6 +15,12 @@ import {
 import {
   getAgentinformation,
   getStudentList,
+  createAppointment,
+  getAppointments,
+  updateAppointments,
+  cancelAppointment,
+  confirmedAppointment,
+  searchAppointmentsByStudentName,
 } from "../controllers/agent/agent.profile.js";
 const router = express.Router();
 

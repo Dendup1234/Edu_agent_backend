@@ -9,6 +9,11 @@ const appointmentSchema = new Schema({
     type: Types.ObjectId,
     ref: "Student",
   },
+  // For agent
+  agentId: {
+    type: Types.ObjectId,
+    ref: "Agent",
+  },
   time: {
     type: Date,
   },

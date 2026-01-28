@@ -21,7 +21,11 @@ const agentSchema = new Schema(
       type: Boolean,
       default: false,
     },
-
+    // for dactivation
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
     agency: {
       type: Types.ObjectId,
       ref: "Agency",
@@ -39,12 +43,6 @@ const agentSchema = new Schema(
       ref: "Role",
       default: null,
     },
-    status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
-    },
-
     assignedStudents: [
       {
         type: Types.ObjectId,
@@ -52,7 +50,7 @@ const agentSchema = new Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Agent", agentSchema);

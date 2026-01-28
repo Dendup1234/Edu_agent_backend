@@ -49,7 +49,7 @@ export const updateProfile = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-
+// Select agency
 export const selectAgency = (io) => async (req, res) => {
   try {
     const userId = req.user.sub;
@@ -80,7 +80,7 @@ export const selectAgency = (io) => async (req, res) => {
           },
         },
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     // try {

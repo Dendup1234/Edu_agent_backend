@@ -42,7 +42,7 @@ import { getDocumentStatus, getRequiredDocumentsList } from "../controllers/stud
 export default function studentRoute(io) {
   const router = express.Router();
 
-  // Authentication apis
+  // Authentication api
   router.post("/send-otp", sendOtp);
   router.post("/resend-otp", resendOtp);
   router.post("/verify-otp", verifyOtp);

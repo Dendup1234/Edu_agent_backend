@@ -85,8 +85,8 @@ export default function studentRoute(io) {
   router.post("/mentors/connect/:mentorId", protect, connectMentor);
 
   // Application & Document status
-  router.get("/document/:agencyId", protect, getDocumentName)
-  router.get("/document/status", protect, getDocumentStatus);
+  router.get("/documents/:agencyId", protect, getDocumentName)
+  router.get("/documents/status", protect, getDocumentStatus);
   router.get("/application/status", protect, getApplicationStatus);
 
   return router;

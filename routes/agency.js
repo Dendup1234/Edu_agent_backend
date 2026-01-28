@@ -101,9 +101,9 @@ import {
   updateDocumentReviewStatus,
 } from "../controllers/agency/agency.document.js";
 
-import {
-  getStudentApplication,
-  updateApplicationStatus,
+import { 
+  getStudentApplication, 
+  updateStageStatus
 } from "../controllers/agency/agency.application.js";
 
 import {
@@ -378,8 +378,8 @@ router.patch(
   updateDocumentReviewStatus,
 );
 
-// Application
-router.get("/application/:studentId", getStudentApplication);
-router.patch("/application/:applicationId/status", updateApplicationStatus);
+// Application 
+router.get("/application/:studentId", getStudentApplication)
+router.patch("/application/:applicationId/stage", updateStageStatus)
 
 export default router;

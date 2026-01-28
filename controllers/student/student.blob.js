@@ -153,7 +153,7 @@ export const confirmUpload = async (req, res) => {
       uploadedBy: studentId,
       documentType: { $in: REQUIRED_DOC_TYPES },
       reviewStatus: "approved"
-    }).select("documentType _id");
+    }).select("documentType _id");         
 
     const approvedTypes = approvedDocs.map(d => d.documentType);
     const allApproved = REQUIRED_DOC_TYPES.every(type =>

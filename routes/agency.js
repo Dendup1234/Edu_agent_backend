@@ -98,13 +98,11 @@ import {
 import { getConversationMessages } from "../controllers/message.js";
 
 import {
-  getDocumentsByStudent,
-  updateDocumentReviewStatus,
+  getDocumentsByStudent
 } from "../controllers/agency/agency.document.js";
 
-import {
-  getStudentApplication,
-  updateApplicationStatus,
+import { 
+  getStudentApplication
 } from "../controllers/agency/agency.application.js";
 
 import {
@@ -379,13 +377,8 @@ router.get("/mentors/dashboard/stats", protect, getMentorDashboard);
 
 // Documents
 router.get("/documents/:studentId", getDocumentsByStudent);
-router.patch(
-  "/documents/:documentId/review-status",
-  updateDocumentReviewStatus,
-);
 
-// Application
-router.get("/application/:studentId", getStudentApplication);
-router.patch("/application/:applicationId/status", updateApplicationStatus);
+// Application 
+router.get("/application/:studentId", getStudentApplication)
 
 export default router;

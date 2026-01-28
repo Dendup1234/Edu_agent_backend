@@ -12,8 +12,9 @@ const documentSchema = new mongoose.Schema(
       ref: "Agency",
     },
 
-    documentType: {
-      type: String
+    documentName: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "RequiredDocument"
     },
 
     fileName: String,

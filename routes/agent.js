@@ -4,12 +4,14 @@ import {
   requireVerifiedAgent,
   authorizeRoles,
 } from "../middlewares/auth.middleware.js";
+
 import {
   login,
   sendPasswordResetOtp,
   setNewPassword,
   verifyPasswordResetOtp,
 } from "../controllers/agent/agent.auth.js";
+
 import {
   getAgentinformation,
   getStudentList,
@@ -21,6 +23,17 @@ import {
   searchAppointmentsByStudentName,
 } from "../controllers/agent/agent.profile.js";
 const router = express.Router();
+
+import {
+  getDocumentsByStudent,
+  updateDocumentReviewStatus,
+  createRequiredDocument
+} from "../controllers/agent/agent.document.js";
+
+import { 
+  getStudentApplication, 
+  updateStageStatus
+} from "../controllers/agent/agent.application.js";
 
 // Auth apis
 router.post("/login", login);

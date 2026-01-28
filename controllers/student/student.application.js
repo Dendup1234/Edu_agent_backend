@@ -5,7 +5,7 @@ export const getApplicationStatus = async(req, res) => {
         const { studentId } = req.params;
         const application = await Application.find({
             applicationFor: studentId
-        }).select("status")
+        }).select("stage status")
         return res.status(200).json(application)
     }
     catch(err){

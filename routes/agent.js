@@ -28,8 +28,7 @@ import {
   getDocumentsByStudent,
   updateDocumentReviewStatus,
   createRequiredDocument,
-  getRequiredDocumentsList, 
-  updateStudentEligibility
+  getRequiredDocumentsList
 } from "../controllers/agent/agent.document.js";
 
 import { 
@@ -54,7 +53,6 @@ router.get("/documents/types", protect, getRequiredDocumentsList)
 router.post("/documents/required", protect, createRequiredDocument);
 router.get("/documents/:studentId", protect, getDocumentsByStudent);
 router.patch("/documents/:documentId/review-status", protect, updateDocumentReviewStatus);
-router.patch("/student/:studentId/eligibility", protect, updateStudentEligibility);
 
 // Application 
 router.get("/application/:studentId", protect, getStudentApplication)

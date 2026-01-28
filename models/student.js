@@ -95,9 +95,7 @@ const StudentSchema = new Schema(
     isValid: {
       type: Boolean,
       default: true,
-    },
-
-    isEligible: { type: Boolean, default: false },
+    }
   },
   { timestamps: true },
 );

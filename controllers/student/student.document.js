@@ -2,7 +2,6 @@ import Document from "../../models/document.js";
 import RequiredDocument from "../../models/requiredDocument.js";
 import Student from "../../models/student.js";
 
-
 export const getRequiredDocumentsList = async (req, res) => {
   try {
     const studentId = req.user.sub;

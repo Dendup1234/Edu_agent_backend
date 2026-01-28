@@ -68,7 +68,7 @@ export const getDocumentsByStudent = async (req, res) => {
   }
 };
 
-const ALLOWED_STATUSES = ["under_review", "approved", "reupload"];
+const ALLOWED_STATUSES = ["under_review", "approved", "reupload", "rejected"];
 
 export const updateDocumentReviewStatus = async (req, res) => {
   try {
@@ -103,59 +103,6 @@ export const updateDocumentReviewStatus = async (req, res) => {
     });
   } catch (err) {
     console.error("updateDocumentReviewStatus:", err);
-    return res.status(500).json({ message: err.message });
-  }
-};
-
-export const updateStudentEligibility = async (req, res) => {
-  try {
-    const { studentId } = req.params;
-    const { isEligible } = req.body;
-    const agency = req.user.agencyId;
-
-    if (typeof isEligible !== "boolean") {
-      return res.status(400).json({
-        message: "isEligible must be a boolean",
-      });
-    }
-
-    const documents = await Document.find({
-      uploadedBy: studentId,
-      agency,
-    }).select("reviewStatus");
-
-    if (!documents || documents.length === 0) {
-      return res.status(400).json({
-        message: "Student has not uploaded any documents yet",
-      });
-    }
-
-    const isRejected = documents.some(
-      (doc) => doc.reviewStatus !== "approved"
-    );
-
-    if (isRejected && isEligible) {
-      return res.status(400).json({
-        message: "Cannot mark student as eligible until all documents are approved",
-      });
-    }
-
-    const student = await Student.findOneAndUpdate(
-      { _id: studentId, registeredAgency: agency },
-      { isEligible },
-      { new: true, runValidators: true }
-    );
-
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" });
-    }
-
-    return res.status(200).json({
-      message: "Update successful",
-      data: student,
-    });
-  } catch (err) {
-    console.error("updateStudentEligibility:", err);
     return res.status(500).json({ message: err.message });
   }
 };

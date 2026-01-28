@@ -89,15 +89,15 @@ export const confirmUpload = async (req, res) => {
   try {
     const {
       blobName,
-      agencyId,
       mimeType,
       size,
+      agencyId,
       documentType
     } = req.body;
 
     const studentId = req.user.sub;
 
-    if (!blobName || !mimeType || !size) {
+    if (!blobName || !mimeType || !size || !documentType) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -110,7 +110,7 @@ export const confirmUpload = async (req, res) => {
     if (documentType === "profile") {
       const student = await Student.findByIdAndUpdate(
         studentId,
-        { profileURL: blobClient.url },
+        { profileUrl: blobClient.url },
         { new: true }
       );
 
@@ -127,7 +127,7 @@ export const confirmUpload = async (req, res) => {
       documentName: documentType
     });
 
-    const document = await Document.create({
+    const newDoc = await Document.create({
       uploadedBy: studentId,
       agency: agencyId,
       documentName: documentType,
@@ -135,22 +135,31 @@ export const confirmUpload = async (req, res) => {
       fileType: mimeType,
       fileSize: size,
       fileURL: blobClient.url,
+      reviewStatus: "under_review",
       isResubmitted: !!existingDoc
     });
 
-    const student = await Student.findById(studentId).select("isEligible");
-    if (!student) {
-      return res.status(404).json({ error: "Student not found" });
-    }      
+    const allDocs = await Document.find({
+      uploadedBy: studentId,
+      agency: agencyId
+    }).select("reviewStatus");
 
-    if (student.isEligible) {
+    const hasRejected = allDocs.some(
+      d => d.reviewStatus === "rejected"
+    );
+
+    const hasPending = allDocs.some(
+      d =>
+        d.reviewStatus === "under_review" ||
+        d.reviewStatus === "needs_revision"
+    );
+
+    if (!hasRejected && !hasPending) {
       const application = await Application.findOneAndUpdate(
         { applicationFor: studentId },
         {
           $set: { status: "document_review" },
-          $addToSet: {
-            documents: { $each: document.map(d => d._id) }
-          }
+          $addToSet: { documents: newDoc._id }
         },
         { new: true, upsert: true }
       );
@@ -161,10 +170,15 @@ export const confirmUpload = async (req, res) => {
       });
     }
 
-    return res.json({ message: "Upload confirmed" });
-    
+    return res.json({
+      message: existingDoc
+        ? "Document resubmitted successfully"
+        : "Document uploaded successfully"
+    });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Confirmation failed" });
   }
 };
+

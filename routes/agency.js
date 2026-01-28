@@ -373,6 +373,6 @@ router.get("/mentors/dashboard/stats", protect, getMentorDashboard);
 router.get("/documents/:studentId", getDocumentsByStudent);
 
 // Application 
-router.get("/application/:studentId", getStudentApplication)
+router.get("/application/:studentId", getStudentApplication);
 
 export default router;

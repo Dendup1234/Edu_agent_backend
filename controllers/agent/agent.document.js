@@ -26,6 +26,24 @@ export const createRequiredDocument = async (req, res) => {
   }
 };
 
+export const getDocumentName = async (req, res) => {
+  try {
+    const agencyId = req.user.agencyId
+
+    if(!agencyId){
+      return res.status(400).json({ message: "agency ID required"})
+    }
+    const documentTypes = await RequiredDocument.find({
+      agency: agencyId
+    }).select("name description")
+
+    return res.status(200).json(documentTypes)
+  }
+  catch(err) {
+    console.error(err)
+    return res.status(500).json({ message: err.message })
+  }
+}
 
 export const getDocumentsByStudent = async (req, res) => {
   try {

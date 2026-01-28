@@ -21,7 +21,8 @@ const router = express.Router();
 import {
   getDocumentsByStudent,
   updateDocumentReviewStatus,
-  createRequiredDocument
+  createRequiredDocument,
+  getDocumentName
 } from "../controllers/agent/agent.document.js";
 
 import { 
@@ -42,6 +43,7 @@ router.get("/profile/me", protect, getAgentinformation);
 router.get("/students", protect, getStudentList);
 
 // Document
+router.get("/documents/types", protect, getDocumentName)
 router.post("/documents/required", protect, createRequiredDocument);
 router.get("/documents/:studentId", protect, getDocumentsByStudent);
 router.patch("/documents/:documentId/review-status", protect, updateDocumentReviewStatus);

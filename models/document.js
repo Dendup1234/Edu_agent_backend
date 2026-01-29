@@ -24,7 +24,7 @@ const documentSchema = new mongoose.Schema(
 
     reviewStatus: {
       type: String,
-      enum: ["under_review", "approved", "reupload"],
+      enum: ["under_review", "approved", "reupload", "rejected"],
       default: "under_review",
     },
 

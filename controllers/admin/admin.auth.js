@@ -1,4 +1,4 @@
-import Agent from "../../models/agent.js";
+import Admin from "../../models/admin.js";
 import bcrypt from "bcryptjs";
 import { signToken, verifyToken } from "../../utils/jwt.js";
 import PendingSignup from "../../models/pendingSignup.js";
@@ -19,8 +19,8 @@ export const login = async (req, res) => {
         .json({ message: "email and password are required" });
     }
 
-    const user = await Agent.findOne({ email }).select(
-      "password agency systemRole roleId isVerified name email isActive",
+    const user = await Admin.findOne({ email }).select(
+      "password isVerified name email isActive",
     );
 
     if (!user) {
@@ -34,7 +34,6 @@ export const login = async (req, res) => {
 
     const token = await signToken({
       id: user._id.toString(), // agent id
-      agencyId: user.agency.toString(), // agency id
       email: user.email,
       isVerified: user.isVerified,
     });
@@ -49,8 +48,6 @@ export const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        systemRole: user.systemRole,
-        roleId: user.roleId,
         isVerified: user.isVerified,
         isActive: user.isActive,
       },
@@ -65,7 +62,7 @@ export const login = async (req, res) => {
 // change password similar as the previous ones
 // RESET PASSWORD FLOW
 
-// 1. SEND PASSWORD RESET OTPs
+// 1. SEND PASSWORD RESET OTP
 export const sendPasswordResetOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -73,7 +70,7 @@ export const sendPasswordResetOtp = async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    const user = await Agent.findOne({ email: normalizedEmail });
+    const user = await Admin.findOne({ email: normalizedEmail });
     if (!user)
       return res.status(200).json({ message: "If email exists, OTP sent" }); // prevent enumeration
 
@@ -190,7 +187,7 @@ export const setNewPassword = async (req, res) => {
     }
 
     const email = decoded.sub;
-    const user = await Agent.findOne({ email });
+    const user = await Admin.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
 
     // hash new password

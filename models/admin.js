@@ -1,4 +1,4 @@
-import mongoose,{Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const adminSchema = new Schema(
   {
@@ -14,16 +14,25 @@ const adminSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
-      role: {
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    isVerified: {
+      type: Boolean,
+      default: true,
+    },
+    role: {
       type: String,
-      enum: ["superadmin"],
-      default: "superadmin",
+      enum: ["super-admin", "admin"],
+    },
+    phone: {
+      type: String,
     },
   },
 
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Admin", adminSchema);

@@ -11,6 +11,7 @@ import adminRoute from "./routes/admin.js";
 import agentRoute from "./routes/agent.js";
 import mentorRoute from "./routes/mentor.js";
 import { initializeWebSocket } from "./controllers/socket.js";
+import { seedSuperAdmin } from "./scripts/seedSuperAdmin.js";
 // Config
 dotenv.config();
 
@@ -37,6 +38,8 @@ const io = initializeWebSocket(server);
 
 // Connect to database
 await connectDB();
+// seed the super admin after the db connect
+await seedSuperAdmin();
 
 app.use("/api/v1/students", studentRoute(io));
 

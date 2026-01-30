@@ -28,7 +28,7 @@ import {
   getDocumentsByStudent,
   updateDocumentReviewStatus,
   createRequiredDocument,
-  getRequiredDocumentsList
+  getRequiredDocumentsList,
 } from "../controllers/agent/agent.document.js";
 
 // Auth apis
@@ -44,9 +44,28 @@ router.get("/profile/me", protect, getAgentinformation);
 router.get("/students", protect, getStudentList);
 
 // Document
-router.get("/documents/types", protect, getRequiredDocumentsList)
+router.get("/documents/types", protect, getRequiredDocumentsList);
 router.post("/documents/required", protect, createRequiredDocument);
 router.get("/documents/:studentId", protect, getDocumentsByStudent);
-router.patch("/documents/:documentId/review-status", protect, updateDocumentReviewStatus);
+router.patch(
+  "/documents/:documentId/review-status",
+  protect,
+  updateDocumentReviewStatus,
+);
 
+// appointment apis
+router.post("/appointments", protect, createAppointment);
+router.get("/appointments", protect, getAppointments);
+router.patch(
+  "/appointments/:appointmentId/update",
+  protect,
+  updateAppointments,
+);
+router.patch("/appointments/:appointmentId/cancel", protect, cancelAppointment);
+router.patch(
+  "/appointments/:appointmentId/complete",
+  protect,
+  confirmedAppointment,
+);
+router.get("/appointments/search/", protect, searchAppointmentsByStudentName);
 export default router;

@@ -35,7 +35,7 @@ export const createAdmin = async (req, res) => {
       password: hashedPassword,
       role: "admin",
     });
-    //Sending the email to the particular mentor
+    //Sending the email to the particular mentors
     await sendAccountEmail(normalizedEmail, {
       subject: "Your Admin Account is Ready",
       title: "Welcome to EduAgent",

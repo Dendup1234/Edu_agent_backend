@@ -31,6 +31,11 @@ import {
   getRequiredDocumentsList
 } from "../controllers/agent/agent.document.js";
 
+import {
+  generateSAS,
+  confirmUpload
+} from "../controllers/agent/agent.blob.js"
+
 // Auth apis
 router.post("/login", login);
 router.post("/password-reset/send-otp", sendPasswordResetOtp);
@@ -48,5 +53,9 @@ router.get("/documents/types", protect, getRequiredDocumentsList)
 router.post("/documents/required", protect, createRequiredDocument);
 router.get("/documents/:studentId", protect, getDocumentsByStudent);
 router.patch("/documents/:documentId/review-status", protect, updateDocumentReviewStatus);
+
+// Uploads
+router.post("/uploads/sas", protect, generateSAS);
+router.post("/uploads/confirm", protect, confirmUpload);
 
 export default router;

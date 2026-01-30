@@ -58,6 +58,10 @@ router.patch(
   updateDocumentReviewStatus,
 );
 
+// upload
+router.post("/uploads/sas", protect, generateSAS);
+router.post("/uploads/confirm", protect, confirmUpload);
+
 // appointment apis
 router.post("/appointments", protect, createAppointment);
 router.get("/appointments", protect, getAppointments);
@@ -73,4 +77,6 @@ router.patch(
   confirmedAppointment,
 );
 router.get("/appointments/search/", protect, searchAppointmentsByStudentName);
+
+
 export default router;

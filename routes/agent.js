@@ -31,6 +31,11 @@ import {
   getRequiredDocumentsList,
 } from "../controllers/agent/agent.document.js";
 
+import {
+  generateSAS,
+  confirmUpload
+} from "../controllers/agent/agent.blob.js"
+
 // Auth apis
 router.post("/login", login);
 router.post("/password-reset/send-otp", sendPasswordResetOtp);

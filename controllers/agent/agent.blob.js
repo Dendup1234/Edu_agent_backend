@@ -100,12 +100,12 @@ export const confirmUpload = async (req, res) => {
       mimeType,
       size,
       studentId,
-      agencyId,
       documentCategory, // offer_letter | COE | other
       description
     } = req.body;
 
-    const agentId = req.user.sub;
+    const agentId = req.user.id;
+    const agencyId = req.user.agencyId;
 
     if (
       !blobName ||

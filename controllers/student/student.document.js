@@ -60,3 +60,29 @@ export const getDocumentStatus = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
+export const getDocuments = async (req, res) => {
+  try {
+    const studentId = req.user.sub;
+
+    if (!studentId) {
+      return res.status(400).json({ message: "student ID required" });
+    }
+
+    const student = await Student.findById(studentId).select("registeredAgency");
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    const documents = await Document.find({
+      belongsTo: studentId,
+      agency: student.registeredAgency,
+    }).lean();
+
+    return res.status(200).json({ data: documents });
+  } catch (err) {
+    console.error("getDocumentsByStudent:", err);
+    return res.status(500).json({ message: err.message });
+  }
+};

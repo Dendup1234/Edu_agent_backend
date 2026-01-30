@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
+
 import Student from "../../models/student.js";
 import Document from "../../models/document.js";
-import RequiredDocument from "../../models/requiredDocument.js";
 
 import {
   StorageSharedKeyCredential,
@@ -12,6 +12,8 @@ import {
 } from "@azure/storage-blob";
 
 dotenv.config();
+
+// AZURE SETUP
 
 const {
   AZURE_STORAGE_ACCOUNT_NAME: accountName,
@@ -31,13 +33,17 @@ const blobServiceClient = new BlobServiceClient(
 
 const containerClient = blobServiceClient.getContainerClient(containerName);
 
+// UPLOAD CONSTRAINTS
+
 const ALLOWED_TYPES = [
   "image/png",
   "image/jpeg",
   "application/pdf"
 ];
 
-const MAX_SIZE = 50 * 1024 * 1024; 
+const MAX_SIZE = 50 * 1024 * 1024; // 50MB
+
+// GENERATE SAS (AGENT)
 
 export const generateSAS = async (req, res) => {
   try {
@@ -85,19 +91,30 @@ export const generateSAS = async (req, res) => {
   }
 };
 
+// CONFIRM UPLOAD (AGENT)
+
 export const confirmUpload = async (req, res) => {
   try {
     const {
       blobName,
       mimeType,
       size,
+      studentId,
       agencyId,
-      documentType 
+      documentCategory, // offer_letter | COE | other
+      description
     } = req.body;
 
-    const agentId = req.user._id;
+    const agentId = req.user.sub;
 
-    if (!blobName || !mimeType || !size || !documentType || !agencyId) {
+    if (
+      !blobName ||
+      !mimeType ||
+      !size ||
+      !studentId ||
+      !agencyId ||
+      !documentCategory
+    ) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -106,59 +123,38 @@ export const confirmUpload = async (req, res) => {
       return res.status(400).json({ error: "Upload not found" });
     }
 
-    if (documentType === "") {
-      const student = await Student.findByIdAndUpdate(
-        studentId,
-        { profileUrl: blobClient.url },
-        { new: true }
-      );
-
-      if (!student) {
-        return res.status(404).json({ error: "Student not found" });
-      }
-
-      return res.json({ message: "Profile picture uploaded successfully", student });
+    // Validate student exists
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
     }
-
-    const requiredDoc = await RequiredDocument.findOne({
-      name: documentType,
-      agency: agencyId
-    });
-
-    if (!requiredDoc) {
-      return res.status(404).json({ error: "Required document not found for this agency" });
-    }
-
-    const existingDoc = await Document.findOne({
-      uploadedBy: studentId,
-      agency: agencyId,
-      requiredDocument: requiredDoc._id
-    });
 
     const documentData = {
-      uploadedBy: studentId,
+      uploadedBy: agentId,
+      uploaderModel: "Agent",
+      belongsTo: studentId,
       agency: agencyId,
-      requiredDocument: requiredDoc._id,
+
+      requiredDocument: null,
+      documentCategory,
+
       fileName: blobName,
       fileType: mimeType,
       fileSize: size,
       fileURL: blobClient.url,
-      reviewStatus: "under_review",
-      isResubmitted: !!existingDoc
+
+      description
     };
 
-    let newDoc;
-    if (existingDoc) {
-      newDoc = await Document.findByIdAndUpdate(existingDoc._id, documentData, { new: true });
-    } else {
-      newDoc = await Document.create(documentData);
-    }
+    const savedDoc = await Document.create(documentData);
 
-    return res.json({ message: "Document uploaded successfully", document: newDoc });
+    return res.json({
+      message: "Document uploaded successfully",
+      document: savedDoc
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Confirmation failed" });
   }
 };
-

@@ -1,5 +1,5 @@
 import Document from "../../models/document.js";
-
+// get document apis
 export const getDocumentsByStudent = async (req, res) => {
   try {
     const { studentId } = req.params;

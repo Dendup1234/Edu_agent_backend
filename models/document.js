@@ -67,15 +67,12 @@ const documentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
-// VALIDATION RULES
-
-documentSchema.pre("validate", function (next) {
+documentSchema.pre("validate", async function () {
   // STUDENT uploads
   if (this.uploaderModel === "Student") {
     if (!this.requiredDocument) {
-      return next(
-        new Error("Student uploads must reference a RequiredDocument")
+      throw new Error(
+        "Student uploads must reference a RequiredDocument"
       );
     }
 
@@ -86,14 +83,14 @@ documentSchema.pre("validate", function (next) {
   // AGENT uploads
   if (this.uploaderModel === "Agent") {
     if (this.requiredDocument) {
-      return next(
-        new Error("Agent uploads cannot reference RequiredDocument")
+      throw new Error(
+        "Agent uploads cannot reference RequiredDocument"
       );
     }
 
     if (!this.documentCategory) {
-      return next(
-        new Error("Agent uploads must have a documentCategory")
+      throw new Error(
+        "Agent uploads must have a documentCategory"
       );
     }
 
@@ -102,8 +99,6 @@ documentSchema.pre("validate", function (next) {
     this.reviewedBy = null;
     this.isResubmitted = false;
   }
-
-  next();
 });
 
 export default mongoose.model("Document", documentSchema);

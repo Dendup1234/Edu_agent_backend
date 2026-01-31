@@ -78,6 +78,38 @@ export const getAllEvents = async (req, res) => {
     res.status(500).json({ message: e.message });
   }
 };
+// event active and inactive
+export const getEventStatusCount = async (req, res) => {
+  try {
+    const userId = req.user.agencyId;
+    const result = await Event.aggregate([
+      {
+        $match: { organizerId: userId },
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    let active = 0;
+    let inactive = 0;
+
+    result.forEach((r) => {
+      if (r._id === true) active = r.count;
+      if (r._id === false) inactive = r.count;
+    });
+
+    return res.status(200).json({
+      active,
+      inactive,
+      total: active + inactive,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
 
 // Getting all the events in the student page
 export const getAllEventsStudent = async (req, res) => {

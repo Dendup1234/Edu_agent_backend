@@ -25,8 +25,24 @@ import {
   searchStudentByName,
 } from "../controllers/admin/admin.lead.js";
 
-import { getAllMentor } from "../controllers/admin/admin.mentor.js";
+import {
+  getAllMentor,
+  getMentorDashboard,
+  searchMentorByName,
+  getStudentMentorMatched,
+  searchStudentMentorMatched,
+} from "../controllers/admin/admin.mentor.js";
+import {
+  getAllEvents,
+  searchEventsByName,
+  getEventStatusCount,
+} from "../controllers/admin/admin.event.js";
 
+import {
+  getAllUniversitiesAdmin,
+  getUniDashboard,
+  searchUniversitiesAdmin,
+} from "../controllers/admin/admin.uni.js";
 const router = express.Router();
 // login api
 router.post("/login", login);
@@ -52,4 +68,20 @@ router.get("/students/", protect, getStudentList);
 router.get("/students/search", protect, searchStudentByName);
 
 //mentor api
+router.get("/mentors", protect, getAllMentor);
+router.get("/mentors/dashboard", protect, getMentorDashboard);
+router.get("/mentors/search", protect, searchMentorByName);
+router.get("/mentors/students/", protect, getStudentMentorMatched);
+router.get("/mentors/students/search", protect, searchStudentMentorMatched);
+
+//event api
+router.get("/events", protect, getAllEvents);
+router.get("/events/search", protect, searchEventsByName);
+router.get("/events/dashboard", protect, getEventStatusCount);
+
+// university
+router.get("/uni", protect, getAllUniversitiesAdmin);
+router.get("/uni/dashboard", protect, getUniDashboard);
+router.get("/uni/search", protect, searchUniversitiesAdmin);
+
 export default router;

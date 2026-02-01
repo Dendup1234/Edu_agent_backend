@@ -124,15 +124,15 @@ export const getStudentMentorMatched = async (req, res) => {
 // Searching api from student name
 export const searchStudentMentorMatched = async (req, res) => {
   try {
-    const name = (req.query.q || "").trim();
-    if (!name) {
+    const q = (req.query.q || "").trim();
+    if (!q) {
       return res.status(400).json({ message: "Query param 'q' is required" });
     }
 
     const students = await Student.find({
       isValid: true,
       connectedMentor: { $ne: null },
-      name: { $regex: name, $options: "i" },
+      name: { $regex: q, $options: "i" },
     })
       .select(
         "name registeredAgency selectedCourse selectedUniversity connectedMentor createdAt",

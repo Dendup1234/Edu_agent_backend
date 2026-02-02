@@ -160,10 +160,28 @@ export const updateStudentPushToken = async (req, res) => {
   }
 };
 
+// getting the notification count if isRead is false
+export const getMyNotificationCount = async (req, res) => {
+  try {
+    const studentId = req.user.sub;
+    if (!studentId) return res.status(401).json({ message: "Invalid token" });
+    const notificationCount = await Notification.countDocuments({
+      receiverId: studentId,
+      isRead: false,
+    });
+    return res.status(200).json({
+      total: notificationCount,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 // getting the notification history
 export const getMyNotificationHistory = async (req, res) => {
   try {
-    const studentId = req.user?.sub;
+    const studentId = req.user.sub;
     if (!studentId) return res.status(401).json({ message: "Invalid token" });
 
     const notifications = await Notification.find({
@@ -183,6 +201,7 @@ export const getMyNotificationHistory = async (req, res) => {
   }
 };
 
+// push notification test
 export const sendStudentPush = async (req, res) => {
   try {
     const { studentId, triggerId, title, body } = req.body;

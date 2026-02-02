@@ -18,6 +18,7 @@ import {
   updateStudentPushToken,
   getMyNotificationHistory,
   sendStudentPush,
+  getMyNotificationCount,
 } from "../controllers/student/student.profile.js";
 
 import { searchUniByName } from "../controllers/student/student.uni.js";

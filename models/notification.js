@@ -24,7 +24,12 @@ const notificationSchema = new Schema(
     body: { type: String, required: true },
 
     expoTicketId: { type: String, default: null },
-
+    // status
+    status: {
+      type: String,
+      enum: ["queued", "sent", "failed"],
+      default: "queued",
+    },
     error: { type: String, default: null },
 
     isRead: {

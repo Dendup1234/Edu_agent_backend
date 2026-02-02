@@ -184,15 +184,20 @@ export const getMyNotificationHistory = async (req, res) => {
     const studentId = req.user.sub;
     if (!studentId) return res.status(401).json({ message: "Invalid token" });
 
+    // updating all the notification as read as true
+    await Notification.updateMany(
+      { receiverId: studentId, isRead: false },
+      { $set: { isRead: true } },
+    );
     const notifications = await Notification.find({
       receiverId: studentId,
     })
+      //createdAt as the notfication send time like 2 days ago or 1 days ago
       .select("title body status createdAt isRead")
       .sort({ createdAt: -1 })
       .lean();
 
     return res.status(200).json({
-      total: notifications.length,
       notifications,
     });
   } catch (e) {

@@ -65,6 +65,12 @@ export default function studentRoute(io) {
   router.delete("/profile/:studentId", protect, deactivateStudent);
   router.patch("/students/update-push-token", protect, updateStudentPushToken);
   router.post("/students/notification/test", protect, sendStudentPush);
+  router.get("/students/notification/count", protect, getMyNotificationCount);
+  router.get(
+    "/students/notification/history",
+    protect,
+    getMyNotificationHistory,
+  );
 
   // Select Agency — pass io safely
   router.post("/select-agency", protect, selectAgency(io));

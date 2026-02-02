@@ -10,7 +10,7 @@ export const getDocumentsByStudent = async (req, res) => {
     }
 
     const documents = await Document.find({
-      uploadedBy: studentId,
+      belongsTo: studentId,
       agency,
     }).lean();
 

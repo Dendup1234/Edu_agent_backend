@@ -101,6 +101,8 @@ export default function studentRoute(io) {
 
   // Application & Document status
   router.get("/document-list", protect, getRequiredDocumentsList);
+  router.get("/document-list/admission", protect, getRequiredAdmissionDocumentsList)
+   router.get("/document-list/visa", protect, getRequiredAdmissionDocumentsList)
   router.get("/documents/status", protect, getDocumentStatus);
   router.get("/documents", protect, getDocuments);
 

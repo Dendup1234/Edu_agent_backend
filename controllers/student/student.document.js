@@ -2,7 +2,7 @@ import Document from "../../models/document.js";
 import RequiredDocument from "../../models/requiredDocument.js";
 import Student from "../../models/student.js";
 
-export const getRequiredDocumentsList = async (req, res) => {
+export const getRequiredAdmissionDocumentsList = async (req, res) => {
   try {
     const studentId = req.user.sub;
 
@@ -13,7 +13,30 @@ export const getRequiredDocumentsList = async (req, res) => {
     }
 
     const requiredDocument = await RequiredDocument.find({
-      agency: student.registeredAgency,
+      agency: student.registeredAgency, stage:"admission"
+    })
+      .select("name description") 
+      .lean();
+
+    return res.status(200).json({ data: requiredDocument });
+  } catch (err) {
+    console.error("getRequiredDocumentsForStudent:", err);
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+export const getRequiredVisaDocumentsList = async (req, res) => {
+  try {
+    const studentId = req.user.sub;
+
+    const student = await Student.findById(studentId).select("registeredAgency");
+
+    if (!student || !student.registeredAgency) {
+      return res.status(404).json({ message: "Student or agency not found" });
+    }
+
+    const requiredDocument = await RequiredDocument.find({
+      agency: student.registeredAgency, stage:"visa"
     })
       .select("name description") 
       .lean();
@@ -47,7 +70,7 @@ export const getDocumentStatus = async (req, res) => {
       uploadedBy: studentId,
       agency: student.registeredAgency,
     })
-    .select("documentName reviewStatus")
+    .select("documentName reviewStatus review")
     .populate({
       path: "requiredDocument",
       select: "name",

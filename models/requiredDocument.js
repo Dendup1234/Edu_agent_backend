@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
 
-const requiredDocumentSchema = new mongoose.Schema(
+const requiredDocumentListSchema = new mongoose.Schema(
   {
     name: { type: String },
     description: { type: String },
+    stage: {
+      type: String,
+      enum: ["admission", "visa"],
+      required: true,
+    },
     agency: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Agency"
@@ -12,4 +17,4 @@ const requiredDocumentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("RequiredDocument", requiredDocumentSchema);
+export default mongoose.model("RequiredDocument", requiredDocumentListSchema);

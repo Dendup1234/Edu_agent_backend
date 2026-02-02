@@ -1,6 +1,6 @@
 import Student from "../../models/student.js";
 
-// Lead profile dashboard (global)
+// Lead profile dashboard (globals)
 export const getLeadDashboard = async (req, res) => {
   try {
     const result = await Student.aggregate([
@@ -256,3 +256,4 @@ export const searchStudentByName = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+

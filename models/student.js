@@ -60,7 +60,10 @@ const StudentSchema = new Schema(
         ref: "Ticket",
       },
     ],
-
+    connectedMentor: {
+      type: Types.ObjectId,
+      ref: "Mentor",
+    },
     dob: {
       type: Date,
     },
@@ -95,7 +98,7 @@ const StudentSchema = new Schema(
     isValid: {
       type: Boolean,
       default: true,
-    }
+    },
   },
   { timestamps: true },
 );

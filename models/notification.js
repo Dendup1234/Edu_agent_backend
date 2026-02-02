@@ -1,43 +1,43 @@
-import mongoose from "mongoose";
-const { Schema, Types } = mongoose;
+import mongoose, { Schema, Types } from "mongoose";
 
-const notificationSchema = new Schema({
-	// User type for the notification
-	userType: {
-		type: String,
-		enum: ["Student", "Mentor", "Agent"],
-	},
+const notificationSchema = new Schema(
+  {
+    receiverType: {
+      type: String,
+      enum: ["Student", "Mentor", "Agent", "Agency"],
+    },
+    receiverId: {
+      type: Types.ObjectId,
+      refPath: "receiverType",
+    },
 
-	receiverId: {
-		type: Types.ObjectId,
-		refPath: "userType",
+    triggeredByType: {
+      type: String,
+      enum: ["Student", "Mentor", "Agent", "Agency"],
+    },
+    triggeredById: {
+      type: Types.ObjectId,
+      refPath: "triggeredByType",
+    },
 
-	},
-	triggeredById: {
-		type: Types.ObjectId,
-		refPath: "userType",
-	},
-	//Notification types like alert or accepted notification
-	type: {
-		type: String,
-		required: true,
-	},
-	title: {
-		type: String,
-		required: true
-	},
-	message: {
-		type: String,
-		required: true
-	},
-	isRead: {
-		type: Boolean,
-		default: false,
-	},
-},
-	{
-		timestamps: true
-	}
+    title: { type: String, required: true },
+    body: { type: String, required: true },
+
+    expoTicketId: { type: String, default: null },
+    // status
+    status: {
+      type: String,
+      enum: ["queued", "sent", "failed"],
+      default: "queued",
+    },
+    error: { type: String, default: null },
+
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { timestamps: true },
 );
 
-export const Notification = mongoose.model('Notification', notificationSchema);
+export default mongoose.model("Notification", notificationSchema);

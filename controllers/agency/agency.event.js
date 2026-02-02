@@ -64,7 +64,7 @@ export const createEvent = async (req, res) => {
   }
 };
 
-// Getting all the events in the agency pages
+// Getting all the events in the agency page
 export const getAllEvents = async (req, res) => {
   try {
     const userId = req.user.agencyId;

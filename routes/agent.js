@@ -53,8 +53,8 @@ router.get("/students", protect, getStudentList);
 // Document
 router.get("/document-list/admission", protect, getRequiredAdmissionDocumentsList);
 router.get("/document-list/visa", protect, getRequiredVisaDocumentsList);
-router.post("/documents/required-list", protect, createRequiredDocument);
-router.patch("/documents/:Id/required-list", protect, updateRequiredDocumentsList)
+router.post("/documents/required", protect, createRequiredDocument);
+router.patch("/documents/:Id/required", protect, updateRequiredDocumentsList)
 router.get("/documents/:studentId", protect, getDocumentsByStudent);
 router.patch("/documents/:documentId/review-status", protect, updateDocumentReviewStatus);
 

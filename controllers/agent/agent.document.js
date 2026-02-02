@@ -1,14 +1,13 @@
 import Document from "../../models/document.js";
 import RequiredDocument from "../../models/requiredDocument.js";
-import Student from "../../models/student.js";
 
 export const createRequiredDocument = async (req, res) => {
   try {
     const agency = req.user.agencyId;
     const { name, description } = req.body;
 
-    if (!name) {
-      return res.status(400).json({ message: "name is required" });
+    if (!name || !description) {
+      return res.status(400).json({ message: "missing required field" });
     }
 
     const exists = await RequiredDocument.findOne({ name, agency });
@@ -31,6 +30,34 @@ export const createRequiredDocument = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
+export const updateRequiredDocumentsList = async(req, res) => {
+  try {
+    const agency = req.user.agencyId;
+    const { Id } = req.params;
+    const { name, description } = req.body;
+
+    if (!name || !description) {
+      return res.status(400).json({ message: "missing required field" });
+    }
+
+    const update = {name, description};
+
+    const requiredDocument = await RequiredDocument.findByIdAndUpdate(
+      { _id: listId, agency },
+      update,
+      { new: true, runValidators: true }
+    )
+
+    return res.status(201).json({
+      message: "Updated successfully",
+      data: requiredDocument,
+    });
+  } catch (err) {
+    console.error("updateRequiredDocument:", err);
+    return res.status(500).json({ message: err.message });
+  }
+}
 
 export const getRequiredDocumentsList = async (req, res) => {
   try {
@@ -74,6 +101,7 @@ export const updateDocumentReviewStatus = async (req, res) => {
   try {
     const { documentId } = req.params;
     const { reviewStatus } = req.body;
+    const { reviewComment } = req.body;
     const agentId = req.user.id;
     const agency = req.user.agencyId;
 
@@ -81,7 +109,7 @@ export const updateDocumentReviewStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid review status" });
     }
 
-    const update = { reviewStatus };
+    const update = { reviewStatus, reviewComment };
 
     if (reviewStatus === "approved") {
       update.verifiedBy = agentId;

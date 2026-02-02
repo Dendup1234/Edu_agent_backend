@@ -47,7 +47,7 @@ export const getDocumentStatus = async (req, res) => {
       uploadedBy: studentId,
       agency: student.registeredAgency,
     })
-    .select("documentName reviewStatus")
+    .select("documentName reviewStatus reviewComment")
     .populate({
       path: "requiredDocument",
       select: "name",

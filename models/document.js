@@ -52,6 +52,10 @@ const documentSchema = new mongoose.Schema(
       default: "under_review",
     },
 
+    reviewComment: {
+      type: String
+    },
+
     // Agent who reviewed student-uploaded docs
     reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -97,6 +101,7 @@ documentSchema.pre("validate", async function () {
     // Agent docs are not reviewed
     this.reviewStatus = null;
     this.reviewedBy = null;
+    this.reviewComment = null;
     this.isResubmitted = false;
   }
 });

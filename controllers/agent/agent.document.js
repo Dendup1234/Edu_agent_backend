@@ -45,7 +45,7 @@ export const updateRequiredDocumentsList = async(req, res) => {
     const update = {name, description};
 
     const requiredDocument = await RequiredDocument.findByIdAndUpdate(
-      { _id: listId, agency },
+      { _id: Id, agency },
       update,
       { new: true, runValidators: true }
     )

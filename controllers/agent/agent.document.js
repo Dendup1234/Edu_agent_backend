@@ -4,13 +4,13 @@ import RequiredDocument from "../../models/requiredDocument.js";
 export const createRequiredDocument = async (req, res) => {
   try {
     const agency = req.user.agencyId;
-    const { name, description } = req.body;
+    const { name, description, stage } = req.body;
 
-    if (!name || !description) {
+    if (!name || !description || !stage) {
       return res.status(400).json({ message: "missing required field" });
     }
 
-    const exists = await RequiredDocument.findOne({ name, agency });
+    const exists = await RequiredDocument.findOne({ name, agency, stage });
     if (exists) {
       return res.status(409).json({ message: "Document already exists" });
     }
@@ -18,6 +18,7 @@ export const createRequiredDocument = async (req, res) => {
     const requiredDocument = await RequiredDocument.create({
       name,
       description,
+      stage,
       agency,
     });
 
@@ -59,11 +60,26 @@ export const updateRequiredDocumentsList = async(req, res) => {
   }
 }
 
-export const getRequiredDocumentsList = async (req, res) => {
+export const getRequiredAdmissionDocumentsList = async (req, res) => {
   try {
     const agency = req.user.agencyId;
 
-    const documentTypes = await RequiredDocument.find({ agency })
+    const documentTypes = await RequiredDocument.find({ agency, stage:"admission" })
+      .select("name description")
+      .lean();
+
+    return res.status(200).json({ data: documentTypes });
+  } catch (err) {
+    console.error("getRequiredDocuments:", err);
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+export const getRequiredVisaDocumentsList = async (req, res) => {
+  try {
+    const agency = req.user.agencyId;
+
+    const documentTypes = await RequiredDocument.find({ agency, stage:"visa" })
       .select("name description")
       .lean();
 

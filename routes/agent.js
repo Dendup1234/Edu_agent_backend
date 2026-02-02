@@ -29,7 +29,8 @@ import {
   updateDocumentReviewStatus,
   createRequiredDocument,
   updateRequiredDocumentsList,
-  getRequiredDocumentsList,
+  getRequiredAdmissionDocumentsList,
+  getRequiredVisaDocumentsList
 } from "../controllers/agent/agent.document.js";
 
 import {
@@ -50,9 +51,10 @@ router.get("/profile/me", protect, getAgentinformation);
 router.get("/students", protect, getStudentList);
 
 // Document
-router.get("/documents/types", protect, getRequiredDocumentsList);
-router.post("/documents/required", protect, createRequiredDocument);
-router.patch("/documents/:Id/required", protect, updateRequiredDocumentsList)
+router.get("/document-list/admission", protect, getRequiredAdmissionDocumentsList);
+router.get("/document-list/visa", protect, getRequiredVisaDocumentsList);
+router.post("/documents/required-list", protect, createRequiredDocument);
+router.patch("/documents/:Id/required-list", protect, updateRequiredDocumentsList)
 router.get("/documents/:studentId", protect, getDocumentsByStudent);
 router.patch("/documents/:documentId/review-status", protect, updateDocumentReviewStatus);
 

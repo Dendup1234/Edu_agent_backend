@@ -20,7 +20,6 @@ const StudentSchema = new Schema(
       type: String,
       select: false,
     },
-
     googleId: {
       type: String,
     },
@@ -98,6 +97,11 @@ const StudentSchema = new Schema(
     isValid: {
       type: Boolean,
       default: true,
+    },
+    // push token for the notification
+    expoPushToken: {
+      type: String,
+      default: null,
     },
   },
   { timestamps: true },

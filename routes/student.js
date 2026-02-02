@@ -15,6 +15,9 @@ import {
   updateProfile,
   selectAgency,
   deactivateStudent,
+  updateStudentPushToken,
+  getMyNotificationHistory,
+  sendStudentPush,
 } from "../controllers/student/student.profile.js";
 
 import { searchUniByName } from "../controllers/student/student.uni.js";
@@ -37,7 +40,11 @@ import {
 
 import { getConversationMessages } from "../controllers/message.js";
 
-import { getDocumentStatus, getRequiredDocumentsList, getDocuments } from "../controllers/student/student.document.js";
+import {
+  getDocumentStatus,
+  getRequiredDocumentsList,
+  getDocuments,
+} from "../controllers/student/student.document.js";
 
 export default function studentRoute(io) {
   const router = express.Router();
@@ -55,6 +62,8 @@ export default function studentRoute(io) {
   router.get("/profile", protect, getProfile);
   router.patch("/profile", protect, updateProfile);
   router.delete("/profile/:studentId", protect, deactivateStudent);
+  router.patch("/students/update-push-token", protect, updateStudentPushToken);
+  router.post("/students/notification/test", protect, sendStudentPush);
 
   // Select Agency — pass io safely
   router.post("/select-agency", protect, selectAgency(io));
@@ -84,7 +93,7 @@ export default function studentRoute(io) {
   router.post("/mentors/connect/:mentorId", protect, connectMentor);
 
   // Application & Document status
-  router.get("/document-list", protect, getRequiredDocumentsList)
+  router.get("/document-list", protect, getRequiredDocumentsList);
   router.get("/documents/status", protect, getDocumentStatus);
   router.get("/documents", protect, getDocuments);
 

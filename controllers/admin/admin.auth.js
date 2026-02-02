@@ -35,6 +35,7 @@ export const login = async (req, res) => {
     const token = await signToken({
       id: user._id.toString(), // agent id
       email: user.email,
+      actor: "Admin",
       isVerified: user.isVerified,
     });
     // unauthorized

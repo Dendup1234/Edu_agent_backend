@@ -38,6 +38,8 @@ import {
   confirmUpload
 } from "../controllers/agent/agent.blob.js"
 
+import { getVisaAgent } from "../controllers/agent/agent.visaofficerlist.js";
+
 // Auth apis
 router.post("/login", login);
 router.post("/password-reset/send-otp", sendPasswordResetOtp);
@@ -50,11 +52,12 @@ router.get("/profile/me", protect, getAgentinformation);
 // admission officers apis
 router.get("/students", protect, getStudentList);
 
+
 // Document
 router.get("/document-list/admission", protect, getRequiredAdmissionDocumentsList);
 router.get("/document-list/visa", protect, getRequiredVisaDocumentsList);
 router.post("/documents/required", protect, createRequiredDocument);
-router.patch("/documents/:Id/required", protect, updateRequiredDocumentsList)
+router.patch("/documents/:Id/required", protect, updateRequiredDocumentsList);
 router.get("/documents/:studentId", protect, getDocumentsByStudent);
 router.patch("/documents/:documentId/review-status", protect, updateDocumentReviewStatus);
 
@@ -77,6 +80,8 @@ router.patch(
   confirmedAppointment,
 );
 router.get("/appointments/search/", protect, searchAppointmentsByStudentName);
+
+router.get("/agent-list", protect, getVisaAgent);
 
 
 export default router;

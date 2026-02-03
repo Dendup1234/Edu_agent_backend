@@ -43,7 +43,12 @@ export const connectMentor = async (req, res) => {
       { $push: { mentees: { student: userId, status: "pending" } } },
       { new: true, runValidators: true },
     );
-
+    // If mentor not found (or student already existed)
+    if (!mentor) {
+      return res.status(404).json({
+        message: "Mentor not found or request already exists",
+      });
+    }
     // updating the student schema
     const student = await Student.findByIdAndUpdate(
       userId,
@@ -55,13 +60,6 @@ export const connectMentor = async (req, res) => {
       },
       { new: true },
     );
-
-    // If mentor not found (or student already existed)
-    if (!mentor) {
-      return res.status(404).json({
-        message: "Mentor not found or request already exists",
-      });
-    }
 
     return res.status(200).json({
       message: "Success",

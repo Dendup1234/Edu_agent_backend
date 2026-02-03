@@ -153,7 +153,6 @@ export const cancelMenteeStatus = async (req, res) => {
   try {
     const userId = req.user.id;
     const { studentId } = req.params;
-    console.log(userId);
     // Confirming the mentee's status to confirmed
     const mentor = await Mentor.findOneAndUpdate(
       {

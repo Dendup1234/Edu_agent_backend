@@ -62,7 +62,7 @@ export const login = async (req, res) => {
   }
 };
 
-// change password similar as the previous ones
+// change password similar as the previous oness
 // RESET PASSWORD FLOW
 
 // SEND PASSWORD RESET OTP

@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
-
+import { sendStudentPushNotification } from "../../utils/notification.js";
 import Student from "../../models/student.js";
 import Document from "../../models/document.js";
 
@@ -8,7 +8,7 @@ import {
   StorageSharedKeyCredential,
   BlobServiceClient,
   generateBlobSASQueryParameters,
-  BlobSASPermissions
+  BlobSASPermissions,
 } from "@azure/storage-blob";
 
 dotenv.config();
@@ -18,28 +18,24 @@ dotenv.config();
 const {
   AZURE_STORAGE_ACCOUNT_NAME: accountName,
   AZURE_STORAGE_ACCOUNT_KEY: accountKey,
-  AZURE_CONTAINER_NAME: containerName
+  AZURE_CONTAINER_NAME: containerName,
 } = process.env;
 
 const sharedKeyCredential = new StorageSharedKeyCredential(
   accountName,
-  accountKey
+  accountKey,
 );
 
 const blobServiceClient = new BlobServiceClient(
   `https://${accountName}.blob.core.windows.net`,
-  sharedKeyCredential
+  sharedKeyCredential,
 );
 
 const containerClient = blobServiceClient.getContainerClient(containerName);
 
 // UPLOAD CONSTRAINTS
 
-const ALLOWED_TYPES = [
-  "image/png",
-  "image/jpeg",
-  "application/pdf"
-];
+const ALLOWED_TYPES = ["image/png", "image/jpeg", "application/pdf"];
 
 const MAX_SIZE = 50 * 1024 * 1024; // 50MB
 
@@ -60,7 +56,7 @@ export const generateSAS = async (req, res) => {
     const extMap = {
       "image/jpeg": "jpg",
       "image/png": "png",
-      "application/pdf": "pdf"
+      "application/pdf": "pdf",
     };
 
     const blobName = `${uuidv4()}.${extMap[mimeType]}`;
@@ -74,16 +70,16 @@ export const generateSAS = async (req, res) => {
         blobName,
         permissions: BlobSASPermissions.parse("cw"),
         startsOn,
-        expiresOn
+        expiresOn,
       },
-      sharedKeyCredential
+      sharedKeyCredential,
     ).toString();
 
     const blobClient = containerClient.getBlockBlobClient(blobName);
 
     res.json({
       sasUrl: `${blobClient.url}?${sasToken}`,
-      blobName
+      blobName,
     });
   } catch (err) {
     console.error(err);
@@ -101,7 +97,7 @@ export const confirmUpload = async (req, res) => {
       size,
       studentId,
       documentCategory, // offer_letter | COE | other
-      description
+      description,
     } = req.body;
 
     const agentId = req.user.id;
@@ -143,16 +139,25 @@ export const confirmUpload = async (req, res) => {
       fileSize: size,
       fileURL: blobClient.url,
 
-      description
+      description,
     };
 
+    // saving the document
     const savedDoc = await Document.create(documentData);
 
-    return res.json({
-      message: "Document uploaded successfully",
-      document: savedDoc
+    //sending the notification
+    await sendStudentPushNotification({
+      studentId,
+      triggerId: agentId,
+      title: `your ${documentCategory} have been uploaded`,
+      body: `please review your${documentCategory}document in the app`,
     });
 
+    // return success message
+    return res.json({
+      message: "Document uploaded successfully",
+      document: savedDoc,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Confirmation failed" });

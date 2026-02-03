@@ -44,6 +44,8 @@ import { getConversationMessages } from "../controllers/message.js";
 import {
   getDocumentStatus,
   getDocuments,
+  getRequiredAdmissionDocumentsList,
+  getRequiredVisaDocumentsList
 } from "../controllers/student/student.document.js";
 
 export default function studentRoute(io) {
@@ -99,6 +101,8 @@ export default function studentRoute(io) {
   router.post("/mentors/connect/:mentorId", protect, connectMentor);
 
   // Application & Document status
+  router.get("/document-list/admission", protect, getRequiredAdmissionDocumentsList)
+  router.get("document-list/visa", protect, getRequiredVisaDocumentsList)
   router.get("/documents/status", protect, getDocumentStatus);
   router.get("/documents", protect, getDocuments);
 

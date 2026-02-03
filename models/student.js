@@ -60,8 +60,15 @@ const StudentSchema = new Schema(
       },
     ],
     connectedMentor: {
-      type: Types.ObjectId,
-      ref: "Mentor",
+      status: {
+        type: String,
+        enum: ["pending", "rejected", "confirmed"],
+        default: "pending",
+      },
+      mentor: {
+        type: Types.ObjectId,
+        ref: "Mentor",
+      },
     },
     dob: {
       type: Date,

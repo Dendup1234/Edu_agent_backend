@@ -41,6 +41,7 @@ export const login = async (req, res) => {
       agencyId: user.partnerAgency, // agency id
       email: user.email,
       isVerified: user.isVerified,
+      actor: "Mentor",
     });
 
     return res.json({

@@ -5,6 +5,7 @@ import {
 } from "../../utils/sendEmail.js";
 import Appointment from "../../models/appointment.js";
 import Student from "../../models/student.js";
+import { sendStudentPushNotification } from "../../utils/notification.js";
 
 // Getting the profile
 export const getProfile = async (req, res) => {
@@ -110,9 +111,14 @@ export const confirmMenteeStatus = async (req, res) => {
     // Having to connect the student to the mentor
     const updatedStudent = await Student.findByIdAndUpdate(
       studentId,
-      { $set: { connectedMentor: userId } },
-      { new: true },
-    ).select("_id name email");
+      {
+        $set: {
+          "connectedMentor.mentor": userId,
+          "connectedMentor.status": "confirmed",
+        },
+      },
+      { new: true, runValidators: true },
+    ).select("_id name email connectedMentor");
 
     // Find the confirmed mentee entry
     const confirmedMentee = mentor.mentees.find(
@@ -147,6 +153,7 @@ export const cancelMenteeStatus = async (req, res) => {
   try {
     const userId = req.user.id;
     const { studentId } = req.params;
+    console.log(userId);
     // Confirming the mentee's status to confirmed
     const mentor = await Mentor.findOneAndUpdate(
       {
@@ -165,6 +172,25 @@ export const cancelMenteeStatus = async (req, res) => {
         message: "Already confirmed or rejected",
       });
     }
+    // Having to connect the student to the mentor
+    const updatedStudent = await Student.findByIdAndUpdate(
+      studentId,
+      {
+        $set: {
+          "connectedMentor.mentor": userId,
+          "connectedMentor.status": "rejected",
+        },
+      },
+      { new: true, runValidators: true },
+    ).select("_id name email connectedMentor");
+
+    // sending the notification to the student
+    await sendStudentPushNotification({
+      studentId: updatedStudent._id,
+      triggerId: userId,
+      title: `Your connection with ${mentor.name} was rejected`,
+      body: "Connect with different mentor",
+    });
     return res
       .status(200)
       .json({ message: "Connection rejected", mentor: mentor });

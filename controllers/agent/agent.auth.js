@@ -37,6 +37,7 @@ export const login = async (req, res) => {
       agencyId: user.agency.toString(), // agency id
       email: user.email,
       isVerified: user.isVerified,
+      actor: "Agent",
     });
     // unauthorized
     if (!user.isActive) {

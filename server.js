@@ -3,7 +3,7 @@ import http from "http";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
-
+import helmet from "helmet";
 import studentRoute from "./routes/student.js";
 import agencyRoute from "./routes/agency.js";
 import oAuthRoute from "./routes/oAuth.js";
@@ -12,11 +12,24 @@ import agentRoute from "./routes/agent.js";
 import mentorRoute from "./routes/mentor.js";
 import { initializeWebSocket } from "./controllers/socket.js";
 import { seedSuperAdmin } from "./scripts/seedSuperAdmin.js";
+import rateLimit from "express-rate-limit";
+
 // Config
 dotenv.config();
 
+// rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+});
 // Express app command
 const app = express();
+
+// rate limiting
+app.use(limiter);
+//helmet config
+app.use(helmet());
+
 app.use(express.json());
 app.use(cors());
 
@@ -47,4 +60,3 @@ app.use("/api/v1/students", studentRoute(io));
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-

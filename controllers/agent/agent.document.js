@@ -1,6 +1,7 @@
 import Document from "../../models/document.js";
 import RequiredDocument from "../../models/requiredDocument.js";
-
+import { sendStudentPushNotification } from "../../utils/notification.js";
+import { getDocumentReviewNotification } from "../../utils/documentStatus.js";
 export const createRequiredDocument = async (req, res) => {
   try {
     const agency = req.user.agencyId;
@@ -32,7 +33,7 @@ export const createRequiredDocument = async (req, res) => {
   }
 };
 
-export const updateRequiredDocumentsList = async(req, res) => {
+export const updateRequiredDocumentsList = async (req, res) => {
   try {
     const agency = req.user.agencyId;
     const { Id } = req.params;
@@ -42,13 +43,13 @@ export const updateRequiredDocumentsList = async(req, res) => {
       return res.status(400).json({ message: "missing required field" });
     }
 
-    const update = {name, description};
+    const update = { name, description };
 
     const requiredDocument = await RequiredDocument.findByIdAndUpdate(
       { _id: Id, agency },
       update,
-      { new: true, runValidators: true }
-    )
+      { new: true, runValidators: true },
+    );
 
     return res.status(201).json({
       message: "Updated successfully",
@@ -58,13 +59,16 @@ export const updateRequiredDocumentsList = async(req, res) => {
     console.error("updateRequiredDocument:", err);
     return res.status(500).json({ message: err.message });
   }
-}
+};
 
 export const getRequiredAdmissionDocumentsList = async (req, res) => {
   try {
     const agency = req.user.agencyId;
 
-    const documentTypes = await RequiredDocument.find({ agency, stage:"admission" })
+    const documentTypes = await RequiredDocument.find({
+      agency,
+      stage: "admission",
+    })
       .select("name description")
       .lean();
 
@@ -79,7 +83,7 @@ export const getRequiredVisaDocumentsList = async (req, res) => {
   try {
     const agency = req.user.agencyId;
 
-    const documentTypes = await RequiredDocument.find({ agency, stage:"visa" })
+    const documentTypes = await RequiredDocument.find({ agency, stage: "visa" })
       .select("name description")
       .lean();
 
@@ -113,11 +117,11 @@ export const getDocumentsByStudent = async (req, res) => {
 
 const ALLOWED_STATUSES = ["under_review", "approved", "reupload", "rejected"];
 
+// updating the document review status
 export const updateDocumentReviewStatus = async (req, res) => {
   try {
     const { documentId } = req.params;
-    const { reviewStatus } = req.body;
-    const { reviewComment } = req.body;
+    const { reviewStatus, reviewComment } = req.body;
     const agentId = req.user.id;
     const agency = req.user.agencyId;
 
@@ -134,12 +138,37 @@ export const updateDocumentReviewStatus = async (req, res) => {
     const document = await Document.findOneAndUpdate(
       { _id: documentId, agency },
       update,
-      { new: true, runValidators: true }
-    );
+      { new: true, runValidators: true },
+    ).populate({
+      path: "requiredDocument",
+      select: "name",
+    });
 
+    // finding the document names
+    const documentName = document.requiredDocument
+      ? document.requiredDocument.name
+      : null;
+
+    // finding the student Id
+    const studentId = document.belongsTo;
+
+    // build notification content
+    const notificationContent = getDocumentReviewNotification(
+      reviewStatus,
+      documentName,
+    );
+    // document not found
     if (!document) {
       return res.status(404).json({ message: "Document not found" });
     }
+
+    // notifying the student when status is change for document
+    await sendStudentPushNotification({
+      studentId,
+      triggerId: agentId,
+      title: notificationContent.title,
+      body: notificationContent.body,
+    });
 
     return res.status(200).json({
       message: "Update successful",

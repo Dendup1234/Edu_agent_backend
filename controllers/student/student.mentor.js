@@ -44,6 +44,18 @@ export const connectMentor = async (req, res) => {
       { new: true, runValidators: true },
     );
 
+    // updating the student schema
+    const student = await Student.findByIdAndUpdate(
+      userId,
+      {
+        connectedMentor: {
+          mentor: mentorId,
+          status: "pending",
+        },
+      },
+      { new: true },
+    );
+
     // If mentor not found (or student already existed)
     if (!mentor) {
       return res.status(404).json({

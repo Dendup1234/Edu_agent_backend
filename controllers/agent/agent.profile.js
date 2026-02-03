@@ -14,7 +14,7 @@ export const getAgentinformation = async (req, res) => {
         select: "name permissions",
       })
       .lean();
-    // returing a status
+    // returing a statuses 
     return res.status(200).json({ message: "Success", agent: agent });
   } catch (e) {
     console.log(e);

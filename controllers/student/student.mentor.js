@@ -39,7 +39,7 @@ export const connectMentor = async (req, res) => {
 
     // Add mentee only if this student isn't already in mentees array
     const mentor = await Mentor.findOneAndUpdate(
-      { _id: mentorId },
+      { _id: mentorId, "mentees.student": { $ne: userId } },
       { $push: { mentees: { student: userId, status: "pending" } } },
       { new: true, runValidators: true },
     );

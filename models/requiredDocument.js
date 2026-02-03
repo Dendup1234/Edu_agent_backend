@@ -1,20 +1,42 @@
 import mongoose from "mongoose";
 
-const requiredDocumentListSchema = new mongoose.Schema(
+const requiredDocumentSchema = new mongoose.Schema(
   {
-    name: { type: String },
-    description: { type: String },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    description: {
+      type: String,
+      required: true,
+    },
+
     stage: {
       type: String,
       enum: ["admission", "visa"],
       required: true,
+      index: true,
     },
+
     agency: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Agency"
-    }
+      ref: "Agency",
+      required: true,
+      index: true,
+    },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("RequiredDocument", requiredDocumentListSchema);
+// One template per agency + stage + name
+requiredDocumentSchema.index(
+  { agency: 1, stage: 1, name: 1 },
+  { unique: true }
+);
+
+export default mongoose.model(
+  "RequiredDocument",
+  requiredDocumentSchema
+);

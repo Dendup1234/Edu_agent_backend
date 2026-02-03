@@ -9,6 +9,8 @@ import Mentor from "../../models/mentor.js";
 import bcrypt from "bcryptjs";
 import Student from "../../models/student.js";
 import mongoose from "mongoose";
+import { seedAdmissionChecklist } from "../agent/agent.studentRequiredDocument.js";
+
 //Creating an account of the employee under the agency
 export const createAgent = async (req, res) => {
   try {
@@ -433,6 +435,9 @@ export const assignAdmission = async (req, res) => {
       { _id: agentId },
       { $addToSet: { assignedStudents: student._id } },
     );
+
+    // auto loading admission checklist
+    await seedAdmissionChecklist(student._id, agent.agency);
 
     // Send success email
     await sendAgentAssignmentEmail({

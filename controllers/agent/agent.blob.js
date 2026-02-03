@@ -96,8 +96,7 @@ export const confirmUpload = async (req, res) => {
       mimeType,
       size,
       studentId,
-      documentCategory, // offer_letter | COE | other
-      description,
+      documentCategory // offer_letter | COE | other
     } = req.body;
 
     const agentId = req.user.id;
@@ -130,16 +129,11 @@ export const confirmUpload = async (req, res) => {
       uploaderModel: "Agent",
       belongsTo: studentId,
       agency: agencyId,
-
-      requiredDocument: null,
       documentCategory,
-
       fileName: blobName,
       fileType: mimeType,
       fileSize: size,
       fileURL: blobClient.url,
-
-      description,
     };
 
     // saving the document

@@ -31,7 +31,19 @@ const documentSchema = new mongoose.Schema(
     fileName: { type: String, required: true },
     fileType: { type: String, required: true },
     fileSize: { type: Number, required: true },
-    fileURL: { type: String, required: true }
+    fileURL: { type: String, required: true },
+
+    // ONLY for agent uploads 
+    documentCategory: { 
+      type: String, 
+      enum: ["offer_letter", "COE", "other"], 
+      default: null
+    },
+    
+    isResubmitted: {
+      type: Boolean,
+      default: false
+     }
   },
   { timestamps: true }
 );

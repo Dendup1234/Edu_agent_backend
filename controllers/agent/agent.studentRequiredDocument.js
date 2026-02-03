@@ -68,6 +68,7 @@ export const createStudentChecklist = async (req, res) => {
 
     const checklist = newTemplates.map((template) => ({
       student: studentId,
+      agency,
       requiredDocument: template._id,
       stage: template.stage,
       status: "under_review",

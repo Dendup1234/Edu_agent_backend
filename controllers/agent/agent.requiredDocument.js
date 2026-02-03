@@ -95,16 +95,17 @@ export const getRequiredDocumentsList = async (req, res) => {
 export const getDocumentsByStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
-    const agency = req.user.agencyId;
 
     if (!studentId) {
       return res.status(400).json({ message: "Student ID is required" });
     }
 
-    const documents = await Document.find({
-      belongsTo: studentId,
-      agency,
-    }).lean();
+    const documents = await StudentRequiredDocument.find({
+      student: studentId
+    })
+    .populate("requiredDocument", "name description stage")
+    .populate("document")
+    .lean();
 
     return res.status(200).json({ data: documents });
   } catch (err) {
@@ -137,7 +138,8 @@ export const updateDocumentReviewStatus = async (req, res) => {
       return res.status(404).json({ message: "Student required document not found" });
     }
 
-    if (!srd.document || String(srd.document.agency) !== String(agency)) {
+    // Only check agency ownership if a document has actually been uploaded
+    if (srd.document && String(srd.document.agency) !== String(agency)) {
       return res.status(403).json({ message: "Access denied" });
     }
 

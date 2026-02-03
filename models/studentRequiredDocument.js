@@ -32,11 +32,17 @@ const studentRequiredDocumentSchema = new mongoose.Schema(
       index: true,
     },
 
+    verifiedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Agent",
+      default: null
+    },
+
     // current uploaded document
     document: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Document",
-      default: null,
+      default: null
     },
   },
   { timestamps: true }

@@ -4,6 +4,7 @@ import { sendAutoMessage } from "../../client.js";
 import mongoose from "mongoose";
 import Notification from "../../models/notification.js";
 import { sendStudentPushNotification } from "../../utils/notification.js";
+import { loadMessagesCursor } from "../../utils/cursor.js";
 // Getting profile of the student
 export const getProfile = async (req, res) => {
   try {
@@ -179,30 +180,31 @@ export const getMyNotificationCount = async (req, res) => {
 };
 
 // getting the notification history
-export const getMyNotificationHistory = async (req, res) => {
+export const getMyNotifications = async (req, res) => {
   try {
     const studentId = req.user.sub;
-    if (!studentId) return res.status(401).json({ message: "Invalid token" });
+    const studentActor = req.user.actor;
 
-    // updating all the notification as read as true
+    const { cursorCreatedAt = null, cursorId = null, limit = 50 } = req.query;
+
+    const data = await loadNotificationsCursor(studentId, studentActor, {
+      cursorCreatedAt,
+      cursorId,
+      limit,
+    });
+
+    // mark ONLY fetched notifications as read
+    const ids = data.notifications.map((n) => n._id);
+
     await Notification.updateMany(
-      { receiverId: studentId, isRead: false },
+      { _id: { $in: ids }, isRead: false },
       { $set: { isRead: true } },
     );
-    const notifications = await Notification.find({
-      receiverId: studentId,
-    })
-      //createdAt as the notfication send time like 2 days ago or 1 days ago
-      .select("title body status createdAt isRead")
-      .sort({ createdAt: -1 })
-      .lean();
 
-    return res.status(200).json({
-      notifications,
-    });
+    return res.status(200).json(data);
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(400).json({ message: e.message || "Server error" });
   }
 };
 

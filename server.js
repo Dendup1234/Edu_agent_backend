@@ -10,6 +10,7 @@ import oAuthRoute from "./routes/oAuth.js";
 import adminRoute from "./routes/admin.js";
 import agentRoute from "./routes/agent.js";
 import mentorRoute from "./routes/mentor.js";
+import healthRoute from "./routes/health.js";
 import { initializeWebSocket } from "./controllers/socket.js";
 import { seedSuperAdmin } from "./scripts/seedSuperAdmin.js";
 import rateLimit from "express-rate-limit";
@@ -55,9 +56,14 @@ await connectDB();
 // seed the super admin after the db connect
 //await seedSuperAdmin();
 
+// health check route
+app.use(healthRoute);
+
 app.use("/api/v1/students", studentRoute(io));
 
-// Start server
+export default app;
+
+// Start server for devlopment
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

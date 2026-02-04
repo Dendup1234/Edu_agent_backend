@@ -86,5 +86,4 @@ router.get("/appointments/search/", protect, searchAppointmentsByStudentName);
 
 router.get("/agent-list", protect, getVisaAgent);
 
-
 export default router;

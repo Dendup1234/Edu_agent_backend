@@ -63,7 +63,6 @@ const StudentSchema = new Schema(
       status: {
         type: String,
         enum: ["pending", "rejected", "confirmed"],
-        default: "pending",
       },
       mentor: {
         type: Types.ObjectId,

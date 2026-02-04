@@ -1,102 +1,79 @@
 import Document from "../../models/document.js";
 import RequiredDocument from "../../models/requiredDocument.js";
+import StudentRequiredDocument from "../../models/studentRequiredDocument.js";
 import Student from "../../models/student.js";
 
-export const getRequiredAdmissionDocumentsList = async (req, res) => {
+const getStudentWithAgency = async (studentId) => {
+  const student = await Student.findById(studentId).select("registeredAgency");
+  if (!student) return { error: "Student not found", status: 404 };
+  if (!student.registeredAgency) return { error: "Agency not found", status: 404 };
+  return { student };
+};
+
+// GET required documents list
+export const getRequiredDocumentsList = async (req, res) => {
   try {
-    const studentId = req.user.sub;
+    const { stage } = req.query;
 
-    const student = await Student.findById(studentId).select("registeredAgency");
-
-    if (!student || !student.registeredAgency) {
-      return res.status(404).json({ message: "Student or agency not found" });
+    if (stage && !["admission", "visa"].includes(stage)) {
+      return res.status(400).json({ message: "Invalid stage. Use 'admission' or 'visa'" });
     }
 
-    const requiredDocument = await RequiredDocument.find({
-      agency: student.registeredAgency, stage:"admission"
-    })
-      .select("name description") 
+    const { student, error, status } = await getStudentWithAgency(req.user.sub);
+    if (error) return res.status(status).json({ message: error });
+
+    const filter = { agency: student.registeredAgency };
+    if (stage) filter.stage = stage;
+
+    const requiredDocuments = await RequiredDocument.find(filter)
+      .select("name description stage")
       .lean();
 
-    return res.status(200).json({ data: requiredDocument });
+    return res.status(200).json({ data: requiredDocuments });
   } catch (err) {
-    console.error("getRequiredDocumentsForStudent:", err);
+    console.error("getRequiredDocumentsList:", err);
     return res.status(500).json({ message: err.message });
   }
 };
 
-export const getRequiredVisaDocumentsList = async (req, res) => {
-  try {
-    const studentId = req.user.sub;
-
-    const student = await Student.findById(studentId).select("registeredAgency");
-
-    if (!student || !student.registeredAgency) {
-      return res.status(404).json({ message: "Student or agency not found" });
-    }
-
-    const requiredDocument = await RequiredDocument.find({
-      agency: student.registeredAgency, stage:"visa"
-    })
-      .select("name description") 
-      .lean();
-
-    return res.status(200).json({ data: requiredDocument });
-  } catch (err) {
-    console.error("getRequiredDocumentsForStudent:", err);
-    return res.status(500).json({ message: err.message });
-  }
-};
+// GET student's checklist with statuses
 
 export const getDocumentStatus = async (req, res) => {
   try {
     const studentId = req.user.sub;
+    const { stage } = req.query;
 
-    if (!studentId) {
-      return res.status(400).json({ message: "student ID required" });
+    if (stage && !["admission", "visa"].includes(stage)) {
+      return res.status(400).json({ message: "Invalid stage. Use 'admission' or 'visa'" });
     }
 
-    const student = await Student.findById(studentId).select("registeredAgency");
+    const { error, status } = await getStudentWithAgency(studentId);
+    if (error) return res.status(status).json({ message: error });
 
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" });
-    }
+    const filter = { student: studentId };
+    if (stage) filter.stage = stage;
 
-    if (!student.registeredAgency) {
-      return res.status(200).json({ data: [] });
-    }
+    const checklist = await StudentRequiredDocument.find(filter)
+      .populate("requiredDocument", "name description stage")
+      .populate("document", "fileName fileType fileURL fileSize")
+      .select("status document requiredDocument stage")
+      .lean();
 
-    const documents = await Document.find({
-      uploadedBy: studentId,
-      agency: student.registeredAgency,
-    })
-    .select("documentName reviewStatus review")
-    .populate({
-      path: "requiredDocument",
-      select: "name",
-    })
-    .lean();
-
-    return res.status(200).json({ data: documents });
+    return res.status(200).json({ data: checklist });
   } catch (err) {
     console.error("getDocumentStatus:", err);
     return res.status(500).json({ message: err.message });
   }
 };
 
+// GET all raw uploaded documents for the student
+
 export const getDocuments = async (req, res) => {
   try {
     const studentId = req.user.sub;
 
-    if (!studentId) {
-      return res.status(400).json({ message: "student ID required" });
-    }
-
-    const student = await Student.findById(studentId).select("registeredAgency");
-
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" });
-    }
+    const { student, error, status } = await getStudentWithAgency(studentId);
+    if (error) return res.status(status).json({ message: error });
 
     const documents = await Document.find({
       belongsTo: studentId,
@@ -105,7 +82,7 @@ export const getDocuments = async (req, res) => {
 
     return res.status(200).json({ data: documents });
   } catch (err) {
-    console.error("getDocumentsByStudent:", err);
+    console.error("getDocuments:", err);
     return res.status(500).json({ message: err.message });
   }
 };

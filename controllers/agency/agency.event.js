@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import { sendSeatedEventSuccessEmail } from "../../utils/sendEmail.js";
 import ticketType from "../../models/ticketType.js";
 import Student from "../../models/student.js";
-// creation of events
+// creation of event
 export const createEvent = async (req, res) => {
   try {
     const userId = req.user.agencyId;

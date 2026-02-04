@@ -16,7 +16,7 @@ import {
   selectAgency,
   deactivateStudent,
   updateStudentPushToken,
-  getMyNotificationHistory,
+  getMyNotifications,
   sendStudentPush,
   getMyNotificationCount,
 } from "../controllers/student/student.profile.js";
@@ -69,11 +69,7 @@ export default function studentRoute(io) {
   router.patch("/students/update-push-token", protect, updateStudentPushToken);
   router.post("/students/notification/test", protect, sendStudentPush);
   router.get("/students/notification/count", protect, getMyNotificationCount);
-  router.get(
-    "/students/notification/history",
-    protect,
-    getMyNotificationHistory,
-  );
+  router.get("/students/notification/history", protect, getMyNotifications);
 
   // Select Agency — pass io safely
   router.post("/select-agency", protect, selectAgency(io));
@@ -82,7 +78,7 @@ export default function studentRoute(io) {
   router.post("/uploads/sas", protect, generateSAS);
   router.post("/uploads/confirm", protect, confirmUpload);
 
-  // Courses / Universities / Scholarships
+  // Course / Universities / Scholarships
   router.get("/courses/query/:agencyId/search", protect, searchCourseByName);
   router.patch("/courses/select/:courseId", protect, selectCourse);
   router.get("/universities/query/:agencyId/search", protect, searchUniByName);

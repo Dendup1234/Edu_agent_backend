@@ -18,15 +18,16 @@ import rateLimit from "express-rate-limit";
 dotenv.config();
 
 // rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
-});
+
+//const limiter = rateLimit({
+//windowMs: 15 * 60 * 1000, // 15 minutes
+//max: 100,
+//});
 // Express app command
 const app = express();
 
 // rate limiting
-app.use(limiter);
+//app.use(limiter);
 //helmet config
 app.use(helmet());
 
@@ -52,7 +53,7 @@ const io = initializeWebSocket(server);
 // Connect to database
 await connectDB();
 // seed the super admin after the db connect
-await seedSuperAdmin();
+//await seedSuperAdmin();
 
 app.use("/api/v1/students", studentRoute(io));
 

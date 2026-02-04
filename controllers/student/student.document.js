@@ -3,6 +3,10 @@ import RequiredDocument from "../../models/requiredDocument.js";
 import StudentRequiredDocument from "../../models/studentRequiredDocument.js";
 import Student from "../../models/student.js";
 
+// ─────────────────────────────────────────────
+// HELPER — used by every endpoint below
+// ─────────────────────────────────────────────
+
 const getStudentWithAgency = async (studentId) => {
   const student = await Student.findById(studentId).select("registeredAgency");
   if (!student) return { error: "Student not found", status: 404 };
@@ -10,34 +14,7 @@ const getStudentWithAgency = async (studentId) => {
   return { student };
 };
 
-// GET required documents list
-export const getRequiredDocumentsList = async (req, res) => {
-  try {
-    const { stage } = req.query;
-
-    if (stage && !["admission", "visa"].includes(stage)) {
-      return res.status(400).json({ message: "Invalid stage. Use 'admission' or 'visa'" });
-    }
-
-    const { student, error, status } = await getStudentWithAgency(req.user.sub);
-    if (error) return res.status(status).json({ message: error });
-
-    const filter = { agency: student.registeredAgency };
-    if (stage) filter.stage = stage;
-
-    const requiredDocuments = await RequiredDocument.find(filter)
-      .select("name description stage")
-      .lean();
-
-    return res.status(200).json({ data: requiredDocuments });
-  } catch (err) {
-    console.error("getRequiredDocumentsList:", err);
-    return res.status(500).json({ message: err.message });
-  }
-};
-
 // GET student's checklist with statuses
-
 export const getDocumentStatus = async (req, res) => {
   try {
     const studentId = req.user.sub;

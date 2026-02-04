@@ -43,9 +43,12 @@ import { getConversationMessages } from "../controllers/message.js";
 
 import {
   getDocumentStatus,
-  getDocuments,
-  getRequiredDocumentsList,
+  getDocuments
 } from "../controllers/student/student.document.js";
+
+import {
+  updateVisaProfile
+} from "../controllers/student/student.survey.js"
 
 export default function studentRoute(io) {
   const router = express.Router();
@@ -100,9 +103,11 @@ export default function studentRoute(io) {
   router.post("/mentors/connect/:mentorId", protect, connectMentor);
 
   // Application & Document status
-  router.get("/documents/required", protect, getRequiredDocumentsList);
   router.get("/documents/status", protect, getDocumentStatus);
   router.get("/documents", protect, getDocuments);
+
+  // Survey
+  router.patch("/survey", protect, updateVisaProfile)
 
   return router;
 }

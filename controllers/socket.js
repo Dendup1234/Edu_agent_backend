@@ -15,7 +15,7 @@ export const initializeWebSocket = (server) => {
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      socket.userId = decoded.sub?.toString() || decoded.agencyId?.toString();
+      socket.userId = decoded.sub?.toString() || decoded.agencyId?.toString() || decoded.id?.toString();
       socket.userModel = decoded.actor;
 
       if (!socket.userId || !socket.userModel) {

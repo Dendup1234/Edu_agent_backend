@@ -1,21 +1,34 @@
 import mongoose from "mongoose";
 
 const conversationSchema = new mongoose.Schema({
-  participants: [
-  {
+  participants: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      refPath: 'model'
+      refPath: 'participants.model', 
+      required: true
     },
     model: {
       type: String,
-      enum: ['Student', 'Agency', 'Mentor', 'Agent']
+      enum: ['Student', 'Agency', 'Mentor', 'Agent'],
+      required: true
     }
   }],
+  participantsHash: { 
+    type: String, 
+    unique: true,
+    required: true,
+    index: true 
+  },
+  lastMessage: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Message" 
+  }
+}, { 
+  timestamps: true 
+});
 
-  participantsHash: { type: String, unique: true },
-
-  lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: "Message" }
-}, { timestamps: true });
+conversationSchema.index({ participantsHash: 1 }, { unique: true });
+conversationSchema.index({ 'participants.user': 1 });
+conversationSchema.index({ updatedAt: -1 });
 
 export default mongoose.model("Conversation", conversationSchema);

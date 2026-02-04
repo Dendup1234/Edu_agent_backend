@@ -91,3 +91,38 @@ export const createStudentChecklist = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
+export const deleteStudentRequiredDocument = async (req, res) => {
+  try {
+    const agency = req.user.agencyId;
+    const { id } = req.params;
+
+    // Find the StudentRequiredDocument and populate to verify agency ownership
+    const srd = await StudentRequiredDocument.findById(id)
+      .populate("requiredDocument", "agency")
+      .lean();
+
+    if (!srd) {
+      return res.status(404).json({ message: "Student required document not found" });
+    }
+
+    // Verify it belongs to this agency
+    if (!srd.requiredDocument || String(srd.requiredDocument.agency) !== String(agency)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Delete the checklist item
+    await StudentRequiredDocument.findByIdAndDelete(id);
+
+    if (srd.document) {
+      await Document.findByIdAndDelete(srd.document);
+    }
+
+    return res.status(200).json({
+      message: "Checklist item deleted successfully"
+    });
+  } catch (err) {
+    console.error("deleteStudentRequiredDocument:", err);
+    return res.status(500).json({ message: err.message });
+  }
+};

@@ -31,6 +31,7 @@ import {
   getDocumentsByStudent,
   getStudentChecklist,
   updateDocumentReviewStatus,
+  deleteRequiredDocument,
 } from "../controllers/agent/agent.requiredDocument.js";
 
 import {
@@ -38,7 +39,7 @@ import {
   confirmUpload
 } from "../controllers/agent/agent.blob.js"
 
-import { createStudentChecklist } from "../controllers/agent/agent.studentRequiredDocument.js";
+import { createStudentChecklist, deleteStudentRequiredDocument } from "../controllers/agent/agent.studentRequiredDocument.js";
 
 import { getVisaAgent } from "../controllers/agent/agent.visaofficerlist.js";
 
@@ -59,10 +60,12 @@ router.post("/documents/required", protect, createRequiredDocument);
 router.get("/documents/required", protect, getRequiredDocumentsList);
 router.patch("/documents/required/:id", protect, updateRequiredDocument);
 router.get("/documents/student/:studentId", protect, getDocumentsByStudent);
+router.delete("/documents/required/:id", protect, deleteRequiredDocument)
 
 router.post("/documents/checklist/:studentId", protect, createStudentChecklist)
 router.get("/documents/checklist/:studentId", protect, getStudentChecklist);
 router.patch("/documents/review/:studentRequiredDocumentId", protect, updateDocumentReviewStatus);
+router.delete("/documents/checklist/:studentRequiredDocumentId", protect, deleteStudentRequiredDocument)
 
 // uploads
 router.post("/uploads/sas", protect, generateSAS);

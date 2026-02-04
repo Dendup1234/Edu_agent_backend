@@ -16,7 +16,7 @@ const agentSchema = new Schema(
     password: {
       type: String,
     },
-    // Verifed for the password changed
+    // Verifed for the password changeds
     isVerified: {
       type: Boolean,
       default: false,

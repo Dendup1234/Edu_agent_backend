@@ -135,7 +135,7 @@ export const registerMeeting = async (req, res) => {
         .select("name email phone")
         .lean();
 
-      // student not found
+      // student not founds
       if (!student)
         return res.status(404).json({ message: "Student not found" });
 

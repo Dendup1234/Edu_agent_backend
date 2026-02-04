@@ -34,7 +34,7 @@ app.use(helmet());
 app.use(express.json());
 app.use(cors());
 
-// REST routes git push
+// REST routes git pushed
 app.use("/api/v1/agency", agencyRoute);
 app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1/agent", agentRoute);

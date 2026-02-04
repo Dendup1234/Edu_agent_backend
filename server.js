@@ -52,7 +52,7 @@ const io = initializeWebSocket(server);
 // Connect to database
 await connectDB();
 // seed the super admin after the db connect
-await seedSuperAdmin();
+//await seedSuperAdmin();
 
 app.use("/api/v1/students", studentRoute(io));
 

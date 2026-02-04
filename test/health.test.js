@@ -1,6 +1,6 @@
 import request from "supertest";
 import { expect } from "chai";
-import app from "../server.js";
+import app from "../test.js";
 
 //api route for health
 describe("GET /health", () => {

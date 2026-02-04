@@ -51,8 +51,6 @@ const server = http.createServer(app);
 // Initialize Socket.IO
 const io = initializeWebSocket(server);
 
-// Connect to database
-await connectDB();
 // seed the super admin after the db connect
 //await seedSuperAdmin();
 
@@ -61,7 +59,8 @@ app.use(healthRoute);
 
 app.use("/api/v1/students", studentRoute(io));
 
-export default app;
+// Connect to database
+await connectDB();
 
 // Start server for devlopment
 server.listen(PORT, () => {

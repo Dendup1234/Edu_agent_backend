@@ -1,6 +1,5 @@
 import request from "supertest";
 import { expect } from "chai";
-import esmock from "esmock";
 import bcrypt from "bcryptjs";
 import app from "../test.js";
 import { before, after, beforeEach, describe, it } from "mocha";

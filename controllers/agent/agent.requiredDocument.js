@@ -1,6 +1,25 @@
 import RequiredDocument from "../../models/requiredDocument.js";
 import StudentRequiredDocument from "../../models/studentRequiredDocument.js";
+import Agent from "../../models/agent.js"
 
+export const getAgentStudentCount = async (req, res) => {
+  try {
+    const agentId = req.user.id;
+
+    const agent = await Agent.findById(agentId).select("assignedStudents");
+    
+    if (!agent) {
+      return res.status(404).json({ message: "Agent not found" });
+    }
+
+    return res.status(200).json({ 
+      count: agent.assignedStudents.length 
+    });
+  } catch (err) {
+    console.error("getAgentStudentCount:", err);
+    return res.status(500).json({ message: err.message });
+  }
+};
 
 export const createRequiredDocument = async (req, res) => {
   try {

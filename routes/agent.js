@@ -32,6 +32,7 @@ import {
   getStudentChecklist,
   updateDocumentReviewStatus,
   deleteRequiredDocument,
+  getAgentStudentCount,
 } from "../controllers/agent/agent.requiredDocument.js";
 
 import {
@@ -88,5 +89,7 @@ router.patch(
 router.get("/appointments/search/", protect, searchAppointmentsByStudentName);
 
 router.get("/agent-list", protect, getVisaAgent);
+
+router.get("/studentcount", protect, getAgentStudentCount)
 
 export default router;

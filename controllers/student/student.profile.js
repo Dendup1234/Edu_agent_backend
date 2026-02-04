@@ -4,7 +4,7 @@ import { sendAutoMessage } from "../../client.js";
 import mongoose from "mongoose";
 import Notification from "../../models/notification.js";
 import { sendStudentPushNotification } from "../../utils/notification.js";
-import { loadMessagesCursor } from "../../utils/cursor.js";
+import { loadNotificationsCursor } from "../../utils/cursor.js";
 // Getting profile of the student
 export const getProfile = async (req, res) => {
   try {
@@ -185,7 +185,7 @@ export const getMyNotifications = async (req, res) => {
     const studentId = req.user.sub;
     const studentActor = req.user.actor;
 
-    const { cursorCreatedAt = null, cursorId = null, limit = 50 } = req.query;
+    const { cursorCreatedAt = null, cursorId = null, limit = 10 } = req.query;
 
     const data = await loadNotificationsCursor(studentId, studentActor, {
       cursorCreatedAt,
@@ -204,7 +204,7 @@ export const getMyNotifications = async (req, res) => {
     return res.status(200).json(data);
   } catch (e) {
     console.error(e);
-    return res.status(400).json({ message: e.message || "Server error" });
+    return res.status(500).json({ message: e.message || "Server error" });
   }
 };
 

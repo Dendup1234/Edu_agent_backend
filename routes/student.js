@@ -79,7 +79,7 @@ export default function studentRoute(io) {
   router.post("/uploads/sas", protect, generateSAS);
   router.post("/uploads/confirm", protect, confirmUpload);
 
-  // Courses / Universities / Scholarships
+  // Course / Universities / Scholarships
   router.get("/courses/query/:agencyId/search", protect, searchCourseByName);
   router.patch("/courses/select/:courseId", protect, selectCourse);
   router.get("/universities/query/:agencyId/search", protect, searchUniByName);

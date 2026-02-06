@@ -25,9 +25,29 @@ dotenv.config();
 //max: 100,
 //});
 // Express app command
+
 const app = express();
 
-// rate limiting
+// for checking the query speeds of the request/response time
+app.use((req, res, next) => {
+  const startHrTime = process.hrtime();
+
+  res.on("finish", () => {
+    const elapsedHrTime = process.hrtime(startHrTime);
+    // Convert to milliseconds
+    const elapsedTimeInMs = (
+      elapsedHrTime[0] * 1000 +
+      elapsedHrTime[1] / 1e6
+    ).toFixed(3);
+    console.log(
+      `${req.method} ${req.originalUrl} finished in ${elapsedTimeInMs}ms`,
+    );
+  });
+
+  next();
+});
+
+//rate limiting
 //app.use(limiter);
 //helmet config
 app.use(helmet());
@@ -60,6 +80,7 @@ app.use(healthRoute);
 app.use("/api/v1/students", studentRoute(io));
 
 //await connectDB();
+
 // Start server for devlopment
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

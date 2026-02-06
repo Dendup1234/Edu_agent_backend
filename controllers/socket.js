@@ -15,7 +15,14 @@ export const initializeWebSocket = (server) => {
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      socket.userId = decoded.sub?.toString() || decoded.agencyId?.toString() || decoded.id?.toString();
+      if (decoded.actor === "agent") {
+        socket.userId = decoded.id.toString();
+      } else if (decoded.actor === "agency") {
+        socket.userId = decoded.agencyId.toString();
+      } else {
+        socket.userId = decoded.sub?.toString();
+      }
+
       socket.userModel = decoded.actor;
 
       if (!socket.userId || !socket.userModel) {

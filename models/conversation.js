@@ -16,8 +16,7 @@ const conversationSchema = new mongoose.Schema({
   participantsHash: { 
     type: String, 
     unique: true,
-    required: true,
-    index: true 
+    required: true
   },
   lastMessage: { 
     type: mongoose.Schema.Types.ObjectId, 

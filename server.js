@@ -14,7 +14,7 @@ import healthRoute from "./routes/health.js";
 import { initializeWebSocket } from "./controllers/socket.js";
 import { seedSuperAdmin } from "./scripts/seedSuperAdmin.js";
 import rateLimit from "express-rate-limit";
-
+import chatRoutes from "./routes/chat.js";
 // Config
 dotenv.config();
 
@@ -41,6 +41,7 @@ app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1/agent", agentRoute);
 app.use("/api/v1/mentor", mentorRoute);
 app.use(oAuthRoute);
+app.use("/api/v1/openai", chatRoutes);
 
 // Server setup
 const PORT = process.env.PORT || 8000;

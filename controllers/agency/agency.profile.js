@@ -145,7 +145,7 @@ export const getStudentLead = async (req, res) => {
       registeredAgency: userId,
       isValid: true,
     })
-      .select(" _id name education joinDate status statusHistory isValid")
+      .select("_id name education joinDate status statusHistory isValid")
       .lean();
 
     const leads = students.map((student) => {
@@ -154,6 +154,7 @@ export const getStudentLead = async (req, res) => {
           ? student.education[student.education.length - 1].qualification
           : null;
       return {
+        id: student._id,
         name: student.name,
         qualification: lastEducation,
         joinDate: student.joinDate,

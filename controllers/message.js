@@ -6,7 +6,7 @@ export const getConversationMessages = async (req, res, next) => {
     const {
       cursorCreatedAt = null,
       cursorId = null,
-      limit = 50
+      limit = 5
     } = req.query;
 
     const result = await loadMessagesCursor(conversationId, {

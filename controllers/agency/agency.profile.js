@@ -1,3 +1,4 @@
+import agency from "../../models/agency.js";
 import Agency from "../../models/agency.js";
 import Student from "../../models/student.js";
 import mongoose from "mongoose";
@@ -48,10 +49,13 @@ export const updateProfile = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 //Getting all the agency
 export const getAllAgency = async (req, res) => {
   try {
-    const agency = await Agency.find().select("-password").lean();
+    const agency = await Agency.find({ isVerified: true })
+      .select("-password")
+      .lean();
     return res.json({
       count: agency.length,
       agency,
@@ -61,6 +65,89 @@ export const getAllAgency = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+// Card stats for all the agency
+export const getAgencyCard = async (req, res) => {
+  try {
+    const agencies = await Agency.aggregate([
+      { $match: { isVerified: true } },
+
+      //outer join
+
+      //student count
+      {
+        $lookup: {
+          from: "students",
+          let: { agencyId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$registeredAgency", "$$agencyId"] },
+                    { $eq: ["$isValid", true] },
+                  ],
+                },
+              },
+            },
+            { $count: "count" },
+          ],
+          as: "studentCountAgg",
+        },
+      },
+      // course counts
+      {
+        $lookup: {
+          from: "courses",
+          let: { agencyId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$createdBy", "$$agencyId"] },
+                    { $eq: ["$status", "open"] },
+                  ],
+                },
+              },
+            },
+            { $count: "count" },
+          ],
+          as: "courseCountAgg",
+        },
+      },
+      //to show the required fields
+      {
+        $project: {
+          organizationName: 1,
+          name: 1,
+          email: 1,
+          phone: 1,
+          logo: 1,
+          isVerified: 1,
+          createdAt: 1,
+          uniCount: { $size: { $ifNull: ["$partnerUniversities", []] } },
+          // counts from lookups
+          studentCount: {
+            $ifNull: [{ $arrayElemAt: ["$studentCountAgg.count", 0] }, 0],
+          },
+          courseCount: {
+            $ifNull: [{ $arrayElemAt: ["$courseCountAgg.count", 0] }, 0],
+          },
+        },
+      },
+      { $sort: { createdAt: -1 } },
+    ]);
+    res.status(200).json({
+      message: "Success",
+      agencies,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 // Getting agency by their id
 export const getAgencybyId = async (req, res) => {
   try {

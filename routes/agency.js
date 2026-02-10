@@ -29,6 +29,7 @@ import {
   getStudentAppStatus,
   getStudentList,
   searchLeadByName,
+  getAgencyCard,
 } from "../controllers/agency/agency.profile.js";
 
 import {
@@ -97,9 +98,7 @@ import {
 
 import { getConversationMessages } from "../controllers/message.js";
 
-import {
-  getDocumentsByStudent
-} from "../controllers/agency/agency.document.js";
+import { getDocumentsByStudent } from "../controllers/agency/agency.document.js";
 
 import {
   getAllMentor,
@@ -130,6 +129,7 @@ router.get("/profile/students/leads/", protect, getStudentLead);
 router.get("/profile/students/leads/:studentId", protect, getStudentAppStatus);
 router.get("/profile/students/leads/query/search", protect, searchLeadByName);
 router.get("/profile/students/studentlist", protect, getStudentList);
+router.get("/profile/students/card", protect, getAgencyCard);
 
 //University apis
 router.post(

@@ -15,7 +15,6 @@ import {
   getCourse,
   updateCourse,
   deactivateCourse,
-  getCourseByAgency,
   getCourseById,
 } from "../controllers/agency/agency.course.js";
 
@@ -97,9 +96,7 @@ import {
 
 import { getConversationMessages } from "../controllers/message.js";
 
-import {
-  getDocumentsByStudent
-} from "../controllers/agency/agency.document.js";
+import { getDocumentsByStudent } from "../controllers/agency/agency.document.js";
 
 import {
   getAllMentor,
@@ -211,9 +208,6 @@ router.get(
   requirePermission("course:readById"),
   getCourseById,
 );
-
-//Student api to get the course
-router.get("/courses/agency/:agencyId", protect, getCourseByAgency);
 
 //All agency
 //Student api

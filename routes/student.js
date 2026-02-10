@@ -25,6 +25,7 @@ import { searchUniByName } from "../controllers/student/student.uni.js";
 import {
   searchCourseByName,
   selectCourse,
+  getCourseByAgency,
 } from "../controllers/student/student.course.js";
 import { searchScholarshipByName } from "../controllers/student/student.scholarship.js";
 import { registerMeeting } from "../controllers/student/student.event.js";
@@ -43,12 +44,10 @@ import { getConversationMessages } from "../controllers/message.js";
 
 import {
   getDocumentStatus,
-  getDocuments
+  getDocuments,
 } from "../controllers/student/student.document.js";
 
-import {
-  updateVisaProfile
-} from "../controllers/student/student.survey.js"
+import { updateVisaProfile } from "../controllers/student/student.survey.js";
 
 export default function studentRoute(io) {
   const router = express.Router();
@@ -79,7 +78,8 @@ export default function studentRoute(io) {
   router.post("/uploads/confirm", protect, confirmUpload);
 
   // Course / Universities / Scholarships
-  router.get("/courses/query/:agencyId/search", protect, searchCourseByName);
+  router.get("/courses", protect, getCourseByAgency);
+  router.get("/courses/search/", protect, searchCourseByName);
   router.patch("/courses/select/:courseId", protect, selectCourse);
   router.get("/universities/query/:agencyId/search", protect, searchUniByName);
   router.get(
@@ -103,7 +103,7 @@ export default function studentRoute(io) {
   router.get("/documents", protect, getDocuments);
 
   // Survey
-  router.patch("/survey", protect, updateVisaProfile)
+  router.patch("/survey", protect, updateVisaProfile);
 
   return router;
 }

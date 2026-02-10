@@ -1,10 +1,10 @@
-import { openAiChat } from "../controllers/chat.js";
+import { chatbotStream } from "../controllers/chat.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import express from "express";
 
 const router = express.Router();
 
 // chatbot api
-router.post("/chatbot", protect, openAiChat);
+router.post("/chatbot", chatbotStream);
 
 export default router;

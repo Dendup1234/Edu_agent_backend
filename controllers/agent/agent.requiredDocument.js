@@ -1,19 +1,21 @@
 import RequiredDocument from "../../models/requiredDocument.js";
 import StudentRequiredDocument from "../../models/studentRequiredDocument.js";
-import Agent from "../../models/agent.js"
+import Agent from "../../models/agent.js";
+import { getDocumentReviewNotification } from "../../utils/documentStatus.js";
+import { sendStudentPushNotification } from "../../utils/notification.js";
 
 export const getAgentStudentCount = async (req, res) => {
   try {
     const agentId = req.user.id;
 
     const agent = await Agent.findById(agentId).select("assignedStudents");
-    
+
     if (!agent) {
       return res.status(404).json({ message: "Agent not found" });
     }
 
-    return res.status(200).json({ 
-      count: agent.assignedStudents.length 
+    return res.status(200).json({
+      count: agent.assignedStudents.length,
     });
   } catch (err) {
     console.error("getAgentStudentCount:", err);
@@ -32,7 +34,9 @@ export const createRequiredDocument = async (req, res) => {
 
     const exists = await RequiredDocument.findOne({ name, agency, stage });
     if (exists) {
-      return res.status(409).json({ message: "Required document already exists for this agency and stage" });
+      return res.status(409).json({
+        message: "Required document already exists for this agency and stage",
+      });
     }
 
     const requiredDocument = await RequiredDocument.create({
@@ -59,7 +63,9 @@ export const updateRequiredDocument = async (req, res) => {
     const { name, description } = req.body;
 
     if (!name && !description) {
-      return res.status(400).json({ message: "Provide at least one field to update" });
+      return res
+        .status(400)
+        .json({ message: "Provide at least one field to update" });
     }
 
     const update = {};
@@ -70,7 +76,7 @@ export const updateRequiredDocument = async (req, res) => {
     const requiredDocument = await RequiredDocument.findOneAndUpdate(
       { _id: id, agency },
       update,
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!requiredDocument) {
@@ -95,7 +101,7 @@ export const deleteRequiredDocument = async (req, res) => {
     // Verify it belongs to this agency before deleting
     const requiredDocument = await RequiredDocument.findOne({
       _id: id,
-      agency
+      agency,
     });
 
     if (!requiredDocument) {
@@ -104,12 +110,12 @@ export const deleteRequiredDocument = async (req, res) => {
 
     // Check if any students have this in their checklist
     const usageCount = await StudentRequiredDocument.countDocuments({
-      requiredDocument: id
+      requiredDocument: id,
     });
 
     if (usageCount > 0) {
       return res.status(409).json({
-        message: `Cannot delete: ${usageCount} student(s) have this document in their checklist. Remove it from their checklists first.`
+        message: `Cannot delete: ${usageCount} student(s) have this document in their checklist. Remove it from their checklists first.`,
       });
     }
 
@@ -117,7 +123,7 @@ export const deleteRequiredDocument = async (req, res) => {
     await RequiredDocument.findByIdAndDelete(id);
 
     return res.status(200).json({
-      message: "Deleted successfully"
+      message: "Deleted successfully",
     });
   } catch (err) {
     console.error("deleteRequiredDocument:", err);
@@ -132,7 +138,9 @@ export const getRequiredDocumentsList = async (req, res) => {
     const { stage } = req.query;
 
     if (stage && !["admission", "visa"].includes(stage)) {
-      return res.status(400).json({ message: "Invalid stage. Use 'admission' or 'visa'" });
+      return res
+        .status(400)
+        .json({ message: "Invalid stage. Use 'admission' or 'visa'" });
     }
 
     const filter = { agency };
@@ -158,11 +166,11 @@ export const getDocumentsByStudent = async (req, res) => {
     }
 
     const documents = await StudentRequiredDocument.find({
-      student: studentId
+      student: studentId,
     })
-    .populate("requiredDocument", "name description stage")
-    .populate("document")
-    .lean();
+      .populate("requiredDocument", "name description stage")
+      .populate("document")
+      .lean();
 
     return res.status(200).json({ data: documents });
   } catch (err) {
@@ -170,7 +178,6 @@ export const getDocumentsByStudent = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
-
 
 const ALLOWED_STATUSES = ["under_review", "approved", "reupload", "rejected"];
 
@@ -183,18 +190,26 @@ export const updateDocumentReviewStatus = async (req, res) => {
     const agency = req.user.agencyId;
 
     if (!status || !ALLOWED_STATUSES.includes(status)) {
-      return res.status(400).json({ message: "Invalid or missing status. Allowed: under_review, approved, reupload, rejected" });
+      return res.status(400).json({
+        message:
+          "Invalid or missing status. Allowed: under_review, approved, reupload, rejected",
+      });
     }
-
     // Verify the StudentRequiredDocument belongs to this agency via its student's linked Document
-    const srd = await StudentRequiredDocument.findById(studentRequiredDocumentId)
-      .populate("document", "agency")
+    const srd = await StudentRequiredDocument.findById(
+      studentRequiredDocumentId,
+    )
+      .populate("requiredDocument student agency")
       .lean();
-
     if (!srd) {
-      return res.status(404).json({ message: "Student required document not found" });
+      return res
+        .status(404)
+        .json({ message: "Student required document not found" });
     }
-
+    //finding the required document name
+    const docName = srd.requiredDocument.name;
+    // student id
+    const studentId = srd.student._id;
     // Only check agency ownership if a document has actually been uploaded
     if (srd.document && String(srd.document.agency) !== String(agency)) {
       return res.status(403).json({ message: "Access denied" });
@@ -207,9 +222,18 @@ export const updateDocumentReviewStatus = async (req, res) => {
     const updated = await StudentRequiredDocument.findByIdAndUpdate(
       studentRequiredDocumentId,
       update,
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
+    const document = await getDocumentReviewNotification(status, docName);
+
+    //push notification
+    await sendStudentPushNotification({
+      studentId: studentId,
+      triggerId: agentId,
+      title: document.title,
+      body: document.body,
+    });
     return res.status(200).json({
       message: "Review status updated",
       data: updated,
@@ -231,7 +255,9 @@ export const getStudentChecklist = async (req, res) => {
     }
 
     if (stage && !["admission", "visa"].includes(stage)) {
-      return res.status(400).json({ message: "Invalid stage. Use 'admission' or 'visa'" });
+      return res
+        .status(400)
+        .json({ message: "Invalid stage. Use 'admission' or 'visa'" });
     }
 
     const filter = { student: studentId };

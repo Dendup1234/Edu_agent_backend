@@ -14,7 +14,7 @@ import healthRoute from "./routes/health.js";
 import { initializeWebSocket } from "./controllers/socket.js";
 import { seedSuperAdmin } from "./scripts/seedSuperAdmin.js";
 import rateLimit from "express-rate-limit";
-import chatRoutes from "./routes/chat.js";
+
 // Config
 dotenv.config();
 
@@ -25,9 +25,29 @@ dotenv.config();
 //max: 100,
 //});
 // Express app command
+
 const app = express();
 
-// rate limiting
+// for checking the query speeds of the request/response time
+app.use((req, res, next) => {
+  const startHrTime = process.hrtime();
+
+  res.on("finish", () => {
+    const elapsedHrTime = process.hrtime(startHrTime);
+    // Convert to milliseconds
+    const elapsedTimeInMs = (
+      elapsedHrTime[0] * 1000 +
+      elapsedHrTime[1] / 1e6
+    ).toFixed(3);
+    console.log(
+      `${req.method} ${req.originalUrl} finished in ${elapsedTimeInMs}ms`,
+    );
+  });
+
+  next();
+});
+
+//rate limiting
 //app.use(limiter);
 //helmet config
 app.use(helmet());
@@ -41,7 +61,6 @@ app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1/agent", agentRoute);
 app.use("/api/v1/mentor", mentorRoute);
 app.use(oAuthRoute);
-app.use("/api/v1/openai", chatRoutes);
 
 // Server setup
 const PORT = process.env.PORT || 8000;
@@ -60,10 +79,11 @@ app.use(healthRoute);
 
 app.use("/api/v1/students", studentRoute(io));
 
-// Connect to database
-await connectDB();
+//await connectDB();
 
 // Start server for devlopment
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+export default app;

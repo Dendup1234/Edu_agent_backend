@@ -11,6 +11,7 @@ const StudentSchema = new Schema(
     },
     email: {
       type: String,
+      required: true,
     },
     phone: {
       type: String,
@@ -109,20 +110,19 @@ const StudentSchema = new Schema(
       type: String,
       default: null,
     },
-    
+
     visaProfile: {
       hasSpouse: {
         type: Boolean,
         required: true,
         default: false,
       },
-     hasChildren: {
+      hasChildren: {
         type: Boolean,
         required: true,
         default: false,
       },
-}
-
+    },
   },
   { timestamps: true },
 );

@@ -15,7 +15,6 @@ import {
   getCourse,
   updateCourse,
   deactivateCourse,
-  getCourseByAgency,
   getCourseById,
 } from "../controllers/agency/agency.course.js";
 
@@ -211,9 +210,6 @@ router.get(
   requirePermission("course:readById"),
   getCourseById,
 );
-
-//Student api to get the course
-router.get("/courses/agency/:agencyId", protect, getCourseByAgency);
 
 //All agency
 //Student api

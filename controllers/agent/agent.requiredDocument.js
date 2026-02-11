@@ -1,5 +1,6 @@
 import RequiredDocument from "../../models/requiredDocument.js";
 import StudentRequiredDocument from "../../models/studentRequiredDocument.js";
+import Document from "../../models/document.js";
 import Agent from "../../models/agent.js";
 import { getDocumentReviewNotification } from "../../utils/documentStatus.js";
 import { sendStudentPushNotification } from "../../utils/notification.js";
@@ -165,14 +166,18 @@ export const getDocumentsByStudent = async (req, res) => {
       return res.status(400).json({ message: "Student ID is required" });
     }
 
-    const documents = await StudentRequiredDocument.find({
+    const StudentUploadedDocuments = await StudentRequiredDocument.find({
       student: studentId,
     })
       .populate("requiredDocument", "name description stage")
-      .populate("document")
+      .populate("document", "fileURL")
       .lean();
 
-    return res.status(200).json({ data: documents });
+    const documents = await Document.find({
+      belongsTo: studentId,
+      documentCategory: { $ne: null }
+    })
+    return res.status(200).json({ data1: StudentUploadedDocuments, data2: documents });
   } catch (err) {
     console.error("getDocumentsByStudent:", err);
     return res.status(500).json({ message: err.message });

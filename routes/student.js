@@ -47,11 +47,6 @@ import {
   getDocuments,
 } from "../controllers/student/student.document.js";
 
-import {
-  updateVisaProfile
-} from "../controllers/student/student.survey.js"
-
-
 const router = express.Router();
 // Authentication api
   router.post("/send-otp", sendOtp);
@@ -102,8 +97,5 @@ const router = express.Router();
   // Application & Document status
   router.get("/documents/status", protect, getDocumentStatus);
   router.get("/documents", protect, getDocuments);
-
-  // Survey
-  // router.patch("/survey", protect, updateVisaProfile)
 
 export default router;

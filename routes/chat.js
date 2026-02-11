@@ -1,10 +1,10 @@
-import { chatbotStream } from "../controllers/chat.js";
-import { protect } from "../middlewares/auth.middleware.js";
-import express from "express";
+// import { chatbotStream } from "../controllers/chat.js";
+// import { protect } from "../middlewares/auth.middleware.js";
+// import express from "express";
 
-const router = express.Router();
+// const router = express.Router();
 
-// chatbot api
-router.post("/chatbot", chatbotStream);
+// // chatbot api
+// router.post("/chatbot", chatbotStream);
 
-export default router;
+// export default router;

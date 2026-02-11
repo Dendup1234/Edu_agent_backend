@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import RequiredDocument from "./requiredDocument.js";
 
 const studentRequiredDocumentSchema = new mongoose.Schema(
   {
@@ -30,6 +29,10 @@ const studentRequiredDocumentSchema = new mongoose.Schema(
       enum: ["under_review", "approved", "reupload", "rejected"],
       default: "under_review",
       index: true,
+    },
+
+    reviewComment: {
+      type: String
     },
 
     verifiedBy: {

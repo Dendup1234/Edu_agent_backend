@@ -1,4 +1,4 @@
-import Agent from "../../models/agent.js"
+import Agent from "../../models/agent.js";
 
 export const getVisaAgent = async (req, res) => {
   try {
@@ -8,8 +8,10 @@ export const getVisaAgent = async (req, res) => {
     }
     // finding all the agent inside the organization
     const agent = await Agent.find({
-      agency: userId, 
-      systemRole: "visa_officer"
+      agency: userId,
+      systemRole: "visa_officer",
+      isVerified: true,
+      isActive: true,
     });
     return res.status(200).json({ message: "Success", agents: agent });
   } catch (e) {

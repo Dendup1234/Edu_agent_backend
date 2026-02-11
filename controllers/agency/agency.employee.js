@@ -389,6 +389,8 @@ export const getAllAdmissionOfficer = async (req, res) => {
     const admissionOfficer = await Agent.find({
       agency: userId,
       systemRole: "admission_officer",
+      isVerified: true,
+      isActive: true,
     });
     // Success message
     return res

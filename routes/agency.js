@@ -332,7 +332,7 @@ router.get(
   getScholarshipDashboard,
 );
 
-//Employees apis
+//Employees api
 router.post("/profile/employee/agents", protect, createAgent);
 router.get("/profile/employee/agents", protect, getAllAgent);
 router.get("/profile/employee/agents/:agentId/agents", protect, getAgentById);

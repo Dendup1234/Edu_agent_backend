@@ -173,7 +173,6 @@ export const verifyOtp = async (req, res) => {
       organizationName: pending.organizationName,
       password: pending.passwordHash,
       isVerified: true,
-      isActive: true,
     });
 
     // cleanup pending

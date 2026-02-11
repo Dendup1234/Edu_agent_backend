@@ -28,6 +28,7 @@ import {
   getStudentAppStatus,
   getStudentList,
   searchLeadByName,
+  getAgencyCard,
 } from "../controllers/agency/agency.profile.js";
 
 import {
@@ -127,6 +128,7 @@ router.get("/profile/students/leads/", protect, getStudentLead);
 router.get("/profile/students/leads/:studentId", protect, getStudentAppStatus);
 router.get("/profile/students/leads/query/search", protect, searchLeadByName);
 router.get("/profile/students/studentlist", protect, getStudentList);
+router.get("/profile/students/card", protect, getAgencyCard);
 
 //University apis
 router.post(

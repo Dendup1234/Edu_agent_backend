@@ -1,6 +1,25 @@
-import Document from "../../models/document.js";
 import RequiredDocument from "../../models/requiredDocument.js";
 import StudentRequiredDocument from "../../models/studentRequiredDocument.js";
+import Agent from "../../models/agent.js"
+
+export const getAgentStudentCount = async (req, res) => {
+  try {
+    const agentId = req.user.id;
+
+    const agent = await Agent.findById(agentId).select("assignedStudents");
+    
+    if (!agent) {
+      return res.status(404).json({ message: "Agent not found" });
+    }
+
+    return res.status(200).json({ 
+      count: agent.assignedStudents.length 
+    });
+  } catch (err) {
+    console.error("getAgentStudentCount:", err);
+    return res.status(500).json({ message: err.message });
+  }
+};
 
 export const createRequiredDocument = async (req, res) => {
   try {
@@ -64,6 +83,44 @@ export const updateRequiredDocument = async (req, res) => {
     });
   } catch (err) {
     console.error("updateRequiredDocument:", err);
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+export const deleteRequiredDocument = async (req, res) => {
+  try {
+    const agency = req.user.agencyId;
+    const { id } = req.params;
+
+    // Verify it belongs to this agency before deleting
+    const requiredDocument = await RequiredDocument.findOne({
+      _id: id,
+      agency
+    });
+
+    if (!requiredDocument) {
+      return res.status(404).json({ message: "Required document not found" });
+    }
+
+    // Check if any students have this in their checklist
+    const usageCount = await StudentRequiredDocument.countDocuments({
+      requiredDocument: id
+    });
+
+    if (usageCount > 0) {
+      return res.status(409).json({
+        message: `Cannot delete: ${usageCount} student(s) have this document in their checklist. Remove it from their checklists first.`
+      });
+    }
+
+    // Safe to delete
+    await RequiredDocument.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      message: "Deleted successfully"
+    });
+  } catch (err) {
+    console.error("deleteRequiredDocument:", err);
     return res.status(500).json({ message: err.message });
   }
 };

@@ -1,11 +1,6 @@
 import Document from "../../models/document.js";
-import RequiredDocument from "../../models/requiredDocument.js";
 import StudentRequiredDocument from "../../models/studentRequiredDocument.js";
 import Student from "../../models/student.js";
-
-// ─────────────────────────────────────────────
-// HELPER — used by every endpoint below
-// ─────────────────────────────────────────────
 
 const getStudentWithAgency = async (studentId) => {
   const student = await Student.findById(studentId).select("registeredAgency");

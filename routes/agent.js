@@ -21,6 +21,7 @@ import {
   cancelAppointment,
   confirmedAppointment,
   searchAppointmentsByStudentName,
+  updateProfile,
 } from "../controllers/agent/agent.profile.js";
 const router = express.Router();
 
@@ -31,14 +32,16 @@ import {
   getDocumentsByStudent,
   getStudentChecklist,
   updateDocumentReviewStatus,
+  deleteRequiredDocument,
+  getAgentStudentCount,
 } from "../controllers/agent/agent.requiredDocument.js";
 
-import {
-  generateSAS,
-  confirmUpload
-} from "../controllers/agent/agent.blob.js"
+import { generateSAS, confirmUpload } from "../controllers/agent/agent.blob.js";
 
-import { createStudentChecklist } from "../controllers/agent/agent.studentRequiredDocument.js";
+import {
+  createStudentChecklist,
+  deleteStudentRequiredDocument,
+} from "../controllers/agent/agent.studentRequiredDocument.js";
 
 import { getVisaAgent } from "../controllers/agent/agent.visaofficerlist.js";
 
@@ -50,6 +53,7 @@ router.post("/password-reset/set-new", setNewPassword);
 
 //Profile apis
 router.get("/profile/me", protect, getAgentinformation);
+router.patch("/profile/update", protect, updateProfile);
 
 // admission officers apis
 router.get("/students", protect, getStudentList);
@@ -59,10 +63,20 @@ router.post("/documents/required", protect, createRequiredDocument);
 router.get("/documents/required", protect, getRequiredDocumentsList);
 router.patch("/documents/required/:id", protect, updateRequiredDocument);
 router.get("/documents/student/:studentId", protect, getDocumentsByStudent);
+router.delete("/documents/required/:id", protect, deleteRequiredDocument);
 
-router.post("/documents/checklist/:studentId", protect, createStudentChecklist)
+router.post("/documents/checklist/:studentId", protect, createStudentChecklist);
 router.get("/documents/checklist/:studentId", protect, getStudentChecklist);
-router.patch("/documents/review/:studentRequiredDocumentId", protect, updateDocumentReviewStatus);
+router.patch(
+  "/documents/review/:studentRequiredDocumentId",
+  protect,
+  updateDocumentReviewStatus,
+);
+router.delete(
+  "/documents/checklist/:studentRequiredDocumentId",
+  protect,
+  deleteStudentRequiredDocument,
+);
 
 // uploads
 router.post("/uploads/sas", protect, generateSAS);
@@ -85,5 +99,7 @@ router.patch(
 router.get("/appointments/search/", protect, searchAppointmentsByStudentName);
 
 router.get("/agent-list", protect, getVisaAgent);
+
+router.get("/studentcount", protect, getAgentStudentCount);
 
 export default router;

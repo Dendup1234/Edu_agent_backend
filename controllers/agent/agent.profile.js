@@ -14,10 +14,39 @@ export const getAgentinformation = async (req, res) => {
         select: "name permissions",
       })
       .lean();
-    // returing a statuses 
+    // returing a statuses git
     return res.status(200).json({ message: "Success", agent: agent });
   } catch (e) {
     console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Updating the agent profile
+//Updating a profile
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const update = req.body;
+    // forbidden fields to be updated
+    const forbidden = ["_id", "password"];
+    forbidden.forEach((field) => delete update[field]);
+    //Find by id and update
+    const updatedAgency = await Agent.findByIdAndUpdate(userId, update, {
+      new: true,
+      runValidators: true,
+    })
+      .select("-password")
+      .lean();
+
+    if (!updatedAgency) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({
+      message: "Profile updated",
+      profile: updatedAgency,
+    });
+  } catch (e) {
     return res.status(500).json({ message: "Server error" });
   }
 };

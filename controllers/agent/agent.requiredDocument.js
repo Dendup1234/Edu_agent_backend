@@ -192,6 +192,7 @@ export const updateDocumentReviewStatus = async (req, res) => {
     const { studentRequiredDocumentId } = req.params;
     const { status, reviewComment } = req.body;
     const agentId = req.user.id;
+    const agency = req.user.agencyId;
 
     if (!status || !ALLOWED_STATUSES.includes(status)) {
       return res.status(400).json({
@@ -205,6 +206,7 @@ export const updateDocumentReviewStatus = async (req, res) => {
       studentRequiredDocumentId,
     )
       .populate("requiredDocument student")
+      .populate("document", "agency")
       .lean();
 
     if (!srd) {

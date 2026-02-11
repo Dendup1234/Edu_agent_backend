@@ -211,7 +211,7 @@ export const updateDocumentReviewStatus = async (req, res) => {
     // student id
     const studentId = srd.student._id;
     // Only check agency ownership if a document has actually been uploaded
-    if (srd.document && String(srd.document.agency) !== String(agency)) {
+    if (String(srd.document.agency) !== String(agency)) {
       return res.status(403).json({ message: "Access denied" });
     }
 

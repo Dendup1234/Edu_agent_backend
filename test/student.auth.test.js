@@ -151,7 +151,7 @@ describe("Auth OTP + Login + Reset Flow", () => {
     expect(created).to.exist;
 
     const pending = await PendingSignup.findOne({ email: "ok@example.com" });
-    expect(pending).to.not.exist; // cleaned uped
+    expect(pending).to.not.exist; // cleaned up
   });
 
   // ---------------------------

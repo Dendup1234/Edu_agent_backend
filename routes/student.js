@@ -25,6 +25,7 @@ import { searchUniByName } from "../controllers/student/student.uni.js";
 import {
   searchCourseByName,
   selectCourse,
+  getCourseByAgency,
 } from "../controllers/student/student.course.js";
 import { searchScholarshipByName } from "../controllers/student/student.scholarship.js";
 import { registerMeeting } from "../controllers/student/student.event.js";
@@ -43,7 +44,7 @@ import { getConversationMessages } from "../controllers/message.js";
 
 import {
   getDocumentStatus,
-  getDocuments
+  getDocuments,
 } from "../controllers/student/student.document.js";
 
 import {
@@ -78,7 +79,8 @@ const router = express.Router();
   router.post("/uploads/confirm", protect, confirmUpload);
 
   // Course / Universities / Scholarships
-  router.get("/courses/query/:agencyId/search", protect, searchCourseByName);
+  router.get("/courses", protect, getCourseByAgency);
+  router.get("/courses/search/", protect, searchCourseByName);
   router.patch("/courses/select/:courseId", protect, selectCourse);
   router.get("/universities/query/:agencyId/search", protect, searchUniByName);
   router.get(

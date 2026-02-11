@@ -98,7 +98,7 @@ export const resendOtp = async (req, res) => {
     if (secondsSinceLast < RESEND_COOLDOWN_SEC) {
       return res.status(429).json({
         message: `Please wait ${Math.ceil(
-          RESEND_COOLDOWN_SEC - secondsSinceLast
+          RESEND_COOLDOWN_SEC - secondsSinceLast,
         )} seconds before resending OTP.`,
       });
     }
@@ -173,6 +173,7 @@ export const verifyOtp = async (req, res) => {
       organizationName: pending.organizationName,
       password: pending.passwordHash,
       isVerified: true,
+      isActive: true,
     });
 
     // cleanup pending
@@ -267,7 +268,7 @@ export const sendPasswordResetOtp = async (req, res) => {
       if (secondsSinceLast < RESEND_COOLDOWN_SEC) {
         return res.status(429).json({
           message: `Please wait ${Math.ceil(
-            RESEND_COOLDOWN_SEC - secondsSinceLast
+            RESEND_COOLDOWN_SEC - secondsSinceLast,
           )}s before resending OTP.`,
         });
       }
@@ -293,7 +294,7 @@ export const sendPasswordResetOtp = async (req, res) => {
         lastSentAt: new Date(),
         resendCount: existing ? existing.resendCount + 1 : 0,
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
 
     await sendOtpEmail(normalizedEmail, otp, "Password Reset OTP");
@@ -337,7 +338,7 @@ export const verifyPasswordResetOtp = async (req, res) => {
     // issue short-lived reset token
     const resetToken = signToken(
       { sub: normalizedEmail },
-      { expiresIn: "10m" }
+      { expiresIn: "10m" },
     );
 
     return res.json({ message: "OTP verified", resetToken });

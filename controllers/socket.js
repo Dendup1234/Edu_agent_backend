@@ -43,12 +43,12 @@ export const initializeWebSocket = (server) => {
     const conversations = await Conversation.find({
       "participants.user": socket.userId
     })
-      .populate("participants.user")
-      .populate({path: "lastMessage"})
-      .sort({ updatedAt: -1 })
-      .lean();
+    .sort({ updatedAt: -1 })
+    .select("_id")
+    .lean();
 
-    socket.emit("conversation_list", conversations);
+    const conversationIds = conversations.map(c => c._id);
+    socket.emit("conversation_list", conversationIds);
 
     socket.on("send_message", async (data) => {
       try {

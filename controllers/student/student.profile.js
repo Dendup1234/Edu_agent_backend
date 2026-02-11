@@ -1,6 +1,5 @@
 import Student from "../../models/student.js";
 import Agency from "../../models/agency.js";
-import { sendAutoMessage } from "../../client.js";
 import mongoose from "mongoose";
 import Notification from "../../models/notification.js";
 import { sendStudentPushNotification } from "../../utils/notification.js";
@@ -52,7 +51,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 // Select agency
-export const selectAgency = (io) => async (req, res) => {
+export const selectAgency = async (req, res) => {
   try {
     const userId = req.user.sub;
     const { agencyId } = req.body;
@@ -84,19 +83,6 @@ export const selectAgency = (io) => async (req, res) => {
       },
       { new: true, runValidators: true },
     );
-
-    // try {
-    //   await sendAutoMessage(
-    //     io,
-    //     agencyId.toString(),
-    //     "Agency",
-    //     userId.toString(),
-    //     "Student",
-    //     `Welcome ${student.name}! We are excited to have you onboard.`
-    //   );
-    // } catch (e) {
-    //   console.error("Auto message error:", e.message);
-    // }
 
     return res.status(200).json({
       message: "Selection successful",

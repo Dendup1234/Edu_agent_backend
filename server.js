@@ -55,7 +55,7 @@ await connectDB();
 // seed the super admin after the db connect
 //await seedSuperAdmin();
 
-app.use("/api/v1/students", studentRoute(io));
+app.use("/api/v1/students", studentRoute);
 
 // Start server
 server.listen(PORT, () => {

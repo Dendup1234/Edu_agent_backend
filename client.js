@@ -1,62 +1,25 @@
-import Message from "./models/message.js";
-import Conversation from "./models/conversation.js";
+// Install first: npm install socket.io-client readline
+import { io } from "socket.io-client";
 
-export const sendAutoMessage = async (
-  io,
-  senderId,
-  senderModel,
-  receiverId,
-  receiverModel,
-  content
-) => {
-  if (!receiverId || !content) return;
+// ===== CONFIG =====
+const SERVER_URL = "https://undeaf-crashing-ellie.ngrok-free.dev"; // replace with your server
+const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTg5YjkyZDUxM2EwNTlhYTNlNWFmMDgiLCJhY3RvciI6IlN0dWRlbnQiLCJpYXQiOjE3NzA2MzM1MTd9.KT78j77fE5rrpKBsIQdGLSE9gLN7OGPvltozjMbRtZ0"; // <-- paste token here
 
-  if (senderId === receiverId) {
-    throw new Error("Cannot send message to yourself");
-  }
+// ===== SETUP SOCKET =====
+const socket = io(`${SERVER_URL}`, {
+  auth: { token: TOKEN }
+});
 
-  // Check if receiver is online
-  const room = io.sockets.adapter.rooms.get(receiverId);
-  const isReceiverOnline = !!room && room.size > 0;
+// Log all events
+socket.on("connect", () => {
+  console.log("Connected as socket id:", socket.id);
+});
 
-  const participants = [
-    { user: senderId, model: senderModel },
-    { user: receiverId, model: receiverModel }
-  ];
+socket.on("disconnect", () => {
+  console.log("Disconnected from server");
+});
 
-  const participantsHash = [senderId, receiverId].sort().join("_");
+socket.on("conversation_list", (conversations) => {
+  console.log("Conversations:", JSON.stringify(conversations, null, 2));
+});
 
-  // Find or create conversation
-  let conversation = await Conversation.findOne({ participantsHash });
-  if (!conversation) {
-    try {
-      conversation = await Conversation.create({
-        participants,
-        participantsHash
-      });
-    } catch (err) {
-      conversation = await Conversation.findOne({ participantsHash });
-    }
-  }
-
-  // Create the message
-  const message = await Message.create({
-    conversationId: conversation._id,
-    sender: senderId,
-    senderModel,
-    receiver: receiverId,
-    receiverModel,
-    content,
-    status: isReceiverOnline ? "delivered" : "sent"
-  });
-
-  conversation.lastMessage = message._id;
-  await conversation.save();
-
-  // Emit message if receiver is online
-  if (isReceiverOnline) {
-    io.to(receiverId).emit("receive_message", message);
-  }
-
-  return message;
-};

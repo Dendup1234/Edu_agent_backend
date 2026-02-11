@@ -50,10 +50,9 @@ import {
   updateVisaProfile
 } from "../controllers/student/student.survey.js"
 
-export default function studentRoute(io) {
-  const router = express.Router();
 
-  // Authentication api
+const router = express.Router();
+// Authentication api
   router.post("/send-otp", sendOtp);
   router.post("/resend-otp", resendOtp);
   router.post("/verify-otp", verifyOtp);
@@ -72,7 +71,7 @@ export default function studentRoute(io) {
   router.get("/students/notification/history", protect, getMyNotifications);
 
   // Select Agency — pass io safely
-  router.post("/select-agency", protect, selectAgency(io));
+  router.post("/select-agency", protect, selectAgency);
 
   // Profile upload
   router.post("/uploads/sas", protect, generateSAS);
@@ -103,7 +102,6 @@ export default function studentRoute(io) {
   router.get("/documents", protect, getDocuments);
 
   // Survey
-  router.patch("/survey", protect, updateVisaProfile)
+  // router.patch("/survey", protect, updateVisaProfile)
 
-  return router;
-}
+export default router;

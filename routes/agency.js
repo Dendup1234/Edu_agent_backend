@@ -277,9 +277,24 @@ router.get(
   requirePermission("event:readTicket"),
   getAllTicket,
 );
-router.get("/events/profile/:seatId/seats/info", protect, getSeatInformation);
-router.get("/events/tickets/", protect, getTickets);
-router.get("/events/tickets/search", protect, searchTickets);
+router.get(
+  "/events/profile/:seatId/seats/info",
+  protect,
+  requirePermission("event:seatRead"),
+  getSeatInformation,
+);
+router.get(
+  "/events/tickets/",
+  protect,
+  requirePermission("event:ticketsRead"),
+  getTickets,
+);
+router.get(
+  "/events/tickets/search",
+  protect,
+  requirePermission("event:ticketsSearch"),
+  searchTickets,
+);
 
 // Scholarships apis
 router.post(
@@ -333,39 +348,130 @@ router.get(
 );
 
 //Employees api
-router.post("/profile/employee/agents", protect, createAgent);
-router.get("/profile/employee/agents", protect, getAllAgent);
-router.get("/profile/employee/agents/:agentId/agents", protect, getAgentById);
-router.patch("/profile/employee/agents/:agentId/agents", protect, updateAgent);
+router.post(
+  "/profile/employee/agents",
+  protect,
+  requirePermission("agent:create"),
+  createAgent,
+);
+router.get(
+  "/profile/employee/agents",
+  protect,
+  requirePermission("agent:read"),
+  getAllAgent,
+);
+router.get(
+  "/profile/employee/agents/:agentId/agents",
+  protect,
+  requirePermission("agent:readById"),
+  getAgentById,
+);
+router.patch(
+  "/profile/employee/agents/:agentId/agents",
+  protect,
+  requirePermission("agent:update"),
+  updateAgent,
+);
 router.delete(
   "/profile/employee/agents/:agentId/agents",
   protect,
+  requirePermission("agent:delete"),
   deactivateAgent,
 );
-router.post("/profile/role/agents", protect, createRole);
-router.get("/profile/role/agents", protect, getAllRole);
-router.patch("/profile/role/agents/:roleId", protect, updateRole);
-router.delete("/profile/role/agents/:roleId", protect, deactivateRole);
-router.get("/profile/employee/agents/search/", protect, searchEmployee);
-router.post("/profile/employee/mentors", protect, createMentor);
-router.get("/profile/role/search", protect, searchRoleByName);
+router.post(
+  "/profile/role/agents",
+  protect,
+  requirePermission("role:create"),
+  createRole,
+);
+router.get(
+  "/profile/role/agents",
+  protect,
+  requirePermission("role:read"),
+  getAllRole,
+);
+router.patch(
+  "/profile/role/agents/:roleId",
+  protect,
+  requirePermission("role:update"),
+  updateRole,
+);
+router.delete(
+  "/profile/role/agents/:roleId",
+  protect,
+  requirePermission("role:delete"),
+  deactivateRole,
+);
+router.get(
+  "/profile/employee/agents/search/",
+  protect,
+  requirePermission("agent:search"),
+  searchEmployee,
+);
+router.get(
+  "/profile/role/search",
+  protect,
+  requirePermission("role:search"),
+  searchRoleByName,
+);
 router.get(
   "/profile/employee/admission-officers",
   protect,
   getAllAdmissionOfficer,
 );
-router.patch("/profile/assign/:studentId", protect, assignAdmission);
-router.patch("/profile/assign/change/:studentId", protect, changeAssignedAgent);
+router.patch(
+  "/profile/assign/:studentId",
+  protect,
+  requirePermission("agent:assign"),
+  assignAdmission,
+);
+router.patch(
+  "/profile/assign/change/:studentId",
+  protect,
+  requirePermission("agent:changeAssign"),
+  changeAssignedAgent,
+);
 
 // Message
 router.get("/conversation/:conversationId/messages", getConversationMessages);
 
 // Mentor apis
-router.get("/mentors/", protect, getAllMentor);
-router.get("/mentors/:mentorId", protect, getMentorById);
-router.delete("/mentors/:mentorId", protect, deactivateMentor);
-router.get("/mentors/search/query", protect, searchMentorByName);
-router.get("/mentors/dashboard/stats", protect, getMentorDashboard);
+router.post(
+  "/profile/employee/mentors",
+  protect,
+  requirePermission("mentor:create"),
+  createMentor,
+);
+router.get(
+  "/mentors/",
+  protect,
+  requirePermission("mentor:read"),
+  getAllMentor,
+);
+router.get(
+  "/mentors/:mentorId",
+  protect,
+  requirePermission("mentor:readById"),
+  getMentorById,
+);
+router.delete(
+  "/mentors/:mentorId",
+  protect,
+  requirePermission("mentor:delete"),
+  deactivateMentor,
+);
+router.get(
+  "/mentors/search/query",
+  protect,
+  requirePermission("mentor:search"),
+  searchMentorByName,
+);
+router.get(
+  "/mentors/dashboard/stats",
+  protect,
+  requirePermission("mentor:dashboard"),
+  getMentorDashboard,
+);
 
 // Documents
 router.get("/documents/:studentId", getDocumentsByStudent);

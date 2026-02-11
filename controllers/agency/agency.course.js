@@ -114,7 +114,7 @@ export const getCourse = async (req, res) => {
     const courses = await University.findById(universityId).populate({
       path: "courses",
       select:
-        "title level about duration tutionfee description entryRequirements status intakes",
+        "title level about duration tuitionFee description entryRequirements status intakes",
     });
     if (!courses) {
       return res.status(404).json({ message: "Course not found" });

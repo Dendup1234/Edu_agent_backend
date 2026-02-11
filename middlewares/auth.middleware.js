@@ -70,7 +70,7 @@ export const requirePermission = (permission) => {
       // printing the agent
       //console.log(agent);
       if (!agent) return res.status(401).json({ message: "Unauthorized" });
-      if (agent.status !== "active")
+      if (agent.isActive == false)
         return res.status(403).json({ message: "Inactive account" });
       if (!agent.isVerified)
         return res.status(403).json({ message: "Account not verified" });

@@ -216,15 +216,13 @@ export const updateDocumentReviewStatus = async (req, res) => {
     if (status === "approved") update.verifiedBy = agentId;
 
     const updated = await StudentRequiredDocument.findOneAndUpdate(
-      { _id: studentRequiredDocumentId, status: "under_review" }, // Filter
+      { _id: studentRequiredDocumentId }, // Filter
       { $set: update }, // Update
       { new: true, runValidators: true },
     );
 
     if (!updated) {
-      return res
-        .status(405)
-        .json({ message: "Document with only under review can be updated" });
+      return res.status(405).json({ message: "Student not found" });
     }
 
     const document = await getDocumentReviewNotification(status, docName);

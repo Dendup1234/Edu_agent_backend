@@ -60,6 +60,7 @@ app.use(healthRoute);
 
 app.use("/api/v1/students", studentRoute);
 
+await connectDB();
 // Start server
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

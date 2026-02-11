@@ -192,7 +192,6 @@ export const updateDocumentReviewStatus = async (req, res) => {
     const { studentRequiredDocumentId } = req.params;
     const { status, reviewComment } = req.body;
     const agentId = req.user.id;
-    const agency = req.user.agencyId;
 
     if (!status || !ALLOWED_STATUSES.includes(status)) {
       return res.status(400).json({
@@ -202,8 +201,10 @@ export const updateDocumentReviewStatus = async (req, res) => {
     }
 
     // Verify the StudentRequiredDocument belongs to this agency via its student's linked Document
-    const srd = await StudentRequiredDocument.findById(studentRequiredDocumentId)
-      .populate("document", "agency")
+    const srd = await StudentRequiredDocument.findById(
+      studentRequiredDocumentId,
+    )
+      .populate("requiredDocument student")
       .lean();
 
     if (!srd) {
@@ -213,6 +214,7 @@ export const updateDocumentReviewStatus = async (req, res) => {
     }
     //finding the required document name
     const docName = srd.requiredDocument.name;
+
     // student id
     const studentId = srd.student._id;
     // Only check agency ownership if a document has actually been uploaded
@@ -224,11 +226,15 @@ export const updateDocumentReviewStatus = async (req, res) => {
     if (reviewComment) update.reviewComment = reviewComment;
     if (status === "approved") update.verifiedBy = agentId;
 
-    const updated = await StudentRequiredDocument.findByIdAndUpdate(
-      studentRequiredDocumentId,
-      update,
+    const updated = await StudentRequiredDocument.findOneAndUpdate(
+      { _id: studentRequiredDocumentId }, // Filter
+      { $set: update }, // Update
       { new: true, runValidators: true },
     );
+
+    if (!updated) {
+      return res.status(405).json({ message: "Student not found" });
+    }
 
     const document = await getDocumentReviewNotification(status, docName);
 

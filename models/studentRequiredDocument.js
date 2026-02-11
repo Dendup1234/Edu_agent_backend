@@ -28,30 +28,30 @@ const studentRequiredDocumentSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["under_review", "approved", "reupload", "rejected"],
-      default: "pending",
+      default: "under_review",
       index: true,
     },
 
     verifiedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Agent",
-      default: null
+      default: null,
     },
 
     // current uploaded document
     document: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Document",
-      default: null
+      default: null,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Prevent duplicate checklist items
 studentRequiredDocumentSchema.index(
   { student: 1, requiredDocument: 1 },
-  { unique: true }
+  { unique: true },
 );
 
 // Enforce stage consistency
@@ -69,5 +69,5 @@ studentRequiredDocumentSchema.pre("validate", async function () {
 
 export default mongoose.model(
   "StudentRequiredDocument",
-  studentRequiredDocumentSchema
+  studentRequiredDocumentSchema,
 );

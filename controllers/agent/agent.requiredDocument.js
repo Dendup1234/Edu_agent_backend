@@ -195,12 +195,12 @@ export const updateDocumentReviewStatus = async (req, res) => {
           "Invalid or missing status. Allowed: under_review, approved, reupload, rejected",
       });
     }
+
     // Verify the StudentRequiredDocument belongs to this agency via its student's linked Document
-    const srd = await StudentRequiredDocument.findById(
-      studentRequiredDocumentId,
-    )
-      .populate("requiredDocument student agency")
+    const srd = await StudentRequiredDocument.findById(studentRequiredDocumentId)
+      .populate("document", "agency")
       .lean();
+
     if (!srd) {
       return res
         .status(404)
@@ -211,7 +211,7 @@ export const updateDocumentReviewStatus = async (req, res) => {
     // student id
     const studentId = srd.student._id;
     // Only check agency ownership if a document has actually been uploaded
-    if (String(srd.document.agency) !== String(agency)) {
+    if (srd.document && String(srd.document.agency) !== String(agency)) {
       return res.status(403).json({ message: "Access denied" });
     }
 

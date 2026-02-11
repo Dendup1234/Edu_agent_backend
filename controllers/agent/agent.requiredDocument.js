@@ -199,7 +199,7 @@ export const updateDocumentReviewStatus = async (req, res) => {
     const srd = await StudentRequiredDocument.findById(
       studentRequiredDocumentId,
     )
-      .populate("requiredDocument student agency")
+      .populate("requiredDocument student")
       .lean();
     if (!srd) {
       return res
@@ -210,10 +210,6 @@ export const updateDocumentReviewStatus = async (req, res) => {
     const docName = srd.requiredDocument.name;
     // student id
     const studentId = srd.student._id;
-    // Only check agency ownership if a document has actually been uploaded
-    if (String(srd.document.agency) !== String(agency)) {
-      return res.status(403).json({ message: "Access denied" });
-    }
 
     const update = { status };
     if (reviewComment) update.reviewComment = reviewComment;

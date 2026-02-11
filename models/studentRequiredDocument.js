@@ -54,19 +54,6 @@ studentRequiredDocumentSchema.index(
   { unique: true }
 );
 
-// Enforce stage consistency
-studentRequiredDocumentSchema.pre("validate", async function () {
-  const doc = await RequiredDocument.findById(this.requiredDocument).select(
-    "stage"
-  );
-
-  if (!doc) throw new Error("Invalid RequiredDocument");
-
-  if (doc.stage !== this.stage) {
-    throw new Error("Stage mismatch with RequiredDocument");
-  }
-});
-
 export default mongoose.model(
   "StudentRequiredDocument",
   studentRequiredDocumentSchema

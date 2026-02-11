@@ -90,7 +90,7 @@ export const getCourseByAgency = async (req, res) => {
 
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-    // fetching the agency id from the student schema
+    // fetching the agency id from the student schemas
     const student = await Student.findById(userId).select("registeredAgency");
     // getting the agency id
     const agencyId = student?.registeredAgency;

@@ -419,18 +419,10 @@ router.get(
   protect,
   getAllAdmissionOfficer,
 );
-router.patch(
-  "/profile/assign/:studentId",
-  protect,
-  requirePermission("agent:assign"),
-  assignAdmission,
-);
-router.patch(
-  "/profile/assign/change/:studentId",
-  protect,
-  requirePermission("agent:changeAssign"),
-  changeAssignedAgent,
-);
+
+//for visa and admission officer
+router.patch("/profile/assign/:studentId", protect, assignAdmission);
+router.patch("/profile/assign/change/:studentId", protect, changeAssignedAgent);
 
 // Message
 router.get("/conversation/:conversationId/messages", getConversationMessages);

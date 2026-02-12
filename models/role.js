@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const { Schema, Types } = mongoose;
 
-// Custom role schema
+// Custom role schemas
 const roleSchema = new Schema(
   {
     agencyId: { type: Types.ObjectId, ref: "Agency" },

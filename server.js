@@ -14,7 +14,7 @@ import healthRoute from "./routes/health.js";
 import { initializeWebSocket } from "./controllers/socket.js";
 import { seedSuperAdmin } from "./scripts/seedSuperAdmin.js";
 import rateLimit from "express-rate-limit";
-//import chatRoutes from "./routes/chat.js";
+import chatRoutes from "./routes/chat.js";
 // Config
 dotenv.config();
 
@@ -40,10 +40,8 @@ app.use("/api/v1/agency", agencyRoute);
 app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1/agent", agentRoute);
 app.use("/api/v1/mentor", mentorRoute);
-app.use("/api/v1/students", studentRoute);
-
 app.use(oAuthRoute);
-//app.use("/api/v1/openai", chatRoutes);
+app.use("/api/v1/openai", chatRoutes);
 
 // Server setup
 const PORT = process.env.PORT || 8000;
@@ -58,9 +56,11 @@ const io = initializeWebSocket(server);
 //await seedSuperAdmin();
 
 // health check route
-app.use(healthRoute)
+app.use(healthRoute);
 
-connectDB()
+app.use("/api/v1/students", studentRoute);
+
+await connectDB();
 
 // Start server
 server.listen(PORT, () => {

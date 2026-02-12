@@ -1,27 +1,7 @@
 import RequiredDocument from "../../models/requiredDocument.js";
 import StudentRequiredDocument from "../../models/studentRequiredDocument.js";
 
-// Seeds all admission-stage checklist items automatically
-export const seedAdmissionChecklist = async (studentId, agencyId) => {
-  const templates = await RequiredDocument.find({
-    agency: agencyId,
-    stage: "admission",
-  }).lean();
-
-  if (templates.length === 0) return;
-
-  const checklist = templates.map((template) => ({
-    student: studentId,
-    requiredDocument: template._id,
-    stage: "admission",
-    status: "under_review",
-    document: null,
-  }));
-
-  await StudentRequiredDocument.insertMany(checklist, { ordered: false });
-};
-
-// AGENT bulk-creates visa checklist items
+// AGENT bulk-creates visa and admission checklist items
 // from selected RequiredDocument IDs
 
 export const createStudentChecklist = async (req, res) => {
@@ -68,7 +48,6 @@ export const createStudentChecklist = async (req, res) => {
 
     const checklist = newTemplates.map((template) => ({
       student: studentId,
-      agency,
       requiredDocument: template._id,
       stage: template.stage,
       status: "under_review",

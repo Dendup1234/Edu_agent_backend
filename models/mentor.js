@@ -43,7 +43,7 @@ const mentorSchema = new Schema(
     education: {
       type: [String],
     },
-    //Mentor free time
+    //Mentor free times
     availability: {
       type: [String],
     },

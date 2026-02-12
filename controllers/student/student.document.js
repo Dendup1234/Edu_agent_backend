@@ -50,7 +50,7 @@ export const getDocuments = async (req, res) => {
     const documents = await Document.find({
       belongsTo: studentId,
       agency: student.registeredAgency,
-      documentCategory: null
+      documentCategory: { $ne: null }
     }).lean();
 
     return res.status(200).json({ data: documents });

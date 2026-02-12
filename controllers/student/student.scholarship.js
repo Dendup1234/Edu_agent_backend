@@ -1,6 +1,6 @@
 import Scholarship from "../../models/scholarship.js";
 
-//Searching scholarship by their name
+//Searching scholarship by their names
 export const searchScholarshipByName = async (req, res) => {
   try {
     const userId = req.user.sub;

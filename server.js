@@ -13,7 +13,9 @@ import mentorRoute from "./routes/mentor.js";
 import healthRoute from "./routes/health.js";
 import { initializeWebSocket } from "./controllers/socket.js";
 import { seedSuperAdmin } from "./scripts/seedSuperAdmin.js";
+import mongoose from "mongoose";
 import rateLimit from "express-rate-limit";
+import admin from "./models/admin.js";
 import chatRoutes from "./routes/chat.js";
 // Config
 dotenv.config();
@@ -43,7 +45,7 @@ app.use("/api/v1/mentor", mentorRoute);
 app.use(oAuthRoute);
 app.use("/api/v1/openai", chatRoutes);
 
-// Server setup
+// Server setups
 const PORT = process.env.PORT || 8000;
 
 // Create HTTP server from Express
@@ -52,9 +54,6 @@ const server = http.createServer(app);
 // Initialize Socket.IO
 const io = initializeWebSocket(server);
 
-// seed the super admin after the db connect
-//await seedSuperAdmin();
-
 // health check route
 app.use(healthRoute);
 
@@ -62,6 +61,8 @@ app.use("/api/v1/students", studentRoute);
 
 await connectDB();
 
+// seed the super admin after the db connect
+//await seedSuperAdmin();
 // Start server
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

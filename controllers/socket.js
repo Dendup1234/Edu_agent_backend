@@ -103,7 +103,7 @@ export const initializeWebSocket = (server) => {
         });
 
         // Push notify student when message is sent (usually only if offlines)
-        if (receiverModel === "Student" && !isReceiverOnline) {
+        if (receiverModel === "Student") {
           try {
             await sendStudentMessageuPushNotification({
               studentId: receiverId,
@@ -121,7 +121,6 @@ export const initializeWebSocket = (server) => {
         await conversation.save();
 
         if (isReceiverOnline) {
-          u;
           io.to(receiverId).emit("receive_message", message);
         }
 

@@ -228,7 +228,7 @@ router.get(
   requirePermission("event:readById"),
   getEventById,
 );
-router.get("/events/student/:agencyId", protect, getAllEventsStudent);
+router.get("/events/student/", protect, getAllEventsStudent);
 router.patch(
   "/events/profile/:eventId",
   protect,

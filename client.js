@@ -33,7 +33,7 @@ socket.on("connect_error", (err) => {
 
 socket.on("conversation_list", (data) => {
   console.log("Conversations:", data);
-  loadMessages("698f575945ac56b201336895")
+  loadMessages("698f5cdfacb6969cec47ca59")
 });
 
 // -------------------

@@ -9,6 +9,8 @@ import Mentor from "../../models/mentor.js";
 import bcrypt from "bcryptjs";
 import Student from "../../models/student.js";
 import mongoose from "mongoose";
+import Conversation from "../../models/conversation.js"
+import Message from "../../models/message.js"
 
 //Creating an account of the employee under the agency
 export const createAgent = async (req, res) => {

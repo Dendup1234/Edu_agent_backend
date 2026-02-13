@@ -31,6 +31,7 @@ const mentorSchema = new Schema(
     },
     profilepic: {
       type: String,
+      default: null
     },
     status: {
       type: String,

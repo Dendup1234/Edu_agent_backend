@@ -48,7 +48,7 @@ app.use("/api/v1/openai", chatRoutes);
 // Server setups
 const PORT = process.env.PORT || 8000;
 
-// Create HTTP server from Expresses
+// Create HTTP server from Express
 const server = http.createServer(app);
 
 // Initialize Socket.IO

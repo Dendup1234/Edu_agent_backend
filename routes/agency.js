@@ -107,7 +107,7 @@ import {
   getMentorDashboard,
 } from "../controllers/agency/agency.mentor.js";
 
-//Router import
+//Router imported
 const router = express.Router();
 
 //Auth apis
@@ -403,16 +403,16 @@ router.delete(
   deactivateRole,
 );
 router.get(
-  "/profile/employee/agents/search/",
-  protect,
-  requirePermission("agent:search"),
-  searchEmployee,
-);
-router.get(
   "/profile/role/search",
   protect,
   requirePermission("role:search"),
   searchRoleByName,
+);
+router.get(
+  "/profile/employee/agents/search/",
+  protect,
+  requirePermission("agent:search"),
+  searchEmployee,
 );
 router.get(
   "/profile/employee/admission-officers",

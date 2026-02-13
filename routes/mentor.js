@@ -26,6 +26,8 @@ import {
   getStudentProfileById,
 } from "../controllers/mentor/mentor.profile.js";
 
+import { generateSAS, confirmUpload } from "../controllers/mentor/mentor.blob.js";
+
 const router = express.Router();
 
 // Auth apis
@@ -60,5 +62,9 @@ router.patch(
 );
 router.get("/appointments/search/", protect, searchAppointmentsByStudentName);
 router.get("/students/:studentId", protect, getStudentProfileById);
+
+// Profile upload
+router.post("/uploads/sas", protect, generateSAS);
+router.post("/uploads/confirm", protect, confirmUpload);
 
 export default router;

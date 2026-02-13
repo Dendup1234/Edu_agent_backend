@@ -79,7 +79,7 @@ app.use(healthRoute);
 
 app.use("/api/v1/students", studentRoute(io));
 
-//await connectDB();
+await connectDB();
 
 // Start server for devlopment
 server.listen(PORT, () => {

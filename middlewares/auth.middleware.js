@@ -59,6 +59,7 @@ export const requirePermission = (permission) => {
       if (req.user.actor === "Student") {
         return next();
       }
+      // for the admin without any restriction
       if (req.user.actor === "Admin") {
         return next();
       }

@@ -114,8 +114,16 @@ export const getEventStatusCount = async (req, res) => {
 // Getting all the events in the student page
 export const getAllEventsStudent = async (req, res) => {
   try {
-    const { agencyId } = req.params;
-    const events = await Event.find({ organizerId: agencyId });
+    const studentId = req.user.sub;
+
+    // fetching the student
+    const student =
+      await Student.findById(studentId).select("registeredAgency");
+
+    // fetching the agency id
+    const agencyId = student.registeredAgency;
+
+    const events = await Event.find({ organizerId: agencyId, status: true });
     return res.status(200).json({ message: "Success", events: events });
   } catch (e) {
     console.log(e);

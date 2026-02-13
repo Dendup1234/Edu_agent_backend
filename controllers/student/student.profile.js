@@ -1,9 +1,12 @@
 import Student from "../../models/student.js";
 import Agency from "../../models/agency.js";
 import mongoose from "mongoose";
+import Message from "../../models/message.js";
+import Conversation from "../../models/conversation.js";
 import Notification from "../../models/notification.js";
 import { sendStudentPushNotification } from "../../utils/notification.js";
 import { loadNotificationsCursor } from "../../utils/cursor.js";
+
 // Getting profile of the student
 export const getProfile = async (req, res) => {
   try {
@@ -50,25 +53,73 @@ export const updateProfile = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+// Helper function to create welcome message
+async function createAutoMessage(agencyId, studentId, organizationName) {
+  try {
+    const participants = [
+      { user: agencyId, model: "Agency" },
+      { user: studentId, model: "Student" },
+    ];
+
+    const participantsHash = [agencyId.toString(), studentId.toString()]
+      .sort()
+      .join("_");
+
+    // Check if conversation already exists
+    let conversation = await Conversation.findOne({ participantsHash });
+
+    if (!conversation) {
+      // Create new conversation
+      conversation = await Conversation.create({
+        participants,
+        participantsHash,
+      });
+    }
+
+    // Create welcome message
+    const welcomeContent = `Welcome! We're excited to have you join ${agencyName}. Feel free to reach out if you have any questions or need assistance. We're here to help you succeed!`;
+
+    const message = await Message.create({
+      conversationId: conversation._id,
+      sender: agencyId,
+      senderModel: "Agency",
+      receiver: studentId,
+      receiverModel: "Student",
+      content: welcomeContent,
+      status: "sent",
+    });
+
+    // Update conversation with last message
+    conversation.lastMessage = message._id;
+    conversation.updatedAt = new Date();
+    await conversation.save();
+
+    console.log(`Welcome message sent to student ${studentId} from agency ${agencyId}`);
+  } catch (error) {
+    console.error("Error creating welcome message:", error);
+    // Don't throw - we don't want to break student registration if messaging fails
+  }
+}
+
 // Select agency
 export const selectAgency = async (req, res) => {
   try {
     const userId = req.user.sub;
     const { agencyId } = req.body;
-
+    
     if (!agencyId) {
       return res.status(400).json({ message: "agencyId is required" });
     }
-
     if (!mongoose.Types.ObjectId.isValid(agencyId)) {
       return res.status(400).json({ message: "Enter the valid agency id" });
     }
-
+    
     const agency = await Agency.findById(agencyId);
     if (!agency) {
       return res.status(404).json({ message: "No agency found" });
     }
-
+    
     const student = await Student.findByIdAndUpdate(
       userId,
       {
@@ -81,8 +132,11 @@ export const selectAgency = async (req, res) => {
           },
         },
       },
-      { new: true, runValidators: true },
+      { new: true, runValidators: true }
     );
+
+    // Create welcome message conversation
+    await createAutoMessage(agencyId, userId, agency.organizationName);
 
     return res.status(200).json({
       message: "Selection successful",

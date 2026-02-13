@@ -2,19 +2,20 @@ import Agent from "../../models/agent.js";
 import Student from "../../models/student.js";
 import Appointment from "../../models/appointment.js";
 import { sendAppointmentEmail } from "../../utils/sendEmail.js";
+
 // Custom role apis
 export const getAgentinformation = async (req, res) => {
   try {
     const userId = req.user.id;
     //fetching the information about the agent with its role and permission
     const agent = await Agent.findById(userId)
-      .select("_id name roleId systemRole")
+      .select("_id name roleId systemRole email phone")
       .populate({
         path: "roleId",
         select: "name permissions",
       })
       .lean();
-    // returing a statuses git
+    // returing a status
     return res.status(200).json({ message: "Success", agent: agent });
   } catch (e) {
     console.log(e);

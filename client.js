@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 const SERVER_URL = "https://undeaf-crashing-ellie.ngrok-free.dev"; // change to your backend
-const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OThmMmMwMTRlODMzMjc1OTJkYzdhODAiLCJlbWFpbCI6IjAyMjIwMTQxLmNzdEBydWIuZWR1LmJ0IiwiYWN0b3IiOiJTdHVkZW50IiwiaWF0IjoxNzcwOTkwNzg5fQ.s7v41UxrZTf5yZEwH9m7h3EvKCaGqVqU6gTo_bjOLkA"; // supply real token
+const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OThmNTZlNDQ1YWM1NmIyMDEzMzY4OGUiLCJlbWFpbCI6ImRhbWNoZXlub3JidTc3MzlAZ21haWwuY29tIiwiYWN0b3IiOiJTdHVkZW50IiwiaWF0IjoxNzcxMDAxNTcyfQ.6eUX7jc9gPFV2FGZW2DlkONYh04GW1aCGyLD6xu-obM"; // supply real token
 
 // Connect
 const socket = io(SERVER_URL, {
@@ -33,6 +33,7 @@ socket.on("connect_error", (err) => {
 
 socket.on("conversation_list", (data) => {
   console.log("Conversations:", data);
+  loadMessages("698f575945ac56b201336895")
 });
 
 // -------------------

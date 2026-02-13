@@ -78,7 +78,7 @@ async function createAutoMessage(agencyId, studentId, organizationName) {
     }
 
     // Create welcome message
-    const welcomeContent = `Welcome! We're excited to have you join ${agencyName}. Feel free to reach out if you have any questions or need assistance. We're here to help you succeed!`;
+    const welcomeContent = `Welcome! We're excited to have you join ${organizationName}. Feel free to reach out if you have any questions or need assistance. We're here to help you succeed!`;
 
     const message = await Message.create({
       conversationId: conversation._id,

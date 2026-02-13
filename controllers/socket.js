@@ -2,10 +2,12 @@ import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import Message from "../models/message.js";
 import Conversation from "../models/conversation.js";
+import { sendStudentMessageuPushNotification } from "../utils/notification.js";
+import { getSenderDisplayInfo } from "../utils/senderInfoMessage.js";
 
 export const initializeWebSocket = (server) => {
   const io = new Server(server, {
-    cors: { origin: "*" } 
+    cors: { origin: "*" },
   });
 
   io.use((socket, next) => {
@@ -16,11 +18,11 @@ export const initializeWebSocket = (server) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       if (decoded.actor === "Agent" || decoded.actor === "Mentor") {
-          socket.userId = decoded.id.toString();
+        socket.userId = decoded.id.toString();
       } else if (decoded.actor === "Agency") {
-          socket.userId = decoded.agencyId.toString();
+        socket.userId = decoded.agencyId.toString();
       } else {
-          socket.userId = decoded.sub?.toString();
+        socket.userId = decoded.sub?.toString();
       }
 
       socket.userModel = decoded.actor;
@@ -38,16 +40,16 @@ export const initializeWebSocket = (server) => {
   io.on("connection", async (socket) => {
     const userRoom = socket.userId;
     socket.join(userRoom);
-    console.log(`user connected ${userRoom}`)
+    console.log(`user connected ${userRoom}`);
 
     const conversations = await Conversation.find({
-      "participants.user": socket.userId
+      "participants.user": socket.userId,
     })
-    .sort({ updatedAt: -1 })
-    .select("_id")
-    .lean();
+      .sort({ updatedAt: -1 })
+      .select("_id")
+      .lean();
 
-    const conversationIds = conversations.map(c => c._id);
+    const conversationIds = conversations.map((c) => c._id);
     socket.emit("conversation_list", conversationIds);
 
     socket.on("send_message", async (data) => {
@@ -68,7 +70,7 @@ export const initializeWebSocket = (server) => {
 
         const participants = [
           { user: sender, model: socket.userModel },
-          { user: receiverId, model: receiverModel }
+          { user: receiverId, model: receiverModel },
         ];
 
         const participantsHash = [sender, receiverId].sort().join("_");
@@ -79,13 +81,17 @@ export const initializeWebSocket = (server) => {
           try {
             conversation = await Conversation.create({
               participants,
-              participantsHash
+              participantsHash,
             });
           } catch (err) {
             conversation = await Conversation.findOne({ participantsHash });
           }
         }
 
+        // getting the sender information
+        const senderInfo = await getSenderDisplayInfo(sender, senderModel);
+
+        // creating a message
         const message = await Message.create({
           conversationId: conversation._id,
           sender,
@@ -93,8 +99,23 @@ export const initializeWebSocket = (server) => {
           receiver: receiverId,
           receiverModel,
           content,
-          status: isReceiverOnline ? "delivered" : "sent"
+          status: isReceiverOnline ? "delivered" : "sent",
         });
+
+        // Push notify student when message is sent (usually only if offline)
+        if (receiverModel === "Student" && !isReceiverOnline) {
+          try {
+            await sendStudentMessageuPushNotification({
+              studentId: receiverId,
+              triggerId: sender,
+              title: `New message from ${senderInfo.name} (${senderInfo.model})`,
+              body:
+                content.length > 60 ? content.slice(0, 60) + "..." : content,
+            });
+          } catch (e) {
+            console.error("Student push notification failed:", e.message);
+          }
+        }
 
         conversation.lastMessage = message._id;
         await conversation.save();
@@ -104,7 +125,6 @@ export const initializeWebSocket = (server) => {
         }
 
         socket.emit("sent_message", message);
-
       } catch (error) {
         console.error("send_message error:", error);
         socket.emit("error", { message: "Failed to send message" });
@@ -112,7 +132,7 @@ export const initializeWebSocket = (server) => {
     });
 
     socket.on("disconnect", () => {
-      console.log(`user disconnected ${userRoom}`)
+      console.log(`user disconnected ${userRoom}`);
     });
   });
 

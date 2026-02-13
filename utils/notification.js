@@ -36,6 +36,7 @@ export const sendStudentPushNotification = async ({
     status: "queued",
   });
 
+  // Sending the notification message
   const messages = [
     {
       to: student.expoPushToken,
@@ -83,6 +84,66 @@ export const sendStudentPushNotification = async ({
 
   return {
     notificationId: notif._id,
+    expoTicketId: ticketId,
+  };
+};
+
+// message notification
+export const sendStudentMessageuPushNotification = async ({
+  studentId,
+  triggerId,
+  title,
+  body,
+}) => {
+  if (!studentId || !title || !body) {
+    throw new Error("studentId, title, body are required");
+  }
+
+  const student = await Student.findById(studentId)
+    .select("expoPushToken registeredAgency")
+    .lean();
+
+  if (!student) throw new Error("Student not found");
+  if (!student.expoPushToken) throw new Error("Student has no expoPushToken");
+
+  if (!Expo.isExpoPushToken(student.expoPushToken)) {
+    throw new Error("Invalid Expo push token");
+  }
+
+  // Sending the notification message
+  const messages = [
+    {
+      to: student.expoPushToken,
+      sound: "default",
+      title,
+      body,
+    },
+  ];
+
+  const chunks = expo.chunkPushNotifications(messages);
+  let ticketId = null;
+
+  for (const chunk of chunks) {
+    const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+
+    if (
+      !Array.isArray(ticketChunk) ||
+      ticketChunk.length === 0 ||
+      !ticketChunk[0]
+    ) {
+      throw new Error("No valid ticket returned from Expo");
+    }
+
+    const ticket = ticketChunk[0];
+
+    if (ticket.status === "error") {
+      throw new Error(ticket.message || "Expo send error");
+    }
+
+    if (ticket.id) ticketId = ticket.id;
+  }
+
+  return {
     expoTicketId: ticketId,
   };
 };

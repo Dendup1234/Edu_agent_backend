@@ -33,13 +33,6 @@ socket.on("connect_error", (err) => {
 
 socket.on("conversation_list", (data) => {
   console.log("Conversations:", data);
-  loadMessages("698f2c504e83327592dc7a86")
-  sendMessage({
-    receiver: "698ecb0a34226f91cf605f6d",
-    receiverModel: "Agency",
-    content: "goodgame dolkar",
-    conversationId: "698f2c504e83327592dc7a86"
-})
 });
 
 // -------------------

@@ -89,7 +89,7 @@ export const initializeWebSocket = (server) => {
         }
 
         // getting the sender information
-        const senderInfo = await getSenderDisplayInfo(sender, senderModel);
+        const senderInfo = await getSenderDisplayInfo(sender, socket.userModel);
 
         // creating a message
         const message = await Message.create({
@@ -120,7 +120,8 @@ export const initializeWebSocket = (server) => {
         conversation.lastMessage = message._id;
         await conversation.save();
 
-        if (isReceiverOnline) {u
+        if (isReceiverOnline) {
+          u;
           io.to(receiverId).emit("receive_message", message);
         }
 

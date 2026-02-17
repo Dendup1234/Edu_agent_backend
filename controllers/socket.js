@@ -58,17 +58,6 @@ export const initializeWebSocket = (server) => {
       })
       .lean();
 
-      // Manually populate each participant based on their model
-      for (let conv of conversations) {
-        for (let participant of conv.participants) {
-          const Model = mongoose.model(participant.model);
-          const userData = await Model.findById(participant.user)
-            .select('name')
-            .lean();
-          participant.userData = userData;
-        }
-      }
-
     socket.emit("conversation_list", {
       success: true,
       conversations,

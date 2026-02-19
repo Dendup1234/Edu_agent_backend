@@ -6,6 +6,7 @@ import {
 import Appointment from "../../models/appointment.js";
 import Student from "../../models/student.js";
 import { sendStudentPushNotification } from "../../utils/notification.js";
+import { createSystemCalendarEvent } from "../../config/systemCalendar.js";
 
 // Getting the profile
 export const getProfile = async (req, res) => {
@@ -253,17 +254,45 @@ export const createAppointment = async (req, res) => {
     // Fetching the student email
     const studentEmail = await Student.findById(studentId).select("email");
     // Fetching the mentor name
-    const mentorName = await Mentor.findById(userId).select("name");
+    const mentorName = await Mentor.findById(userId).select("name email");
+    console.log(mentorName.email);
     //sending the email
     await sendAppointmentEmail(
-      studentEmail,
+      studentEmail.email,
       mentorName.name,
       appointment.time,
       appointment.date,
     );
+    // sending the invitation for the system calendar
+
+    // Build datetime
+    const timezone = "Asia/Thimphu";
+    const end = new Date(appointment.time.getTime() + 60 * 60 * 1000); //  1 hour for events
+
+    // Create Google Calendar event in System Calendar
+    const ev = await createSystemCalendarEvent({
+      title: `Appointment: ${mentorName.name} ↔ ${studentEmail.name}`,
+      description: `Purpose: ${purpose}\nMeeting: ${meeting || ""}`,
+      startISO: appointment.time,
+      endISO: end.toISOString(),
+      timezone,
+      receiverEmail: studentEmail.email,
+      senderEmail: mentorName.email,
+    });
+
+    // Save google info on appointment
+    appointment.google = {
+      calendarId: process.env.SYSTEM_CALENDAR_ID,
+      eventId: ev.eventId,
+      htmlLink: ev.htmlLink,
+      meetLink: ev.meetLink,
+    };
+    await appointment.save();
+
     return res.status(201).json({
       message: "Appointment created successfully",
-      appointment: appointment,
+      appointment,
+      googleEvent: appointment.google,
     });
   } catch (e) {
     console.log(e);

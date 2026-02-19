@@ -36,6 +36,13 @@ const appointmentSchema = new Schema({
   purpose: {
     type: String,
   },
+  // for the system calander
+  google: {
+    calendarId: String,
+    eventId: String,
+    htmlLink: String,
+    meetLink: String,
+  },
 });
 
 export default mongoose.model("Appointment", appointmentSchema);

@@ -1,10 +1,8 @@
 import Event from "../../models/event.js";
 import TicketType from "../../models/ticketType.js";
 import Ticket from "../../models/ticket.js";
-import mongoose from "mongoose";
-import { sendSeatedEventSuccessEmail } from "../../utils/sendEmail.js";
-import ticketType from "../../models/ticketType.js";
 import Student from "../../models/student.js";
+import { fetchTimezones } from "../../utils/timezone.js";
 // creation of event
 export const createEvent = async (req, res) => {
   try {
@@ -490,5 +488,19 @@ export const searchTickets = async (req, res) => {
   } catch (e) {
     console.log(e);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// getting the time zone
+export const getAllTimeZone = async (req, res) => {
+  try {
+    const timezones = await fetchTimezones();
+
+    res.status(200).json({
+      timezones,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "Failed to fetch timezones" });
   }
 };

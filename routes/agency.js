@@ -63,6 +63,7 @@ import {
   updateSeatType,
   getTickets,
   searchTickets,
+  getAllTimeZone,
 } from "../controllers/agency/agency.event.js";
 
 import {
@@ -248,53 +249,25 @@ router.get(
   searchEventsByName,
 );
 // new permission not assigned
-router.post(
-  "/events/profile/:eventId/seats",
-  protect,
-  requirePermission("event:seat"),
-  assigningSeatTypes,
-);
+router.post("/events/profile/:eventId/seats", protect, assigningSeatTypes);
 router.patch(
   "/events/profile/:eventId/seats/:seatId/update",
   protect,
   updateSeatType,
 );
-router.post(
-  "/events/profile/:eventId/tickets",
-  protect,
-  requirePermission("event:createTicket"),
-  createTicketType,
-);
+router.post("/events/profile/:eventId/tickets", protect, createTicketType);
 router.patch(
   "/events/profile/:eventId/tickets/:ticketId",
   protect,
-  requirePermission("event:updateTicket"),
   updateTicketType,
 );
-router.get(
-  "/events/profile/:eventId/tickets/",
-  protect,
-  requirePermission("event:readTicket"),
-  getAllTicket,
-);
-router.get(
-  "/events/profile/:seatId/seats/info",
-  protect,
-  requirePermission("event:seatRead"),
-  getSeatInformation,
-);
-router.get(
-  "/events/tickets/",
-  protect,
-  requirePermission("event:ticketsRead"),
-  getTickets,
-);
-router.get(
-  "/events/tickets/search",
-  protect,
-  requirePermission("event:ticketsSearch"),
-  searchTickets,
-);
+router.get("/events/profile/:eventId/tickets/", protect, getAllTicket);
+router.get("/events/profile/:seatId/seats/info", protect, getSeatInformation);
+router.get("/events/tickets/", protect, getTickets);
+router.get("/events/tickets/search", protect, searchTickets);
+
+// getting all the timeZone
+router.get("/timezone/", protect, getAllTimeZone);
 
 // Scholarships apis
 router.post(

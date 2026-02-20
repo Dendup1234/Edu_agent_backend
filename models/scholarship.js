@@ -31,7 +31,7 @@ const scholarshipSchema = new Schema({
     name: {
       type: String,
     },
-    logoUrl: {
+    profileUrlUrl: {
       type: String,
     },
   },

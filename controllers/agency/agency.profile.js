@@ -123,7 +123,7 @@ export const getAgencyCard = async (req, res) => {
           name: 1,
           email: 1,
           phone: 1,
-          logo: 1,
+          profileUrl: 1,
           isVerified: 1,
           createdAt: 1,
           uniCount: { $size: { $ifNull: ["$partnerUniversities", []] } },
@@ -160,7 +160,7 @@ export const getAgencybyId = async (req, res) => {
       .select("-password -googleId")
       .populate({
         path: "partnerUniversities",
-        select: "logo",
+        select: "profileUrl",
       }); // hide sensitive fields
 
     if (!agency) {

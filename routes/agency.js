@@ -95,8 +95,6 @@ import {
   deactivateAgent,
 } from "../controllers/agency/agency.employee.js";
 
-import { getConversationMessages } from "../controllers/message.js";
-
 import { getDocumentsByStudent } from "../controllers/agency/agency.document.js";
 
 import {
@@ -423,9 +421,6 @@ router.get(
 //for visa and admission officer
 router.patch("/profile/assign/:studentId", protect, assignAdmission);
 router.patch("/profile/assign/change/:studentId", protect, changeAssignedAgent);
-
-// Message
-router.get("/conversation/:conversationId/messages", getConversationMessages);
 
 // Mentor apis
 router.post(

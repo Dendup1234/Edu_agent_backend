@@ -8,7 +8,7 @@ import mongoose from "mongoose";
 export const createUni = async (req, res) => {
   try {
     const userId = req.user.agencyId;
-    const { name, logo, websiteURL, country, about, mission, status } =
+    const { name, profileUrl, websiteURL, country, about, mission, status } =
       req.body;
     // Checking if the userid exist
     if (!userId) {
@@ -16,7 +16,7 @@ export const createUni = async (req, res) => {
     }
     const university = await University.create({
       name,
-      logo,
+      profileUrl,
       websiteURL,
       country,
       about,
@@ -62,7 +62,7 @@ export const getUni = async (req, res) => {
     const agency = await Agency.findById(userId).populate({
       path: "partnerUniversities",
       match: { status: "Active" }, // only active universities returned
-      select: "name country status about mission websiteURL logo",
+      select: "name country status about mission websiteURL profileUrl",
     });
 
     if (!agency) {
@@ -134,7 +134,7 @@ export const getUniStudent = async (req, res) => {
       .populate({
         path: "partnerUniversities",
         match: { status: "Active" },
-        select: "logo status",
+        select: "profileUrl status",
       });
     return res
       .status(200)
@@ -243,7 +243,7 @@ export const searchUniByName = async (req, res) => {
       .populate({
         path: "partnerUniversities",
         match: { name: { $regex: q, $options: "i" } }, // search
-        select: "name country status about mission websiteURL logo",
+        select: "name country status about mission websiteURL profileUrl",
       });
 
     if (!agency) {

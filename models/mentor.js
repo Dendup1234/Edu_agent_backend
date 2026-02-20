@@ -29,7 +29,7 @@ const mentorSchema = new Schema(
       type: String,
       required: true,
     },
-    profilepic: {
+    profileUrl: {
       type: String,
       default: null
     },

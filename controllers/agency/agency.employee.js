@@ -109,7 +109,7 @@ export const getAgentById = async (req, res) => {
           populate: [
             {
               path: "selectedUniversity",
-              select: "name country logo",
+              select: "name country profileUrl",
             },
             {
               path: "selectedCourse",

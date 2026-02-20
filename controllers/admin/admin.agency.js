@@ -60,7 +60,7 @@ export const getAllAgency = async (req, res) => {
           email: 1,
           phone: 1,
           isVerified: 1,
-          logo: 1,
+          profileUrl: 1,
 
           joinDate: "$createdAt",
 
@@ -206,7 +206,7 @@ export const searchAgencyByOrganizationName = async (req, res) => {
           email: 1,
           phone: 1,
           isVerified: 1,
-          logo: 1,
+          profileUrl: 1,
           joinDate: "$createdAt",
 
           uniCount: { $size: { $ifNull: ["$partnerUniversities", []] } },

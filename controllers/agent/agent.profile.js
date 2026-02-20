@@ -289,7 +289,7 @@ export const getStudentProfileById = async (req, res) => {
       .select("-password") // password is already select:false, but safe
       .populate({
         path: "selectedUniversity",
-        select: "name logo", // university name
+        select: "name profileUrl", // university name
       })
       .populate({
         path: "selectedCourse",

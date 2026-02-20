@@ -19,7 +19,7 @@ export const searchUniByName = async (req, res) => {
       .select("_id partnerUniversities")
       .populate({
         path: "partnerUniversities",
-        select: "logo name",
+        select: "profileUrl name",
         match: {
           name: { $regex: q, $options: "i" }, // case-insensitive search
         },

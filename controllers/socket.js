@@ -5,7 +5,6 @@ import Conversation from "../models/conversation.js";
 import { sendStudentMessageuPushNotification } from "../utils/notification.js";
 import { getSenderDisplayInfo } from "../utils/senderInfoMessage.js";
 import { loadMessagesCursor } from "../utils/cursor.js";
-import mongoose from "mongoose";
 
 export const initializeWebSocket = (server) => {
   const io = new Server(server, {
@@ -52,6 +51,10 @@ export const initializeWebSocket = (server) => {
         "participants.user": socket.userId,
     })
       .sort({ updatedAt: -1 })
+      .populate({
+        path: "participants.user",
+        select: "name profileUrl", // Get user details
+      })
       .populate({
         path: "lastMessage",
         select: "content sender senderModel createdAt status",

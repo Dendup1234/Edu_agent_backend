@@ -90,7 +90,7 @@ export const confirmUpload = async (req, res) => {
     if (imageType == "profile") {
       const mentor = await Mentor.findByIdAndUpdate(
         mentorId,
-        { profilepic: blobClient.url },
+        { profileUrl: blobClient.url },
         { new: true },
       );
       res.json({ message: "Upload confuirmed" });

@@ -12,7 +12,7 @@ export const createAdmin = async (req, res) => {
 
     const { name, email, phone } = req.body;
 
-    //check if agent already exists
+    //check if agent already exist
     const existingMentor = await Admin.findOne({ email });
     if (existingMentor) {
       return res

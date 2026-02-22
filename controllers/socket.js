@@ -97,7 +97,7 @@ export const initializeWebSocket = (server) => {
           cursorCreatedAt,
           cursorId,
           limit,
-          excludeDeletedFor: socket.userId
+          currentUserId: socket.userId
         });
 
         socket.emit("conversation_messages", {

@@ -45,7 +45,7 @@ const messageSchema = new mongoose.Schema(
     
     isDeleted: { type: Boolean, default: false },
     deletedAt: Date,
-    deletedFor: [{ type: Schema.Types.ObjectId }],
+    deletedFor: [{ type: mongoose.Schema.Types.ObjectId }],
   },
   { timestamps: true }
 );

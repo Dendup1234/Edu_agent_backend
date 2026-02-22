@@ -34,6 +34,12 @@ socket.on("connect_error", (err) => {
 socket.on("conversation_list", (data) => {
   console.log(JSON.stringify(data, null, 2));
   loadMessages("")
+  sendMessage({
+  receiver: "698ed1b3ebacb64311c9cfd3",
+  receiverModel: "Mentor",
+  content: "is the auto message still overwriting your messages?",
+  conversationId: "6998b9d47dad286175dec128"
+});
 });
 
 // -------------------

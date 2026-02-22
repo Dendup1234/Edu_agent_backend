@@ -11,7 +11,6 @@ export const initializeWebSocket = (server) => {
     cors: { origin: "*" }
   });
 
-  // Authentication middleware
   io.use((socket, next) => {
     try {
       const token = socket.handshake.auth?.token;
@@ -34,8 +33,7 @@ export const initializeWebSocket = (server) => {
       }
 
       next();
-    } catch (error) {
-      console.error("Auth error:", error.message);
+    } catch {
       next(new Error("Authentication error"));
     }
   });
@@ -43,66 +41,63 @@ export const initializeWebSocket = (server) => {
   io.on("connection", async (socket) => {
     const userRoom = socket.userId;
     socket.join(userRoom);
-    console.log(`User connected: ${socket.userModel} - ${userRoom}`);
 
-    // Send full conversation list with last message details
     try {
       const conversations = await Conversation.find({
-        "participants.user": socket.userId,
-    })
-      .sort({ updatedAt: -1 })
-      .populate({
-        path: "participants.user",
-        select: "name profileUrl", // Get user details
+        "participants.user": socket.userId
       })
-      .populate({
-        path: "lastMessage",
-        select: "content sender senderModel createdAt status",
-      })
-      .lean();
+        .sort({ updatedAt: -1 })
+        .populate({
+          path: "participants.user",
+          select: "name profileUrl"
+        })
+        .populate("lastMessage")
+        .lean();
 
-    socket.emit("conversation_list", {
-      success: true,
-      conversations,
-    });
-    } catch (error) {
-      console.error("Error loading conversations:", error);
+      socket.emit("conversation_list", {
+        success: true,
+        conversations
+      });
+    } catch {
       socket.emit("conversation_list", {
         success: false,
-        error: "Failed to load conversations",
+        error: "Failed to load conversations"
       });
     }
 
-    // Handle fetching messages for a specific conversation
     socket.on("get_conversation_messages", async (data) => {
       try {
-        const { conversationId, cursorCreatedAt = null, cursorId = null, limit = 5 } = data;
+        const {
+          conversationId,
+          cursorCreatedAt = null,
+          cursorId = null,
+          limit = 5
+        } = data;
 
         if (!conversationId) {
           return socket.emit("conversation_messages", {
             success: false,
-            error: "Conversation ID required",
+            error: "Conversation ID required"
           });
         }
 
-        // Verify user is a participant
         const conversation = await Conversation.findOne({
           _id: conversationId,
-          "participants.user": socket.userId,
+          "participants.user": socket.userId
         }).lean();
 
         if (!conversation) {
           return socket.emit("conversation_messages", {
             success: false,
-            error: "Conversation not found or unauthorized",
+            error: "Unauthorized"
           });
         }
 
-        // Use cursor-based pagination
         const result = await loadMessagesCursor(conversationId, {
           cursorCreatedAt,
           cursorId,
           limit,
+          excludeDeletedFor: socket.userId
         });
 
         socket.emit("conversation_messages", {
@@ -110,26 +105,24 @@ export const initializeWebSocket = (server) => {
           conversationId,
           messages: result.messages,
           nextCursor: result.nextCursor,
-          hasNextPage: result.hasNextPage,
+          hasNextPage: result.hasNextPage
         });
-      } catch (error) {
-        console.error("get_conversation_messages error:", error);
+
+      } catch {
         socket.emit("conversation_messages", {
           success: false,
-          error: "Failed to fetch messages",
+          error: "Failed to fetch messages"
         });
       }
     });
 
-    // Send message handler
     socket.on("send_message", async (data) => {
       try {
-        const { receiver, receiverModel, content, conversationId } = data;
+        const { receiver, receiverModel, content } = data;
 
-        // Validation
         if (!receiver || !content?.trim()) {
           return socket.emit("message_error", {
-            error: "Receiver and content are required",
+            error: "Receiver and content required"
           });
         }
 
@@ -138,43 +131,29 @@ export const initializeWebSocket = (server) => {
 
         if (sender === receiverId) {
           return socket.emit("message_error", {
-            error: "Cannot message yourself",
+            error: "Cannot message yourself"
           });
         }
-
-        // Check if receiver is online
-        const room = io.sockets.adapter.rooms.get(receiverId);
-        const isReceiverOnline = !!room && room.size > 0;
-
-        // Find or create conversation
-        const participants = [
-          { user: sender, model: socket.userModel },
-          { user: receiverId, model: receiverModel },
-        ];
 
         const participantsHash = [sender, receiverId].sort().join("_");
 
         let conversation = await Conversation.findOne({ participantsHash });
 
         if (!conversation) {
-          try {
-            conversation = await Conversation.create({
-              participants,
-              participantsHash,
-            });
-          } catch (err) {
-            // Handle race condition
-            conversation = await Conversation.findOne({ participantsHash });
-            if (!conversation) {
-              throw new Error("Failed to create conversation");
-            }
-          }
+          conversation = await Conversation.create({
+            participants: [
+              { user: sender, model: socket.userModel },
+              { user: receiverId, model: receiverModel }
+            ],
+            participantsHash
+          });
         }
 
-        // Get sender info for notifications
+        const room = io.sockets.adapter.rooms.get(receiverId);
+        const isReceiverOnline = !!room && room.size > 0;
+
         const senderInfo = await getSenderDisplayInfo(sender, socket.userModel);
 
-        // Create message
         const message = await Message.create({
           conversationId: conversation._id,
           sender,
@@ -182,73 +161,150 @@ export const initializeWebSocket = (server) => {
           receiver: receiverId,
           receiverModel,
           content: content.trim(),
-          status: isReceiverOnline ? "delivered" : "sent",
+          status: isReceiverOnline ? "delivered" : "sent"
         });
 
-        // Update conversation
         conversation.lastMessage = message._id;
         conversation.updatedAt = new Date();
         await conversation.save();
 
-        // Prepare message object
         const messageObj = message.toObject();
         messageObj.senderInfo = senderInfo;
 
-        // Send to receiver if online
         if (isReceiverOnline) {
           io.to(receiverId).emit("new_message", {
             message: messageObj,
-            conversationId: conversation._id,
+            conversationId: conversation._id
           });
-
-          // Update receiver's conversation list
-          const updatedConversation = await Conversation.findById(
-            conversation._id
-          )
-            .populate("lastMessage")
-            .lean();
-          io.to(receiverId).emit("conversation_updated", updatedConversation);
-        } else {
-          // Send push notification if offline and receiver is student
-          if (receiverModel === "Student") {
-            try {
-              await sendStudentMessageuPushNotification({
-                studentId: receiverId,
-                triggerId: sender,
-                title: `New message from ${senderInfo.name} (${senderInfo.model})`,
-                body:
-                  content.length > 60
-                    ? content.slice(0, 60) + "..."
-                    : content,
-              });
-            } catch (e) {
-              console.error("Push notification failed:", e.message);
-            }
-          }
+        } else if (receiverModel === "Student") {
+          await sendStudentMessageuPushNotification({
+            studentId: receiverId,
+            triggerId: sender,
+            title: `New message from ${senderInfo.name}`,
+            body: content.length > 60
+              ? content.slice(0, 60) + "..."
+              : content
+          });
         }
 
-        // Confirm to sender
         socket.emit("message_sent", {
           message: messageObj,
-          conversationId: conversation._id,
+          conversationId: conversation._id
         });
 
-        // Update sender's conversation list
         const updatedConversation = await Conversation.findById(conversation._id)
           .populate("lastMessage")
           .lean();
+
+        io.to(receiverId).emit("conversation_updated", updatedConversation);
         socket.emit("conversation_updated", updatedConversation);
-      } catch (error) {
-        console.error("send_message error:", error);
+
+      } catch {
         socket.emit("message_error", {
-          error: "Failed to send message",
-          details: error.message,
+          error: "Failed to send message"
         });
       }
     });
 
-    socket.on("disconnect", () => {
-      console.log(`User disconnected: ${userRoom}`);
+    socket.on("edit_message", async ({ messageId, newContent }) => {
+      try {
+        if (!newContent?.trim()) {
+          return socket.emit("error", { message: "Content required" });
+        }
+
+        const message = await Message.findOne({
+          _id: messageId,
+          sender: socket.userId
+        });
+
+        if (!message) {
+          return socket.emit("error", { message: "Unauthorized" });
+        }
+
+        message.content = newContent.trim();
+        message.isEdited = true;
+        message.editedAt = new Date();
+        await message.save();
+
+        const messageObj = message.toObject();
+        const receiverRoom = message.receiver.toString();
+
+        io.to(receiverRoom).emit("message_edited", messageObj);
+        socket.emit("message_edited", messageObj);
+
+        const updatedConversation = await Conversation.findById(
+          message.conversationId
+        )
+          .populate("lastMessage")
+          .lean();
+
+        io.to(receiverRoom).emit("conversation_updated", updatedConversation);
+        socket.emit("conversation_updated", updatedConversation);
+
+      } catch {}
+    });
+
+    socket.on("delete_message", async ({ messageId, deleteFor }) => {
+      try {
+        const message = await Message.findOne({
+          _id: messageId,
+          sender: socket.userId
+        });
+
+        if (!message) {
+          return socket.emit("error", { message: "Unauthorized" });
+        }
+
+        if (deleteFor === "everyone") {
+          message.isDeleted = true;
+          message.deletedAt = new Date();
+          await message.save();
+
+          const receiverRoom = message.receiver.toString();
+
+          io.to(receiverRoom).emit("message_deleted", {
+            messageId,
+            conversationId: message.conversationId
+          });
+
+          socket.emit("message_deleted", {
+            messageId,
+            conversationId: message.conversationId
+          });
+
+          const updatedConversation = await Conversation.findById(
+            message.conversationId
+          )
+            .populate("lastMessage")
+            .lean();
+
+          io.to(receiverRoom).emit("conversation_updated", updatedConversation);
+          socket.emit("conversation_updated", updatedConversation);
+
+        } else {
+          await Message.findByIdAndUpdate(messageId, {
+            $addToSet: { deletedFor: socket.userId }
+          });
+
+          socket.emit("message_deleted", { messageId });
+        }
+
+      } catch {}
+    });
+
+    socket.on("typing_start", ({ receiverId, conversationId }) => {
+      io.to(receiverId).emit("user_typing", {
+        conversationId,
+        userId: socket.userId,
+        userModel: socket.userModel
+      });
+    });
+
+    socket.on("typing_stop", ({ receiverId, conversationId }) => {
+      io.to(receiverId).emit("user_stopped_typing", {
+        conversationId,
+        userId: socket.userId
+      });
     });
   });
 

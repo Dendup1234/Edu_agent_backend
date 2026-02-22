@@ -195,7 +195,6 @@ export const confirmMenteeStatus = async (req, res) => {
     });
   } catch (e) {
     // Find the confirmed mentee entry
-    con;
     console.log(e);
     return res.status(500).json({ message: "Server Error" });
   }

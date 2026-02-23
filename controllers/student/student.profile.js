@@ -104,7 +104,6 @@ async function createAutoMessage(agencyId, studentId, organizationName) {
     console.log(`Welcome message sent to student ${studentId} from agency ${agencyId}`);
   } catch (error) {
     console.error("Error creating welcome message:", error);
-    // Don't throw - we don't want to break student registration if messaging fails
   }
 }
 

@@ -26,7 +26,6 @@ const conversationSchema = new mongoose.Schema({
   timestamps: true 
 });
 
-conversationSchema.index({ participantsHash: 1 }, { unique: true });
 conversationSchema.index({ 'participants.user': 1 });
 conversationSchema.index({ updatedAt: -1 });
 

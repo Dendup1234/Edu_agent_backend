@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 const SERVER_URL = "https://undeaf-crashing-ellie.ngrok-free.dev"; // change to your backend
-const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTljMjRjMmIyOTBhMjhjMTcxYzg3ZDQiLCJhY3RvciI6IlN0dWRlbnQiLCJpYXQiOjE3NzE4NDA3MDd9.kKaDSN5mJ1CNOgxuuFPgj5zeLDU1S_Tmsqc6cw4N3ec"; // supply real token
+const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTljMjRjMmIyOTBhMjhjMTcxYzg3ZDQiLCJhY3RvciI6IlN0dWRlbnQiLCJpYXQiOjE3NzE4NDQ4NDd9.uH26y7VAj0BLjr0HXw6KuRJCMsuhn8CKTIQ1Waz9S4s"; // supply real token
 
 // Connect
 const socket = io(SERVER_URL, {

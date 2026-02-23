@@ -39,9 +39,7 @@ const messageSchema = new mongoose.Schema(
       enum: ["sent", "delivered", "read"],
       default: "sent",
     },
-
-    isWelcomeMessage: {type: Boolean},
-
+    
     isEdited: { type: Boolean, default: false },
     editedAt: Date,
     

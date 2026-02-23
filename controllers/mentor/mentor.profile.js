@@ -124,10 +124,10 @@ async function createAutoMessage(mentorId, studentId, mentorName) {
     conversation.updatedAt = new Date();
     await conversation.save();
     
-    console.log(`Welcome message sent to student ${studentId} from agent ${mentorId}`);
+    console.log(`Welcome message sent to student ${studentId} from mentor ${mentorId}`);
   } catch (error) {
     console.error("Error creating welcome message:", error);
-    // Don't throw - we don't want to break agent assignment if messaging fails
+    throw error;
   }
 }
 

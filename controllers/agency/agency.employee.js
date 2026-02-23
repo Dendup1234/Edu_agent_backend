@@ -427,7 +427,7 @@ async function createAutoMessage(agentId, studentId, agentName) {
     }
     
     // Create welcome message
-    const welcomeContent = `Hello, I'm ${agentName}, your assigned admission officer. I'm here to guide you through your application process. If you have any queries or need assistance, feel free to reach out anytime. Looking forward to working with you!`;
+    const welcomeContent = `Hello, I'm ${agentName}, your assigned agent. I'm here to guide you through your application process. If you have any queries or need assistance, feel free to reach out anytime. Looking forward to working with you!`;
     
     const message = await Message.create({
       conversationId: conversation._id,

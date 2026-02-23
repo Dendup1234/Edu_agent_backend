@@ -76,11 +76,6 @@ async function createAutoMessage(agencyId, studentId, organizationName) {
         participantsHash,
       });
     }
-    const alreadyWelcomed = await Message.findOne({
-      conversationId: conversation._id,
-      isWelcomeMessage: true,
-    });
-    if (alreadyWelcomed) return;
 
     // Create welcome message
     const welcomeContent = `Welcome! We're excited to have you join ${organizationName}. Feel free to reach out if you have any questions or need assistance. We're here to help you succeed!`;
@@ -92,8 +87,7 @@ async function createAutoMessage(agencyId, studentId, organizationName) {
       receiver: studentId,
       receiverModel: "Student",
       content: welcomeContent,
-      status: "sent",
-      isWelcomeMessage: true,
+      status: "sent"
     });
 
     // Update conversation with last message

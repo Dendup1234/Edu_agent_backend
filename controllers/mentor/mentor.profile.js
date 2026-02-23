@@ -58,7 +58,10 @@ export const getStudentPending = async (req, res) => {
       select:
         "name email phone profileUrl nationality selectedUniversity selectedCourse",
       populate: [
-        { path: "selectedUniversity", select: "name country profileUrl websiteURL" },
+        {
+          path: "selectedUniversity",
+          select: "name country profileUrl websiteURL",
+        },
         { path: "selectedCourse", select: "title level duration intake fee" },
       ],
     });
@@ -90,14 +93,14 @@ async function createAutoMessage(mentorId, studentId, mentorName) {
       { user: mentorId, model: "Mentor" },
       { user: studentId, model: "Student" },
     ];
-    
+
     const participantsHash = [mentorId.toString(), studentId.toString()]
       .sort()
       .join("_");
-    
+
     // Check if conversation already exists
     let conversation = await Conversation.findOne({ participantsHash });
-    
+
     if (!conversation) {
       // Create new conversation
       conversation = await Conversation.create({
@@ -105,10 +108,10 @@ async function createAutoMessage(mentorId, studentId, mentorName) {
         participantsHash,
       });
     }
-    
+
     // Create welcome message
     const welcomeContent = `Hello, I'm ${mentorName}, your mentor. If you have any queries or need assistance, feel free to reach out anytime. Looking forward to working with you!`;
-    
+
     const message = await Message.create({
       conversationId: conversation._id,
       sender: mentorId,
@@ -118,13 +121,15 @@ async function createAutoMessage(mentorId, studentId, mentorName) {
       content: welcomeContent,
       status: "sent",
     });
-    
+
     // Update conversation with last message
     conversation.lastMessage = message._id;
     conversation.updatedAt = new Date();
     await conversation.save();
-    
-    console.log(`Welcome message sent to student ${studentId} from agent ${mentorId}`);
+
+    console.log(
+      `Welcome message sent to student ${studentId} from agent ${mentorId}`,
+    );
   } catch (error) {
     console.error("Error creating welcome message:", error);
     // Don't throw - we don't want to break agent assignment if messaging fails
@@ -136,6 +141,8 @@ export const confirmMenteeStatus = async (req, res) => {
   try {
     const userId = req.user.id;
     const { studentId } = req.params;
+    console.log(userId);
+    console.log(studentId);
     // Confirming the mentee's status to confirmed
     const mentor = await Mentor.findOneAndUpdate(
       {
@@ -169,25 +176,16 @@ export const confirmMenteeStatus = async (req, res) => {
         },
       },
       { new: true, runValidators: true },
-    ).select("_id name email connectedMentor");
+    ).select("name email connectedMentor");
 
-    // Find the confirmed mentee entry
-    const confirmedMentee = mentor.mentees.find(
-      (m) => m.student._id.toString() === studentId,
-    );
-
-    if (!confirmedMentee) {
-      return res.status(404).json({ message: "Confirmed mentee not found" });
-    }
-
-    const studentEmail = confirmedMentee.student.email;
+    const studentEmail = updatedStudent.email;
     const mentorName = mentor.name;
-    const studentName = confirmedMentee.student.name;
+    const studentName = updatedStudent.name;
 
     // if Success
     await sendMenteeEmail(studentEmail, mentorName, "Mentor connection");
 
-    await createAutoMessage(userId, studentId, mentor.name)
+    await createAutoMessage(userId, studentId, mentor.name);
 
     return res.status(200).json({
       message: "Mentee status confirmed successfully",
@@ -263,7 +261,10 @@ export const getStudentConfirmed = async (req, res) => {
       select:
         "name email phone profileUrl nationality selectedUniversity selectedCourse",
       populate: [
-        { path: "selectedUniversity", select: "name country profileUrl websiteURL" },
+        {
+          path: "selectedUniversity",
+          select: "name country profileUrl websiteURL",
+        },
         { path: "selectedCourse", select: "title level duration intake fee" },
       ],
     });

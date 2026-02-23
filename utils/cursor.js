@@ -5,12 +5,16 @@ import mongoose from "mongoose";
 // for the message cursor
 export const loadMessagesCursor = async (
   conversationId,
-  { cursorCreatedAt = null, cursorId = null, limit = 50 } = {},
+  { cursorCreatedAt = null, cursorId = null, limit = 50, currentUserId = null } = {},
 ) => {
   limit = Number(limit);
   if (limit < 1) throw new Error("Invalid limit");
 
   const query = { conversationId };
+
+  if (currentUserId) {
+    query.deletedFor = { $ne: currentUserId };
+  }
 
   if (cursorCreatedAt && cursorId) {
     query.$or = [

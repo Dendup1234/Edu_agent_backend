@@ -5,7 +5,7 @@ const universitySchema = new Schema(
     name: {
       type: String,
     },
-    logo: {
+    profileUrl: {
       type: String,
     },
     websiteURL: {

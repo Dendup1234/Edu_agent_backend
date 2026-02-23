@@ -152,11 +152,42 @@ export const getAgencyCard = async (req, res) => {
 export const getAgencybyId = async (req, res) => {
   try {
     const { agencyId } = req.params;
+    const studentId = req.user.sub;
     if (!mongoose.Types.ObjectId.isValid(agencyId)) {
       return res.status(400).json({ message: "Invalid agency id" });
     }
+    // fetching the student agency id from student
+
     // Getting the agency by their particular id
     const agency = await Agency.findById(agencyId)
+      .select("-password -googleId")
+      .populate({
+        path: "partnerUniversities",
+        select: "logo",
+      }); // hide sensitive fields
+
+    if (!agency) {
+      return res.status(404).json({ message: "Agency not found" });
+    }
+
+    return res.status(200).json({ message: "Successful", agency: agency });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Getting agency by their id by the student
+export const getAgencybyIdByStudent = async (req, res) => {
+  try {
+    const studentId = req.user.sub;
+
+    // fetching the student agency id from student
+    const agencyId =
+      await Student.findById(studentId).select("registeredAgency");
+
+    // Getting the agency by their particular id
+    const agency = await Agency.findById(agencyId.registeredAgency._id)
       .select("-password -googleId")
       .populate({
         path: "partnerUniversities",

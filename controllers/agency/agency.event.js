@@ -2,7 +2,7 @@ import Event from "../../models/event.js";
 import TicketType from "../../models/ticketType.js";
 import Ticket from "../../models/ticket.js";
 import Student from "../../models/student.js";
-import { fetchTimezones } from "../../utils/timezone.js";
+
 // creation of event
 export const createEvent = async (req, res) => {
   try {
@@ -117,6 +117,8 @@ export const getAllEventsStudent = async (req, res) => {
     // fetching the student
     const student =
       await Student.findById(studentId).select("registeredAgency");
+
+    console.log(student);
 
     // fetching the agency id
     const agencyId = student.registeredAgency;
@@ -411,7 +413,7 @@ export const getTickets = async (req, res) => {
 
     // getting all tickets for those events
     const tickets = await Ticket.find({ eventId: { $in: eventIds } })
-      .select("status")
+      .select("status ticketInfo.ticketNumber")
       .sort({ createdAt: -1 }) // retrives the most lastest ticket
       .populate({
         path: "eventId",

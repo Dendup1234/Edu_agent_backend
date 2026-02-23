@@ -53,7 +53,7 @@ export const getMentorById = async (req, res) => {
     const { mentorId } = req.params;
     const mentor = await Mentor.findById(mentorId).populate({
       path: "mentees.student",
-      select: "name email phone profilePic selectedUniversity",
+      select: "name email phone profileUrl selectedUniversity",
     });
 
     if (!mentor) {

@@ -92,7 +92,7 @@ export const confirmUpload = async (req, res) => {
     if (imageType == "agency") {
       const agency = await Agency.findByIdAndUpdate(
         agencyId,
-        { logo: blobClient.url },
+        { profileUrl: blobClient.url },
         { new: true },
       );
       res.json({ message: "Upload confuirmed" });
@@ -101,7 +101,7 @@ export const confirmUpload = async (req, res) => {
     if (imageType == "university") {
       const university = await University.findByIdAndUpdate(
         universityId,
-        { logo: blobClient.url },
+        { profileUrl: blobClient.url },
         { new: true },
       );
       res.json({ message: "Upload confuirmed" });

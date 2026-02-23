@@ -7,6 +7,8 @@ import Appointment from "../../models/appointment.js";
 import Student from "../../models/student.js";
 import { sendStudentPushNotification } from "../../utils/notification.js";
 import { createSystemCalendarEvent } from "../../config/systemCalendar.js";
+import Message from "../../models/message.js";
+import Conversation from "../../models/conversation.js";
 
 // Getting the profile
 export const getProfile = async (req, res) => {
@@ -57,7 +59,7 @@ export const getStudentPending = async (req, res) => {
       select:
         "name email phone profileUrl nationality selectedUniversity selectedCourse",
       populate: [
-        { path: "selectedUniversity", select: "name country logo websiteURL" },
+        { path: "selectedUniversity", select: "name country profileUrl websiteURL" },
         { path: "selectedCourse", select: "title level duration intake fee" },
       ],
     });
@@ -81,6 +83,55 @@ export const getStudentPending = async (req, res) => {
     return res.status(500).json({ message: "Server Error" });
   }
 };
+
+// Helper function to create auto message
+async function createAutoMessage(mentorId, studentId, mentorName) {
+  try {
+    const participants = [
+      { user: mentorId, model: "Mentor" },
+      { user: studentId, model: "Student" },
+    ];
+    
+    const participantsHash = [mentorId.toString(), studentId.toString()]
+      .sort()
+      .join("_");
+    
+    // Check if conversation already exists
+    let conversation = await Conversation.findOne({ participantsHash });
+    
+    if (!conversation) {
+      // Create new conversation
+      conversation = await Conversation.create({
+        participants,
+        participantsHash,
+      });
+    }
+    
+    // Create welcome message
+    const welcomeContent = `Hello, I'm ${mentorName}, your mentor. If you have any queries or need assistance, feel free to reach out anytime. Looking forward to working with you!`;
+    
+    const message = await Message.create({
+      conversationId: conversation._id,
+      sender: mentorId,
+      senderModel: "Mentor",
+      receiver: studentId,
+      receiverModel: "Student",
+      content: welcomeContent,
+      status: "sent",
+    });
+    
+    // Update conversation with last message
+    conversation.lastMessage = message._id;
+    conversation.updatedAt = new Date();
+    await conversation.save();
+    
+    console.log(`Welcome message sent to student ${studentId} from agent ${mentorId}`);
+  } catch (error) {
+    console.error("Error creating welcome message:", error);
+    // Don't throw - we don't want to break agent assignment if messaging fails
+  }
+}
+
 // Confirming the status of the student that wants to connect to the mentor
 export const confirmMenteeStatus = async (req, res) => {
   try {
@@ -137,13 +188,14 @@ export const confirmMenteeStatus = async (req, res) => {
     // if Success
     await sendMenteeEmail(studentEmail, mentorName, "Mentor connection");
 
+    await createAutoMessage(userId, studentId, mentor.name)
+
     return res.status(200).json({
       message: "Mentee status confirmed successfully",
       mentee: mentor,
     });
   } catch (e) {
     // Find the confirmed mentee entry
-    con;
     console.log(e);
     return res.status(500).json({ message: "Server Error" });
   }
@@ -212,7 +264,7 @@ export const getStudentConfirmed = async (req, res) => {
       select:
         "name email phone profileUrl nationality selectedUniversity selectedCourse",
       populate: [
-        { path: "selectedUniversity", select: "name country logo websiteURL" },
+        { path: "selectedUniversity", select: "name country profileUrl websiteURL" },
         { path: "selectedCourse", select: "title level duration intake fee" },
       ],
     });
@@ -443,7 +495,7 @@ export const getStudentProfileById = async (req, res) => {
       .select("-password") // password is already select:false, but safe
       .populate({
         path: "selectedUniversity",
-        select: "name logo", // university name
+        select: "name profileUrl", // university name
       })
       .populate({
         path: "selectedCourse",

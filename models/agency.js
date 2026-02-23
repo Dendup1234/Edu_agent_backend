@@ -27,7 +27,7 @@ const agencySchema = new Schema(
       default: true,
     },
 
-    logo: {
+    profileUrl: {
       type: String,
       trim: true,
     },

@@ -40,8 +40,6 @@ import {
   confirmUpload,
 } from "../controllers/student/student.blob.js";
 
-import { getConversationMessages } from "../controllers/message.js";
-
 import {
   getDocumentStatus,
   getDocuments,
@@ -86,9 +84,6 @@ const router = express.Router();
 
   // Events
   router.post("/events/registration/:eventId", protect, registerMeeting);
-
-  // Messages
-  router.get("/conversation/:conversationId/messages", getConversationMessages);
 
   // Mentors
   router.get("/mentors/:agencyId", protect, getAllMentor);

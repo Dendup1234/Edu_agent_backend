@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 const SERVER_URL = "https://undeaf-crashing-ellie.ngrok-free.dev"; // change to your backend
-const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OThmNTZlNDQ1YWM1NmIyMDEzMzY4OGUiLCJlbWFpbCI6ImRhbWNoZXlub3JidTc3MzlAZ21haWwuY29tIiwiYWN0b3IiOiJTdHVkZW50IiwiaWF0IjoxNzcxMDAxNTcyfQ.6eUX7jc9gPFV2FGZW2DlkONYh04GW1aCGyLD6xu-obM"; // supply real token
+const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTljMjRjMmIyOTBhMjhjMTcxYzg3ZDQiLCJhY3RvciI6IlN0dWRlbnQiLCJpYXQiOjE3NzE4NDA3MDd9.kKaDSN5mJ1CNOgxuuFPgj5zeLDU1S_Tmsqc6cw4N3ec"; // supply real token
 
 // Connect
 const socket = io(SERVER_URL, {
@@ -32,8 +32,14 @@ socket.on("connect_error", (err) => {
 // -------------------
 
 socket.on("conversation_list", (data) => {
-  console.log("Conversations:", data);
-  loadMessages("698f5cdfacb6969cec47ca59")
+  console.log(JSON.stringify(data, null, 2));
+  loadMessages("")
+//   sendMessage({
+//   receiver: "698ed1b3ebacb64311c9cfd3",
+//   receiverModel: "Mentor",
+//   content: "is the auto message still overwriting your messages?",
+//   conversationId: "6998b9d47dad286175dec128"
+// });
 });
 
 // -------------------

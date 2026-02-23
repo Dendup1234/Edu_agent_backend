@@ -29,6 +29,7 @@ import {
   getStudentList,
   searchLeadByName,
   getAgencyCard,
+  getAgencybyIdByStudent,
 } from "../controllers/agency/agency.profile.js";
 
 import {
@@ -96,8 +97,6 @@ import {
   deactivateAgent,
 } from "../controllers/agency/agency.employee.js";
 
-import { getConversationMessages } from "../controllers/message.js";
-
 import { getDocumentsByStudent } from "../controllers/agency/agency.document.js";
 
 import {
@@ -111,7 +110,7 @@ import {
 //Router imported
 const router = express.Router();
 
-//Auth apis
+//Auth api
 router.post("/send-otp", sendOtp);
 router.post("/resend-otp", resendOtp);
 router.post("/verify-otp", verifyOtp);
@@ -124,6 +123,7 @@ router.post("/password-reset/set-new", setNewPassword);
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
 router.get("/profile/:agencyId", protect, getAgencybyId);
+router.get("/student/", protect, getAgencybyIdByStudent);
 router.get("/profile/dashboard/leads/", protect, getLeadDashboard);
 router.get("/profile/students/leads/", protect, getStudentLead);
 router.get("/profile/students/leads/:studentId", protect, getStudentAppStatus);
@@ -396,9 +396,6 @@ router.get(
 //for visa and admission officer
 router.patch("/profile/assign/:studentId", protect, assignAdmission);
 router.patch("/profile/assign/change/:studentId", protect, changeAssignedAgent);
-
-// Message
-router.get("/conversation/:conversationId/messages", getConversationMessages);
 
 // Mentor apis
 router.post(

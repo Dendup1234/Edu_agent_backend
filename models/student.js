@@ -109,20 +109,7 @@ const StudentSchema = new Schema(
     expoPushToken: {
       type: String,
       default: null,
-    },
-
-    visaProfile: {
-      hasSpouse: {
-        type: Boolean,
-        required: true,
-        default: false,
-      },
-      hasChildren: {
-        type: Boolean,
-        required: true,
-        default: false,
-      },
-    },
+    }
   },
   { timestamps: true },
 );

@@ -110,7 +110,7 @@ async function createAutoMessage(mentorId, studentId, mentorName) {
     }
 
     // Create welcome message
-    const welcomeContent = `Hello, I'm ${mentorName}, your mentor. If you have any queries or need assistance, feel free to reach out anytime. Looking forward to working with you!`;
+    const welcomeContent = `Hello, I'm ${mentorName}, If you have any queries or need assistance, feel free to reach out anytime. Looking forward to working with you!`;
 
     const message = await Message.create({
       conversationId: conversation._id,
@@ -130,7 +130,6 @@ async function createAutoMessage(mentorId, studentId, mentorName) {
     console.log(`Welcome message sent to student ${studentId} from mentor ${mentorId}`);
   } catch (error) {
     console.error("Error creating welcome message:", error);
-    throw error;
   }
 }
 

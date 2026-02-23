@@ -40,6 +40,8 @@ const messageSchema = new mongoose.Schema(
       default: "sent",
     },
 
+    isWelcomeMessage: {type: Boolean},
+
     isEdited: { type: Boolean, default: false },
     editedAt: Date,
     
@@ -52,7 +54,11 @@ const messageSchema = new mongoose.Schema(
 
 // index
 messageSchema.index({ conversationId: 1, createdAt: -1, _id: -1 });
-messageSchema.index({ receiver: 1, status: 1 }); 
-messageSchema.index({ sender: 1, createdAt: -1 }); 
+messageSchema.index({ receiver: 1, status: 1 });
+messageSchema.index({ sender: 1, createdAt: -1 });
+messageSchema.index(
+  { conversationId: 1, isWelcomeMessage: 1 },
+  { unique: true, sparse: true }
+);
 
 export default mongoose.model("Message", messageSchema);

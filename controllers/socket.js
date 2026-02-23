@@ -41,7 +41,7 @@ export const initializeWebSocket = (server) => {
   io.on("connection", async (socket) => {
     const userRoom = socket.userId;
     socket.join(userRoom);
-
+    console.log(`User connected: ${socket.userModel} - ${userRoom}`);
     try {
       const conversations = await Conversation.find({
         "participants.user": socket.userId

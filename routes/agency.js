@@ -109,7 +109,7 @@ import {
 //Router imported
 const router = express.Router();
 
-//Auth apis
+//Auth api
 router.post("/send-otp", sendOtp);
 router.post("/resend-otp", resendOtp);
 router.post("/verify-otp", verifyOtp);

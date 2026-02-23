@@ -168,7 +168,7 @@ export const getCourseById = async (req, res) => {
     const courses = await Course.findById(courseId)
       .populate({
         path: "providedBy",
-        select: "profileUrl",
+        select: "logo",
       })
       .lean();
     if (!courses) {

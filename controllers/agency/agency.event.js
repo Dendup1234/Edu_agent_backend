@@ -1,10 +1,8 @@
 import Event from "../../models/event.js";
 import TicketType from "../../models/ticketType.js";
 import Ticket from "../../models/ticket.js";
-import mongoose from "mongoose";
-import { sendSeatedEventSuccessEmail } from "../../utils/sendEmail.js";
-import ticketType from "../../models/ticketType.js";
 import Student from "../../models/student.js";
+
 // creation of event
 export const createEvent = async (req, res) => {
   try {
@@ -119,6 +117,8 @@ export const getAllEventsStudent = async (req, res) => {
     // fetching the student
     const student =
       await Student.findById(studentId).select("registeredAgency");
+
+    console.log(student);
 
     // fetching the agency id
     const agencyId = student.registeredAgency;
@@ -413,7 +413,7 @@ export const getTickets = async (req, res) => {
 
     // getting all tickets for those events
     const tickets = await Ticket.find({ eventId: { $in: eventIds } })
-      .select("status")
+      .select("status ticketInfo.ticketNumber")
       .sort({ createdAt: -1 }) // retrives the most lastest ticket
       .populate({
         path: "eventId",
@@ -490,5 +490,19 @@ export const searchTickets = async (req, res) => {
   } catch (e) {
     console.log(e);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// getting the time zone
+export const getAllTimeZone = async (req, res) => {
+  try {
+    const timezones = await fetchTimezones();
+
+    res.status(200).json({
+      timezones,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "Failed to fetch timezones" });
   }
 };

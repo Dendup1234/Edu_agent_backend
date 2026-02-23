@@ -29,6 +29,7 @@ import {
   getStudentList,
   searchLeadByName,
   getAgencyCard,
+  getAgencybyIdByStudent,
 } from "../controllers/agency/agency.profile.js";
 
 import {
@@ -121,6 +122,7 @@ router.post("/password-reset/set-new", setNewPassword);
 router.get("/profile", protect, getProfile);
 router.patch("/profile", protect, updateProfile);
 router.get("/profile/:agencyId", protect, getAgencybyId);
+router.get("/student/", protect, getAgencybyIdByStudent);
 router.get("/profile/dashboard/leads/", protect, getLeadDashboard);
 router.get("/profile/students/leads/", protect, getStudentLead);
 router.get("/profile/students/leads/:studentId", protect, getStudentAppStatus);

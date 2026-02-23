@@ -29,7 +29,7 @@ export const createUni = async (req, res) => {
       {
         $addToSet: { partnerUniversities: university._id },
       },
-      { new: true }
+      { new: true },
     );
     if (!agency) {
       return res.status(404).json({ message: "Unauthorized" });
@@ -94,10 +94,10 @@ export const getUni = async (req, res) => {
     ]);
 
     const courseCountMap = new Map(
-      courseCounts.map((x) => [String(x._id), x.count])
+      courseCounts.map((x) => [String(x._id), x.count]),
     );
     const studentCountMap = new Map(
-      studentCounts.map((x) => [String(x._id), x.count])
+      studentCounts.map((x) => [String(x._id), x.count]),
     );
 
     const universitiesWithCounts = (agency.partnerUniversities || []).map(
@@ -108,7 +108,7 @@ export const getUni = async (req, res) => {
           courseCount: courseCountMap.get(id) || 0,
           studentCount: studentCountMap.get(id) || 0,
         };
-      }
+      },
     );
 
     return res.status(200).json({
@@ -134,7 +134,7 @@ export const getUniStudent = async (req, res) => {
       .populate({
         path: "partnerUniversities",
         match: { status: "Active" },
-        select: "profileUrl status",
+        select: "logo status",
       });
     return res
       .status(200)
@@ -184,7 +184,7 @@ export const deactivateUni = async (req, res) => {
     const university = await University.findByIdAndUpdate(
       universityId,
       { status: "Inactive" },
-      { new: true }
+      { new: true },
     );
     if (!university) {
       return res.status(404).json({ message: "University not found" });
@@ -243,7 +243,7 @@ export const searchUniByName = async (req, res) => {
       .populate({
         path: "partnerUniversities",
         match: { name: { $regex: q, $options: "i" } }, // search
-        select: "name country status about mission websiteURL profileUrl",
+        select: "name country status about mission websiteURL logo",
       });
 
     if (!agency) {
@@ -274,10 +274,10 @@ export const searchUniByName = async (req, res) => {
     ]);
 
     const courseCountMap = new Map(
-      courseCounts.map((x) => [String(x._id), x.count])
+      courseCounts.map((x) => [String(x._id), x.count]),
     );
     const studentCountMap = new Map(
-      studentCounts.map((x) => [String(x._id), x.count])
+      studentCounts.map((x) => [String(x._id), x.count]),
     );
 
     // Attach counts
@@ -346,7 +346,7 @@ export const getUniDashboard = async (req, res) => {
 
     const courseActiveCount = courseActive.partnerUniversities.reduce(
       (total, uni) => total + (uni.courses?.length || 0),
-      0
+      0,
     );
 
     // Getting the inactive course count
@@ -366,7 +366,7 @@ export const getUniDashboard = async (req, res) => {
 
     const courseInactiveCount = courseInactive.partnerUniversities.reduce(
       (total, uni) => total + (uni.courses?.length || 0),
-      0
+      0,
     );
 
     //Success

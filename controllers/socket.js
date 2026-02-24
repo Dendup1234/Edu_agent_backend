@@ -47,7 +47,7 @@ export const initializeWebSocket = (server) => {
       { receiver: socket.userId, status: "sent" },
       { $set: { status: "delivered" } }
     );
-    
+
     try {
       const conversations = await Conversation.find({
         "participants.user": socket.userId
@@ -121,6 +121,16 @@ export const initializeWebSocket = (server) => {
         });
       }
     });
+
+    socket.on("mark_read", async ({ conversationId }) => {
+      try {
+        await Message.updateMany(
+          { conversationId, receiver: socket.userId, status: { $ne: "read" } },
+          { $set: { status: "read" } }
+        );
+      } catch (err) {
+      console.error("mark_read error:", err);
+    }});
 
     socket.on("send_message", async (data) => {
       try {

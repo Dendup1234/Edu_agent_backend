@@ -42,6 +42,12 @@ export const initializeWebSocket = (server) => {
     const userRoom = socket.userId;
     socket.join(userRoom);
     console.log(`User connected: ${socket.userModel} - ${userRoom}`);
+
+    await Message.updateMany(
+      { receiver: socket.userId, status: "sent" },
+      { $set: { status: "delivered" } }
+    );
+    
     try {
       const conversations = await Conversation.find({
         "participants.user": socket.userId

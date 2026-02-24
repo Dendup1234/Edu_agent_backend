@@ -75,28 +75,39 @@ export const confirmUpload = async (req, res) => {
     const { blobName, imageType } = req.body;
     const mentorId = req.user.id;
 
-    if (!blobName) {
-      return res
-        .status(400)
-        .json({ error: "Missing blobName or originalName" });
+    if (!blobName || !imageType) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    if (imageType !== "profile") {
+      return res.status(400).json({ error: "Invalid image type" });
     }
 
     const blobClient = containerClient.getBlobClient(blobName);
 
-    if (!(await blobClient.exists())) {
+    const exists = await blobClient.exists();
+    if (!exists) {
       return res.status(400).json({ error: "Upload not found" });
     }
 
-    if (imageType == "profile") {
-      const mentor = await Mentor.findByIdAndUpdate(
-        mentorId,
-        { profileUrl: blobClient.url },
-        { new: true },
-      );
-      res.json({ message: "Upload confuirmed" });
+    const mentor = await Mentor.findByIdAndUpdate(
+      mentorId,
+      { profileUrl: blobClient.url },
+      { new: true }
+    );
+
+    if (!mentor) {
+      return res.status(404).json({ error: "Mentor not found" });
     }
+
+    return res.status(200).json({
+      message: "Upload confirmed",
+      profileUrl: blobClient.url,
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Confirmation failed" });
+    console.error("confirmUpload error:", err);
+    return res.status(500).json({ error: "Confirmation failed" });
   }
 };
+

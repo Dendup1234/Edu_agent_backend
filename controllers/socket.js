@@ -43,10 +43,27 @@ export const initializeWebSocket = (server) => {
     socket.join(userRoom);
     console.log(`User connected: ${socket.userModel} - ${userRoom}`);
 
-    await Message.updateMany(
+    const undelivered = await Message.find(
       { receiver: socket.userId, status: "sent" },
+      { _id: 1, sender: 1, conversationId: 1 } // only fetch needed fields
+    );
+
+    if (undelivered.length > 0) {
+      const ids = undelivered.map(m => m._id);
+
+    await Message.updateMany(
+      { _id: { $in: ids } },
       { $set: { status: "delivered" } }
     );
+
+    undelivered.forEach(msg => {
+      io.to(msg.sender.toString()).emit("message_status_updated", {
+        messageId: msg._id,
+        status: "delivered",
+        conversationId: msg.conversationId
+        });
+      });
+    }
 
     try {
       const conversations = await Conversation.find({
@@ -121,16 +138,6 @@ export const initializeWebSocket = (server) => {
         });
       }
     });
-
-    socket.on("mark_read", async ({ conversationId }) => {
-      try {
-        await Message.updateMany(
-          { conversationId, receiver: socket.userId, status: { $ne: "read" } },
-          { $set: { status: "read" } }
-        );
-      } catch (err) {
-      console.error("mark_read error:", err);
-    }});
 
     socket.on("send_message", async (data) => {
       try {

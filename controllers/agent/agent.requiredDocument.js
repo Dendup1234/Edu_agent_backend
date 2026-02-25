@@ -170,7 +170,7 @@ export const getDocumentsByStudent = async (req, res) => {
       student: studentId,
     })
       .populate("requiredDocument", "name description stage")
-      .populate("document", "fileURL")
+      .populate("document", "fileURL", "isResubmitted")
       .lean();
 
     const documents = await Document.find({

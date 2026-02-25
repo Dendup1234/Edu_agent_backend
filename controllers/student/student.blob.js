@@ -169,7 +169,7 @@ export const confirmUpload = async (req, res) => {
     if (!checklist) {
       return res.status(404).json({ error: "This document is not on your checklist" });
     }
-
+    
     // If there's already a Document linked, replace it. Otherwise create a new one.
     let savedDoc;
 
@@ -209,6 +209,10 @@ export const confirmUpload = async (req, res) => {
       document: savedDoc._id,
       status: "under_review"
     });
+
+    await Student.findByIdAndUpdate(studentId, {
+      status: "converted"
+    })
 
     return res.json({
       message: "Document uploaded successfully",

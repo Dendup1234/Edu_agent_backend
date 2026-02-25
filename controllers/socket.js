@@ -45,7 +45,7 @@ export const initializeWebSocket = (server) => {
 
     const undelivered = await Message.find(
       { receiver: socket.userId, status: "sent" },
-      { _id: 1, sender: 1, conversationId: 1 } // only fetch needed fields
+      { _id: 1, sender: 1, conversationId: 1 } 
     );
 
     if (undelivered.length > 0) {

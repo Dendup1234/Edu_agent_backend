@@ -35,9 +35,6 @@ const StudentSchema = new Schema(
       enum: [
         "new",
         "contacted",
-        "qualified",
-        "negotiated",
-        "applied",
         "converted",
         "lost",
       ],

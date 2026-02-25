@@ -78,7 +78,6 @@ export const getStudentList = async (req, res) => {
       })
       .lean();
 
-    console.log(studentList);
     // Finding the count of student
     const studentCount = studentList.length;
 

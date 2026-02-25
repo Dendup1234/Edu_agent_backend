@@ -9,8 +9,10 @@ import Mentor from "../../models/mentor.js";
 import bcrypt from "bcryptjs";
 import Student from "../../models/student.js";
 import mongoose from "mongoose";
-import Conversation from "../../models/conversation.js"
-import Message from "../../models/message.js"
+import Conversation from "../../models/conversation.js";
+import Message from "../../models/message.js";
+import { getSenderDisplayInfo } from "../../utils/senderInfoMessage.js";
+import { sendStudentMessageuPushNotification } from "../../utils/notification.js";
 
 //Creating an account of the employee under the agency
 export const createAgent = async (req, res) => {
@@ -410,14 +412,14 @@ async function createAutoMessage(agentId, studentId, agentName) {
       { user: agentId, model: "Agent" },
       { user: studentId, model: "Student" },
     ];
-    
+
     const participantsHash = [agentId.toString(), studentId.toString()]
       .sort()
       .join("_");
-    
+
     // Check if conversation already exists
     let conversation = await Conversation.findOne({ participantsHash });
-    
+
     if (!conversation) {
       // Create new conversation
       conversation = await Conversation.create({
@@ -425,10 +427,10 @@ async function createAutoMessage(agentId, studentId, agentName) {
         participantsHash,
       });
     }
-    
+
     // Create welcome message
     const welcomeContent = `Hello, I'm ${agentName}, your assigned agent. I'm here to guide you through your application process. If you have any queries or need assistance, feel free to reach out anytime. Looking forward to working with you!`;
-    
+
     const message = await Message.create({
       conversationId: conversation._id,
       sender: agentId,
@@ -438,13 +440,25 @@ async function createAutoMessage(agentId, studentId, agentName) {
       content: welcomeContent,
       status: "sent",
     });
-    
+
     // Update conversation with last message
     conversation.lastMessage = message._id;
     conversation.updatedAt = new Date();
     await conversation.save();
-    
-    console.log(`Welcome message sent to student ${studentId} from agent ${agentId}`);
+
+    console.log(
+      `Welcome message sent to student ${studentId} from agent ${agentId}`,
+    );
+    // sending the message notification to the student
+    await sendStudentMessageuPushNotification({
+      studentId: studentId,
+      triggerId: agentId,
+      title: `New message from ${agentName}`,
+      body:
+        message.content.length > 60
+          ? message.content.slice(0, 60) + "..."
+          : message.content,
+    });
   } catch (error) {
     console.error("Error creating welcome message:", error);
     // Don't throw - we don't want to break agent assignment if messaging fails
@@ -456,13 +470,14 @@ export const assignAdmission = async (req, res) => {
   try {
     const { studentId } = req.params;
     const { agentId } = req.body;
-    
+
     // Find the student first
-    const student = await Student.findById(studentId);
+    const student =
+      await Student.findById(studentId).select("assignedAgent name");
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
-    
+
     // Check if already assigned
     if (student.assignedAgent) {
       return res.status(409).json({
@@ -470,34 +485,39 @@ export const assignAdmission = async (req, res) => {
         assignedAgent: student.assignedAgent,
       });
     }
-    
+
     // Find agent details
     const agent = await Agent.findById(agentId);
     if (!agent) {
       return res.status(404).json({ message: "Agent not found" });
     }
-    
+
     // Assign
     student.assignedAgent = agentId;
     await student.save();
-    
+
     // keep agent side in sync (no duplicates)
     await Agent.updateOne(
       { _id: agentId },
       { $addToSet: { assignedStudents: student._id } },
     );
-    
+
+    // changing the status of the student
+    const studentStatus = await Student.findByIdAndUpdate(studentId, {
+      status: "contacted",
+    });
     // Send success email
     await sendAgentAssignmentEmail({
       studentEmail: student.email,
       agentEmail: agent.email,
       agentName: agent.name,
       studentName: student.name,
+      studentStatus: studentStatus,
     });
-    
+
     // Send auto-message to student
     await createAutoMessage(agentId, studentId, agent.name);
-    
+
     return res.status(200).json({
       message: "Student successfully assigned to agent",
       student,
@@ -513,24 +533,24 @@ export const changeAssignedAgent = async (req, res) => {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
-    
+
     const { studentId } = req.params;
     const { agentId } = req.body;
-    
+
     if (!agentId) {
       await session.abortTransaction();
       return res.status(400).json({ message: "newAgentId is required" });
     }
-    
+
     const student = await Student.findById(studentId)
       .select("name email assignedAgent")
       .session(session);
-      
+
     if (!student) {
       await session.abortTransaction();
       return res.status(404).json({ message: "Student not found" });
     }
-    
+
     if (!student.assignedAgent) {
       await session.abortTransaction();
       return res.status(409).json({
@@ -538,50 +558,50 @@ export const changeAssignedAgent = async (req, res) => {
           "Student has no agent assigned yet. Use assignAdmission first.",
       });
     }
-    
+
     if (String(student.assignedAgent) === String(agentId)) {
       await session.abortTransaction();
       return res.status(409).json({
         message: "Student is already assigned to this agent",
       });
     }
-    
+
     const oldAgentId = student.assignedAgent;
-    
+
     const newAgent = await Agent.findById(agentId)
       .select("name email")
       .session(session);
-      
+
     if (!newAgent) {
       await session.abortTransaction();
       return res.status(404).json({ message: "New agent not found" });
     }
-    
+
     const oldAgent = await Agent.findById(oldAgentId)
       .select("name email")
       .session(session);
-      
+
     // remove from old agent list
     await Agent.updateOne(
       { _id: oldAgentId },
       { $pull: { assignedStudents: student._id } },
       { session },
     );
-    
+
     // add to new agent list (no duplicates)
     await Agent.updateOne(
       { _id: agentId },
       { $addToSet: { assignedStudents: student._id } },
       { session },
     );
-    
+
     // update student assigned agent
     student.assignedAgent = agentId;
     await student.save({ session });
-    
+
     await session.commitTransaction();
     session.endSession();
-    
+
     // email AFTER commit (so you don't email if transaction fails)
     await sendAgentAssignmentEmail({
       studentEmail: student.email,
@@ -589,10 +609,10 @@ export const changeAssignedAgent = async (req, res) => {
       agentName: newAgent.name,
       studentName: student.name,
     });
-    
+
     // Send auto-message to student about agent change
     await createAutoMessage(agentId, studentId, newAgent.name);
-    
+
     return res.status(200).json({
       message: "Agent changed successfully",
       studentId: student._id,

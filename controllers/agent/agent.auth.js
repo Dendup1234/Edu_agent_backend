@@ -39,6 +39,7 @@ export const login = async (req, res) => {
       isVerified: user.isVerified,
       actor: "Agent",
     });
+    console.log(token);
     // unauthorized
     if (!user.isActive) {
       return res.status(403).json({ message: "Unauthorized" });

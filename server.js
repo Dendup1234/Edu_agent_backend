@@ -20,7 +20,7 @@ import chatRoutes from "./routes/chat.js";
 // Config
 dotenv.config();
 
-// rate limiting
+// rate limitings
 
 //const limiter = rateLimit({
 //windowMs: 15 * 60 * 1000, // 15 minutes

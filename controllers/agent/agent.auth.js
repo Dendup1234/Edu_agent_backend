@@ -39,7 +39,6 @@ export const login = async (req, res) => {
       isVerified: user.isVerified,
       actor: "Agent",
     });
-    console.log(token);
     // unauthorized
     if (!user.isActive) {
       return res.status(403).json({ message: "Unauthorized" });
@@ -67,7 +66,7 @@ export const login = async (req, res) => {
 // change password similar as the previous ones
 // RESET PASSWORD FLOW
 
-// 1. SEND PASSWORD RESET OTPs
+// 1. SEND PASSWORD RESET OTP
 export const sendPasswordResetOtp = async (req, res) => {
   try {
     const { email } = req.body;

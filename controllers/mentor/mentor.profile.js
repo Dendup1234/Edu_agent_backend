@@ -8,6 +8,7 @@ import Student from "../../models/student.js";
 import { sendStudentPushNotification } from "../../utils/notification.js";
 import Message from "../../models/message.js";
 import Conversation from "../../models/conversation.js";
+import { sendStudentMessageuPushNotification } from "../../utils/notification.js";
 
 // Getting the profile
 export const getProfile = async (req, res) => {
@@ -121,13 +122,25 @@ async function createAutoMessage(mentorId, studentId, mentorName) {
       content: welcomeContent,
       status: "sent",
     });
+    // sending the message notification to the student
+    await sendStudentMessageuPushNotification({
+      studentId: studentId,
+      triggerId: mentorId,
+      title: `New message from ${mentorName}`,
+      body:
+        message.content.length > 60
+          ? message.content.slice(0, 60) + "..."
+          : message.content,
+    });
 
     // Update conversation with last message
     conversation.lastMessage = message._id;
     conversation.updatedAt = new Date();
     await conversation.save();
-    
-    console.log(`Welcome message sent to student ${studentId} from mentor ${mentorId}`);
+
+    console.log(
+      `Welcome message sent to student ${studentId} from mentor ${mentorId}`,
+    );
   } catch (error) {
     console.error("Error creating welcome message:", error);
   }

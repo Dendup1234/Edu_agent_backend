@@ -134,7 +134,7 @@ export const getUniStudent = async (req, res) => {
       .populate({
         path: "partnerUniversities",
         match: { status: "Active" },
-        select: "logo status",
+        select: "profileUrl status",
       });
     return res
       .status(200)

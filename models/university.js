@@ -34,7 +34,7 @@ const universitySchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.model("University", universitySchema);

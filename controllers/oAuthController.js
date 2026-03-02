@@ -29,6 +29,7 @@ export const authController = {
 
       if (user && !user.googleId) {
         user.googleId = payload.sub
+        await user.save()
       }
 
       if (!user) {
@@ -82,6 +83,7 @@ export const authController = {
 
       if (user && !user.googleId) {
         user.googleId = payload.sub
+        await user.save()
       }
 
       if (!user) {

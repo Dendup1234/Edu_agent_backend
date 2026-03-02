@@ -25,7 +25,11 @@ export const authController = {
       const payload = ticket.getPayload();
       if (!payload) throw new Error("Invalid token payload");
 
-      let user = await Agency.findOne({ googleId: payload.sub, email: payload.email });
+      let user = await Agency.findOne({ googleId: payload.sub });
+
+      if (user && !user.googleId) {
+        user.googleId = payload.sub
+      }
 
       if (!user) {
         user = await Agency.create({
@@ -73,9 +77,12 @@ export const authController = {
           error: "Invalid token",
         });
       }
-      console.log(payload)
 
-      let user = await Student.findOne({ googleId: payload.sub,  email: payload.email});
+      let user = await Student.findOne({ googleId: payload.sub});
+
+      if (user && !user.googleId) {
+        user.googleId = payload.sub
+      }
 
       if (!user) {
         user = await Student.create({

@@ -1,0 +1,15 @@
+// text embedder
+import { OpenRouter } from "@openrouter/sdk";
+
+const openrouter = new OpenRouter({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+});
+
+export const embedText = async (text) => {
+  const res = await openrouter.embeddings.create({
+    model: "openai/text-embedding-3-small",
+    input: text,
+  });
+
+  return res.data[0].embedding;
+};

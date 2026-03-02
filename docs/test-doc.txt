@@ -1,0 +1,50 @@
+EduBridge System Documentation
+
+Overview
+EduBridge is a platform designed to connect students with verified education agents. 
+The platform helps students find universities, apply for courses, schedule appointments with agents, 
+and track their application progress.
+
+Key Features
+1. Student–Agent Matching  
+   EduBridge automatically matches students with suitable agents based on country preferences, course interests, and academic profile.
+
+2. Appointment Scheduling  
+   Students can book appointments with agents. Agents can view, update, and manage appointments from their dashboard.
+
+3. Course & University Selection  
+   Students can browse courses, compare universities, and select their preferred options. 
+   Agents get access to these selections to guide the student properly.
+
+4. Application Tracking  
+   Each student has a statusHistory field that shows:  
+   - Document Collection  
+   - Application Submission  
+   - Offer Letter Received  
+   - Visa Filing  
+   - Pre-departure Preparation  
+
+5. Communication System  
+   The platform supports real-time messaging and automated email notifications for:
+   - Appointment confirmations  
+   - Status updates  
+   - Required actions (missing documents, interview dates, etc.)
+
+Important Definitions
+• Agent: A verified counsellor who helps students apply to universities.  
+• Student: A user seeking university admission guidance.  
+• Appointment: A scheduled meeting between agent and student.  
+• Course: A specific academic program that the student selects.  
+• University: An institution that offers academic programs.  
+
+FAQ
+Q: Can students change their assigned agent?  
+A: Yes. Students may request reassignment if they are not satisfied with their current agent.
+
+Q: How do agents track progress?  
+A: Through the statusHistory array attached to each student profile.
+
+Q: Does EduBridge apply on behalf of the student?  
+A: No. Agents handle the application, but students must provide all required documents.
+
+End of Document.

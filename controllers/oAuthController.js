@@ -25,13 +25,17 @@ export const authController = {
       const payload = ticket.getPayload();
       if (!payload) throw new Error("Invalid token payload");
 
-      let user = await Agency.findOne({ googleId: payload.sub });
+      let user = await Agency.findOne({ googleId: payload.sub, email: payload.email });
+      if(user){
+        return res.status(409).json({ message: "Email already registered" });
+      }
 
       if (!user) {
         user = await Agency.create({
           googleId: payload.sub,
           email: payload.email,
           name: payload.name,
+          profile: payload.picture
         });
       }
 
@@ -72,14 +76,19 @@ export const authController = {
           error: "Invalid token",
         });
       }
+      console.log(payload)
 
-      let user = await Student.findOne({ googleId: payload.sub });
+      let user = await Student.findOne({ googleId: payload.sub,  email: payload.email});
+      if(user){
+        return res.status(409).json({ message: "Email already registered" });
+      }
 
       if (!user) {
         user = await Student.create({
           googleId: payload.sub,
           email: payload.email,
           name: payload.name,
+          profileUrl: payload.picture
         });
       }
 

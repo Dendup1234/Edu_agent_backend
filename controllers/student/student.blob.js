@@ -92,7 +92,6 @@ export const generateSAS = async (req, res) => {
   }
 };
 
-
 // CONFIRM UPLOAD (STUDENT)
 export const confirmUpload = async (req, res) => {
   try {

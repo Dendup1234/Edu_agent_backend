@@ -4,7 +4,7 @@ import express from "express";
 
 const router = express.Router();
 
-// chatbots api
+// chatbots apis
 router.post("/chatbot", chatbotStream);
 
 export default router;

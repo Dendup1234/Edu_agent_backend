@@ -66,7 +66,7 @@ export const login = async (req, res) => {
 // change password similar as the previous ones
 // RESET PASSWORD FLOW
 
-// 1. SEND PASSWORD RESET OTP
+// 1. SEND PASSWORD RESET OTPs
 export const sendPasswordResetOtp = async (req, res) => {
   try {
     const { email } = req.body;

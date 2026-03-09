@@ -1,8 +1,8 @@
 import { OpenRouter } from "@openrouter/sdk";
-import { retrieveContext } from "./retrieve.js";
+import { retrieveContext } from "../rag/retrive.js";
 
 const openrouter = new OpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY,
+  apiKey: process.env.DEEPSEEK_API_KEY,
 });
 
 export const chatbotStream = async (req, res) => {
@@ -27,16 +27,23 @@ export const chatbotStream = async (req, res) => {
 
     ping = setInterval(() => res.write(`: ping\n\n`), 15000);
 
-    const retrievedChunks = await retrieveContext(message, 3);
+    const retrievedChunks = await retrieveContext(message, 5);
 
-    const contextText = retrievedChunks.length
-      ? retrievedChunks
+    console.log("Retrieved chunks:", JSON.stringify(retrievedChunks, null, 2));
+
+    // Optional score filter - tune this based on your results
+    const filteredChunks = retrievedChunks.filter((chunk) =>
+      typeof chunk.score === "number" ? chunk.score >= 0.45 : true,
+    );
+
+    const contextText = filteredChunks.length
+      ? filteredChunks
           .map(
             (chunk, i) =>
-              `[Source ${i + 1} | ${chunk.source} | chunk ${chunk.chunkIndex}]\n${chunk.text}`,
+              `[Source ${i + 1} | ${chunk.source || "unknown"} | chunk ${chunk.chunkIndex} | score ${chunk.score ?? "n/a"}]\n${chunk.text}`,
           )
           .join("\n\n---\n\n")
-      : "No relevant context found.";
+      : "";
 
     const model =
       mode === "reasoning"
@@ -44,19 +51,27 @@ export const chatbotStream = async (req, res) => {
         : "deepseek/deepseek-chat";
 
     const systemPrompt = `
-You are a helpful assistant for EduAgent.
-Answer the user using the retrieved context when relevant.
-If the answer is not in the context, say you are not fully sure and answer cautiously.
-Do not invent facts.
+You are an assistant for EduBridge.
+
+Rules:
+- Answer only from the provided context.
+- If the answer is not explicitly stated in the context, reply exactly:
+I could not find that in the provided document.
+- Do not use outside knowledge.
+- Do not invent fields, JSON examples, timestamps, schemas, or explanations.
+- Keep answers short and directly quote the document meaning when possible.
 `;
 
-    const userPrompt = `
-Retrieved context:
+    const userPrompt = contextText
+      ? `Context:
 ${contextText}
 
-User question:
-${message}
-`;
+Question:
+${message}`
+      : `No relevant context was retrieved.
+
+Question:
+${message}`;
 
     res.write(
       `data: ${JSON.stringify({ type: "status", text: "Generating answer..." })}\n\n`,
@@ -66,6 +81,7 @@ ${message}
       chatGenerationParams: {
         model,
         stream: true,
+        temperature: 0,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
@@ -90,7 +106,7 @@ ${message}
     res.write(
       `data: ${JSON.stringify({
         type: "sources",
-        data: retrievedChunks.map((c) => ({
+        data: filteredChunks.map((c) => ({
           source: c.source,
           chunkIndex: c.chunkIndex,
           score: c.score,

@@ -1,7 +1,7 @@
 import { embedText } from "./embed.js";
-import { index } from "./pinecone.js";
+import { index } from "./vector.js";
 
-export const retrieveContext = async (query, topK = 3) => {
+export const retrieveContext = async (query, topK = 5) => {
   const queryEmbedding = await embedText(query);
 
   const result = await index.query({
@@ -10,11 +10,10 @@ export const retrieveContext = async (query, topK = 3) => {
     includeMetadata: true,
   });
 
-  return result.matches.map((match) => ({
-    id: match.id,
-    score: match.score,
-    text: match.metadata?.text || "",
-    source: match.metadata?.source || "unknown",
-    chunkIndex: match.metadata?.chunkIndex ?? -1,
+  return (result.matches || []).map((m) => ({
+    score: m.score,
+    text: m.metadata?.text || "",
+    source: m.metadata?.source || "unknown",
+    chunkIndex: m.metadata?.chunkIndex ?? -1,
   }));
 };

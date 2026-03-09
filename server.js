@@ -17,6 +17,10 @@ import mongoose from "mongoose";
 import rateLimit from "express-rate-limit";
 import admin from "./models/admin.js";
 import chatRoutes from "./routes/chat.js";
+import { initCollection } from "./rag/vector.js";
+
+// activating the vector DB
+initCollection();
 // Config
 dotenv.config();
 

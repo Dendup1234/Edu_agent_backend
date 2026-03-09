@@ -6,9 +6,11 @@ const openrouter = new OpenRouter({
 });
 
 export const embedText = async (text) => {
-  const res = await openrouter.embeddings.create({
-    model: "openai/text-embedding-3-small",
-    input: text,
+  const res = await openrouter.embeddings.generate({
+    requestBody: {
+      model: "openai/text-embedding-3-small",
+      input: text,
+    },
   });
 
   return res.data[0].embedding;

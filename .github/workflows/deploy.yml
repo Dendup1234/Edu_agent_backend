@@ -23,7 +23,7 @@ jobs:
           script: |
             export PATH=$PATH:/root/.nvm/versions/node/v22.19.0/bin
             echo "🚀 Deploying Bar Entertainer Platform..."
-            cd /root/Bar_entertainer_platform
-            git pull origin master
+            cd /root/Edu_agent_backend
+            git pull origin Master
             npm install
             pm2 reload edu-agent-backend

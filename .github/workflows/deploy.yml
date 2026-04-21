@@ -26,4 +26,4 @@ jobs:
             cd /root/Bar_entertainer_platform
             git pull origin master
             npm install
-            pm2 reload Bar-platform-BE 
+            pm2 reload edu-agent-backend

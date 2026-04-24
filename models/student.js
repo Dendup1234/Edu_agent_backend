@@ -6,21 +6,28 @@ const StudentSchema = new Schema(
       type: String,
       trim: true,
     },
+
     profileUrl: {
       type: String,
     },
+
     email: {
       type: String,
       required: true,
+      trim: true,
+      lowercase: true,
     },
+
     phone: {
       type: String,
       trim: true,
     },
+
     password: {
       type: String,
       select: false,
     },
+
     googleId: {
       type: String,
     },
@@ -28,6 +35,7 @@ const StudentSchema = new Schema(
     registeredAgency: {
       type: Types.ObjectId,
       ref: "Agency",
+      index: true,
     },
 
     status: {
@@ -35,15 +43,30 @@ const StudentSchema = new Schema(
       enum: [
         "new",
         "contacted",
+        "admission_assigned",
+        "admission_in_progress",
+        "offer_received",
+        "ready_for_visa",
+        "visa_assigned",
+        "visa_in_progress",
         "converted",
         "lost",
       ],
       default: "new",
+      index: true,
+    },
+
+    // Important for compatibility matching
+    preferredCountry: {
+      type: String,
+      trim: true,
+      index: true,
     },
 
     selectedUniversity: {
       type: Types.ObjectId,
       ref: "University",
+      index: true,
     },
 
     selectedCourse: {
@@ -51,32 +74,13 @@ const StudentSchema = new Schema(
       ref: "Course",
     },
 
-    ticket: [
-      {
-        type: Types.ObjectId,
-        ref: "Ticket",
-      },
-    ],
-    connectedMentor: {
-      status: {
-        type: String,
-        enum: ["pending", "rejected", "confirmed"],
-      },
-      mentor: {
-        type: Types.ObjectId,
-        ref: "Mentor",
-      },
-    },
-    dob: {
-      type: Date,
-    },
-    assignedAgent: {
-      type: Types.ObjectId,
-      ref: "Agent",
-    },
     nationality: {
       type: String,
       trim: true,
+    },
+
+    dob: {
+      type: Date,
     },
 
     education: [
@@ -98,17 +102,86 @@ const StudentSchema = new Schema(
       },
     ],
 
+    connectedMentor: {
+      status: {
+        type: String,
+        enum: ["pending", "rejected", "confirmed"],
+      },
+      mentor: {
+        type: Types.ObjectId,
+        ref: "Mentor",
+      },
+    },
+
+    ticket: [
+      {
+        type: Types.ObjectId,
+        ref: "Ticket",
+      },
+    ],
+
+    // Separate assignment fields for each stage
+    assignedAdmissionOfficer: {
+      type: Types.ObjectId,
+      ref: "Agent",
+      default: null,
+      index: true,
+    },
+
+    assignedVisaOfficer: {
+      type: Types.ObjectId,
+      ref: "Agent",
+      default: null,
+      index: true,
+    },
+
+    assignmentHistory: [
+      {
+        role: {
+          type: String,
+          enum: ["admission_officer", "visa_officer"],
+          required: true,
+        },
+        agent: {
+          type: Types.ObjectId,
+          ref: "Agent",
+          required: true,
+        },
+        assignedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        assignedBy: {
+          type: String,
+          enum: ["manual", "automation"],
+          default: "automation",
+        },
+        reason: {
+          type: String,
+          trim: true,
+        },
+      },
+    ],
+
     isValid: {
       type: Boolean,
       default: true,
     },
-    // push token for the notification
+
     expoPushToken: {
       type: String,
       default: null,
-    }
+    },
   },
   { timestamps: true },
 );
+
+// Useful filtering index
+StudentSchema.index({
+  registeredAgency: 1,
+  status: 1,
+  preferredCountry: 1,
+  selectedUniversity: 1,
+});
 
 export default mongoose.model("Student", StudentSchema);

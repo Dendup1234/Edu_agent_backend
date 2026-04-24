@@ -1,5 +1,9 @@
 import express from "express";
-import { protect, requirePermission } from "../middlewares/auth.middleware.js";
+import {
+  protect,
+  requirePermission,
+  verifyInternalToken,
+} from "../middlewares/auth.middleware.js";
 import {
   sendOtp,
   resendOtp,
@@ -91,8 +95,6 @@ import {
   createMentor,
   searchRoleByName,
   getAllAdmissionOfficer,
-  assignAdmission,
-  changeAssignedAgent,
   deactivateAgent,
 } from "../controllers/agency/agency.employee.js";
 
@@ -105,6 +107,13 @@ import {
   searchMentorByName,
   getMentorDashboard,
 } from "../controllers/agency/agency.mentor.js";
+
+import {
+  triggerAutoAssignmentWorkflow,
+  getAssignmentStudentContext,
+  getCandidateAgents,
+  saveAssignmentFromWorkflow,
+} from "../controllers/agency/agency.autoAssignment.js";
 
 //Router imported
 const router = express.Router();
@@ -419,11 +428,6 @@ router.get(
   protect,
   getAllAdmissionOfficer,
 );
-
-//for visa and admission officer
-router.patch("/profile/assign/:studentId", protect, assignAdmission);
-router.patch("/profile/assign/change/:studentId", protect, changeAssignedAgent);
-
 // Mentor apis
 router.post(
   "/profile/employee/mentors",
@@ -464,5 +468,26 @@ router.get(
 
 // Documents
 router.get("/documents/:studentId", getDocumentsByStudent);
+
+// Auto assignment of student to the student
+router.post(
+  "/students/:studentId/assignment/auto-trigger",
+  triggerAutoAssignmentWorkflow,
+);
+router.get(
+  "/internal/assignment/student/:studentId",
+  verifyInternalToken,
+  getAssignmentStudentContext,
+);
+router.get(
+  "/internal/assignment/candidates",
+  verifyInternalToken,
+  getCandidateAgents,
+);
+router.post(
+  "/internal/assignment/assign",
+  verifyInternalToken,
+  saveAssignmentFromWorkflow,
+);
 
 export default router;

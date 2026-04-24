@@ -96,6 +96,8 @@ import {
   searchRoleByName,
   getAllAdmissionOfficer,
   deactivateAgent,
+  assignAdmission,
+  changeAssignedAgent,
 } from "../controllers/agency/agency.employee.js";
 
 import { getDocumentsByStudent } from "../controllers/agency/agency.document.js";
@@ -138,6 +140,10 @@ router.get("/profile/students/leads/:studentId", protect, getStudentAppStatus);
 router.get("/profile/students/leads/query/search", protect, searchLeadByName);
 router.get("/profile/students/studentlist", protect, getStudentList);
 router.get("/profile/students/card", protect, getAgencyCard);
+
+//for visa and admission officer
+router.patch("/profile/assign/:studentId", protect, assignAdmission);
+router.patch("/profile/assign/change/:studentId", protect, changeAssignedAgent);
 
 //University apis
 router.post(
@@ -469,7 +475,7 @@ router.get(
 // Documents
 router.get("/documents/:studentId", getDocumentsByStudent);
 
-// Auto assignment of student to the student
+// Auto assignment of student to the agent
 router.post(
   "/students/:studentId/assignment/auto-trigger",
   triggerAutoAssignmentWorkflow,

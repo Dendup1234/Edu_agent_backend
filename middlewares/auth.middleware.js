@@ -105,3 +105,16 @@ export const requirePermission = (permission) => {
     }
   };
 };
+
+// middleware for the n8n workflow
+export const verifyInternalToken = (req, res, next) => {
+  const token = req.headers["x-internal-token"];
+
+  if (!token || token !== process.env.INTERNAL_AUTOMATION_TOKEN) {
+    return res.status(401).json({
+      message: "Unauthorized internal request",
+    });
+  }
+
+  next();
+};

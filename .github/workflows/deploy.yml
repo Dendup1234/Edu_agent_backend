@@ -21,9 +21,11 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            export PATH=$PATH:/root/.nvm/versions/node/v22.19.0/bin
-            echo "🚀 Deploying Bar Entertainer Platform..."
-            cd /root/Edu_agent_backend
-            git pull origin Master
-            npm install
-            pm2 reload edu-agent-backend
+           export PATH=$PATH:/root/.nvm/versions/node/v22.19.0/bin
+           echo "🚀 Deploying Edu Agent Backend..."
+
+           cd /root/Edu_agent_backend
+           git fetch origin Master
+           git reset --hard origin/Master
+           npm install
+           pm2 reload edu-agent-backend --update-env

@@ -1,8 +1,11 @@
 import axios from "axios";
 import Student from "../../models/student.js";
 import mongoose from "mongoose";
+import Agent from "../../models/agent.js"
 import { createAutoMessage } from "../../utils/autoMessage.js";
 import { sendAgentAssignmentEmail } from "../../utils/sendEmail.js";
+import dotenv from "dotenv";
+dotenv.config();
 // Button to trigger the automatic assignment of student
 export const triggerAutoAssignmentWorkflow = async (req, res) => {
   try {
@@ -126,6 +129,7 @@ export const getCandidateAgents = async (req, res) => {
       candidates,
     });
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: "Server error" });
   }
 };

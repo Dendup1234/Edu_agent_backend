@@ -1,7 +1,7 @@
 import axios from "axios";
 import Student from "../../models/student.js";
 import mongoose from "mongoose";
-import Agent from "../../models/agent.js"
+import Agent from "../../models/agent.js";
 import { createAutoMessage } from "../../utils/autoMessage.js";
 import { sendAgentAssignmentEmail } from "../../utils/sendEmail.js";
 import dotenv from "dotenv";
@@ -44,28 +44,36 @@ export const triggerAutoAssignmentWorkflow = async (req, res) => {
       });
     }
 
-    const n8nResponse = await axios.post(
-      process.env.N8N_AUTO_ASSIGNMENT_WEBHOOK_URL,
-      {
+    const response = await fetch(process.env.N8N_AUTO_ASSIGNMENT_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.N8N_WEBHOOK_SECRET,
+      },
+      body: JSON.stringify({
         studentId,
         agencyId: student.registeredAgency,
         role,
         triggeredBy: "admin_button",
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.N8N_WEBHOOK_SECRET,
-        },
-      },
-    );
+      }),
+    });
+
+    // parse response safely
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        message: "n8n workflow returned an error",
+        error: data,
+      });
+    }
 
     return res.status(200).json({
       message: "Auto assignment workflow triggered successfully",
-      data: n8nResponse.data,
+      data,
     });
   } catch (error) {
-    console.log(error.response?.data || error.message);
+    console.log(error.message);
 
     return res.status(500).json({
       message: "Failed to trigger auto assignment workflow",
@@ -129,7 +137,7 @@ export const getCandidateAgents = async (req, res) => {
       candidates,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({ message: "Server error" });
   }
 };

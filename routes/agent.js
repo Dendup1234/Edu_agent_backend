@@ -3,6 +3,7 @@ import {
   protect,
   requireVerifiedAgent,
   authorizeRoles,
+  verifyInternalToken,
 } from "../middlewares/auth.middleware.js";
 
 import {
@@ -44,6 +45,11 @@ import {
 } from "../controllers/agent/agent.studentRequiredDocument.js";
 
 import { getVisaAgent } from "../controllers/agent/agent.visaofficerlist.js";
+
+import {
+  getDocumentFraudContext,
+  updateDocumentFraudResult,
+} from "../controllers/agent/agent.fraudCheck.js";
 
 // Auth apis
 router.post("/login", login);
@@ -101,5 +107,17 @@ router.get("/appointments/search/", protect, searchAppointmentsByStudentName);
 router.get("/agent-list", protect, getVisaAgent);
 
 router.get("/studentcount", protect, getAgentStudentCount);
+
+// Document fraud checking
+router.get(
+  "/student-required-documents/:studentRequiredDocumentId/fraud-context",
+  verifyInternalToken,
+  getDocumentFraudContext,
+);
+router.patch(
+  "/student-required-documents/:studentRequiredDocumentId/fraud-result",
+  verifyInternalToken,
+  updateDocumentFraudResult,
+);
 
 export default router;

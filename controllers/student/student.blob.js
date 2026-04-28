@@ -5,12 +5,13 @@ import Student from "../../models/student.js";
 import Document from "../../models/document.js";
 import RequiredDocument from "../../models/requiredDocument.js";
 import StudentRequiredDocument from "../../models/studentRequiredDocument.js";
+import { triggerFraudCheckWorkflow } from "../../utils/triggerDocumentCheck.js";
 
 import {
   StorageSharedKeyCredential,
   BlobServiceClient,
   generateBlobSASQueryParameters,
-  BlobSASPermissions
+  BlobSASPermissions,
 } from "@azure/storage-blob";
 
 dotenv.config();
@@ -19,27 +20,23 @@ dotenv.config();
 const {
   AZURE_STORAGE_ACCOUNT_NAME: accountName,
   AZURE_STORAGE_ACCOUNT_KEY: accountKey,
-  AZURE_CONTAINER_NAME: containerName
+  AZURE_CONTAINER_NAME: containerName,
 } = process.env;
 
 const sharedKeyCredential = new StorageSharedKeyCredential(
   accountName,
-  accountKey
+  accountKey,
 );
 
 const blobServiceClient = new BlobServiceClient(
   `https://${accountName}.blob.core.windows.net`,
-  sharedKeyCredential
+  sharedKeyCredential,
 );
 
 const containerClient = blobServiceClient.getContainerClient(containerName);
 
 // UPLOAD CONSTRAINTS
-const ALLOWED_TYPES = [
-  "image/png",
-  "image/jpeg",
-  "application/pdf"
-];
+const ALLOWED_TYPES = ["image/png", "image/jpeg", "application/pdf"];
 
 const MAX_SIZE = 50 * 1024 * 1024; // 50MB
 
@@ -61,7 +58,7 @@ export const generateSAS = async (req, res) => {
     const extMap = {
       "image/jpeg": "jpg",
       "image/png": "png",
-      "application/pdf": "pdf"
+      "application/pdf": "pdf",
     };
 
     const blobName = `${uuidv4()}.${extMap[mimeType]}`;
@@ -75,16 +72,16 @@ export const generateSAS = async (req, res) => {
         blobName,
         permissions: BlobSASPermissions.parse("cw"),
         startsOn,
-        expiresOn
+        expiresOn,
       },
-      sharedKeyCredential
+      sharedKeyCredential,
     ).toString();
 
     const blobClient = containerClient.getBlockBlobClient(blobName);
 
     res.json({
       sasUrl: `${blobClient.url}?${sasToken}`,
-      blobName
+      blobName,
     });
   } catch (err) {
     console.error(err);
@@ -95,13 +92,8 @@ export const generateSAS = async (req, res) => {
 // CONFIRM UPLOAD (STUDENT)
 export const confirmUpload = async (req, res) => {
   try {
-    const {
-      blobName,
-      mimeType,
-      size,
-      documentType, // "profile" OR a RequiredDocument name
-      requiredDocumentId // the _id of the RequiredDocument being uploaded for
-    } = req.body;
+    const { blobName, mimeType, size, documentType, requiredDocumentId } =
+      req.body;
 
     const studentId = req.user.sub;
 
@@ -109,19 +101,20 @@ export const confirmUpload = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const student = await Student.findById(studentId).select("registeredAgency");
+    const student =
+      await Student.findById(studentId).select("registeredAgency");
+
     if (!student || !student.registeredAgency) {
       return res.status(404).json({ message: "Student or agency not found" });
     }
 
-    // Verify the blob actually exists in Azure
     const blobClient = containerClient.getBlobClient(blobName);
+
     if (!(await blobClient.exists())) {
       return res.status(400).json({ error: "Upload not found in storage" });
     }
 
-    // PROFILE UPLOAD 
-
+    // PROFILE UPLOAD
     if (documentType === "profile") {
       if (!PROFILE_TYPES.includes(mimeType)) {
         return res.status(400).json({ error: "Profile must be a png or jpeg" });
@@ -130,96 +123,153 @@ export const confirmUpload = async (req, res) => {
       const updated = await Student.findByIdAndUpdate(
         studentId,
         { profileUrl: blobClient.url },
-        { new: true }
+        { new: true },
       );
-
-      if (!updated) {
-        return res.status(404).json({ error: "Student not found" });
-      }
 
       return res.json({
         message: "Profile picture uploaded successfully",
-        profileUrl: updated.profileUrl
+        profileUrl: updated.profileUrl,
       });
     }
 
     // REQUIRED DOCUMENT UPLOAD
-
     if (!requiredDocumentId) {
-      return res.status(400).json({ error: "requiredDocumentId is required for document uploads" });
+      return res.status(400).json({
+        error: "requiredDocumentId is required for document uploads",
+      });
     }
 
-    // Verify the RequiredDocument exists and belongs to this agency
     const requiredDoc = await RequiredDocument.findOne({
       _id: requiredDocumentId,
-      agency: student.registeredAgency
+      agency: student.registeredAgency,
     });
 
     if (!requiredDoc) {
-      return res.status(404).json({ error: "Required document not found for this agency" });
+      return res.status(404).json({
+        error: "Required document not found for this agency",
+      });
     }
 
-    // Find the student's checklist item for this required document
     const checklist = await StudentRequiredDocument.findOne({
       student: studentId,
-      requiredDocument: requiredDocumentId
+      requiredDocument: requiredDocumentId,
     });
 
     if (!checklist) {
-      return res.status(404).json({ error: "This document is not on your checklist" });
+      return res.status(404).json({
+        error: "This document is not on your checklist",
+      });
     }
-    
-    // If there's already a Document linked, replace it. Otherwise create a new one.
+
     let savedDoc;
 
     if (!checklist.document) {
-    // First upload — create a new Document
-    savedDoc = await Document.create({
-      uploadedBy: studentId,
-      uploaderModel: "Student",
-      belongsTo: studentId,
-      agency: student.registeredAgency,
-      fileName: blobName,
-      fileType: mimeType,
-      fileSize: size,
-      fileURL: blobClient.url
-    });
-  } else if (checklist.status === "reupload") {
-    // Agent requested reupload — update the existing Document
-    savedDoc = await Document.findByIdAndUpdate(
-      checklist.document,
-      {
+      savedDoc = await Document.create({
+        uploadedBy: studentId,
+        uploaderModel: "Student",
+        belongsTo: studentId,
+        agency: student.registeredAgency,
         fileName: blobName,
         fileType: mimeType,
         fileSize: size,
         fileURL: blobClient.url,
-        isResubmitted: true
+        documentAnalysis: {
+          status: "pending",
+        },
+      });
+    } else if (checklist.status === "reupload") {
+      savedDoc = await Document.findByIdAndUpdate(
+        checklist.document,
+        {
+          fileName: blobName,
+          fileType: mimeType,
+          fileSize: size,
+          fileURL: blobClient.url,
+          isResubmitted: true,
+          documentAnalysis: {
+            status: "pending",
+            expectedDocumentType: null,
+            detectedDocumentType: null,
+            documentMatchesRequirement: null,
+            fraudPercentage: null,
+            riskLevel: null,
+            reasons: [],
+            recommendedAction: "under_review",
+            checkedAt: null,
+            rawResult: null,
+          },
+        },
+        { new: true },
+      );
+    } else {
+      return res.status(409).json({
+        error:
+          "Document already uploaded. Wait for the agent to request a reupload before uploading again",
+      });
+    }
+
+    if (!savedDoc) {
+      return res.status(500).json({
+        error: "Document could not be saved",
+      });
+    }
+
+    const updatedChecklist = await StudentRequiredDocument.findByIdAndUpdate(
+      checklist._id,
+      {
+        document: savedDoc._id,
+        status: "under_review",
+        reviewComment: "",
       },
-      { new: true }
+      { new: true },
     );
-  } else {
-    // Document exists and status is not "reupload" — block it
-    return res.status(409).json({
-      error: "Document already uploaded. Wait for the agent to request a reupload before uploading again"
-    });
-  }
-    // Link the Document to the checklist item and reset status to under_review
-    await StudentRequiredDocument.findByIdAndUpdate(checklist._id, {
-      document: savedDoc._id,
-      status: "under_review"
-    });
 
     await Student.findByIdAndUpdate(studentId, {
-      status: "converted"
-    })
-
-    return res.json({
-      message: "Document uploaded successfully",
-      document: savedDoc
+      status: "converted",
     });
 
+    // IMPORTANT: trigger n8n before success response
+    try {
+      console.log("Triggering n8n fraud workflow...", {
+        documentId: savedDoc._id.toString(),
+        studentRequiredDocumentId: updatedChecklist._id.toString(),
+      });
+
+      await triggerFraudCheckWorkflow({
+        documentId: savedDoc._id.toString(),
+        studentRequiredDocumentId: updatedChecklist._id.toString(),
+      });
+
+      console.log("n8n fraud workflow triggered successfully");
+    } catch (workflowError) {
+      console.error("Fraud workflow trigger failed:", {
+        message: workflowError.message,
+        response: workflowError.response?.data,
+        status: workflowError.response?.status,
+      });
+
+      await Document.findByIdAndUpdate(savedDoc._id, {
+        "documentAnalysis.status": "failed",
+        "documentAnalysis.reasons": ["Fraud workflow could not be triggered"],
+      });
+
+      return res.status(502).json({
+        message: "Document uploaded, but fraud workflow failed to trigger",
+        error: workflowError.response?.data || workflowError.message,
+        document: savedDoc,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Document uploaded successfully and fraud workflow triggered",
+      document: savedDoc,
+      checklist: updatedChecklist,
+    });
   } catch (error) {
     console.error("confirmUpload:", error);
-    res.status(500).json({ error: "Confirmation failed" });
+    return res.status(500).json({
+      error: "Confirmation failed",
+      details: error.message,
+    });
   }
 };

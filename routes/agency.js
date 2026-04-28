@@ -117,6 +117,11 @@ import {
   saveAssignmentFromWorkflow,
 } from "../controllers/agency/agency.autoAssignment.js";
 
+import {
+  getDocumentFraudContext,
+  updateDocumentFraudResult,
+} from "../controllers/agency/agency.fraudCheck.js";
+
 //Router imported
 const router = express.Router();
 
@@ -494,6 +499,18 @@ router.post(
   "/internal/assignment/assign",
   verifyInternalToken,
   saveAssignmentFromWorkflow,
+);
+
+// Document fraud checking
+router.get(
+  "/student-required-documents/:studentRequiredDocumentId/fraud-context",
+  verifyInternalToken,
+  getDocumentFraudContext,
+);
+router.patch(
+  "/student-required-documents/:studentRequiredDocumentId/fraud-result",
+  verifyInternalToken,
+  updateDocumentFraudResult,
 );
 
 export default router;

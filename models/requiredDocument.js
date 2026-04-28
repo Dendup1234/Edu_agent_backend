@@ -27,16 +27,13 @@ const requiredDocumentSchema = new mongoose.Schema(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // One template per agency + stage + name
 requiredDocumentSchema.index(
   { agency: 1, stage: 1, name: 1 },
-  { unique: true }
+  { unique: true },
 );
 
-export default mongoose.model(
-  "RequiredDocument",
-  requiredDocumentSchema
-);
+export default mongoose.model("RequiredDocument", requiredDocumentSchema);

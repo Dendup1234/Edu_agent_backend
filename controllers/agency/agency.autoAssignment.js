@@ -11,6 +11,7 @@ export const triggerAutoAssignmentWorkflow = async (req, res) => {
   try {
     const { studentId } = req.params;
     const { role } = req.body;
+    console.log(process.env.N8N_AUTO_ASSIGNMENT_WEBHOOK_URL);
 
     if (!["admission_officer", "visa_officer"].includes(role)) {
       return res.status(400).json({

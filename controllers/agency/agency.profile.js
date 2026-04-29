@@ -295,18 +295,20 @@ export const getStudentLead = async (req, res) => {
 // Getting the student list if they have a selected course and uni
 export const getStudentList = async (req, res) => {
   try {
-    const userId = req.user.agencyId;
-    if (!userId) {
-      return res.status(401).json({ message: "token not found" });
+    const agencyId = req.user.agencyId;
+
+    if (!agencyId) {
+      return res.status(401).json({ message: "Token not found" });
     }
+
     const studentList = await Student.find({
-      registeredAgency: userId,
+      registeredAgency: agencyId,
       isValid: true,
       selectedCourse: { $ne: null },
       selectedUniversity: { $ne: null },
     })
       .select(
-        "name statusHistory selectedCourse selectedUniversity assignedAgent",
+        "name status selectedCourse selectedUniversity assignedAdmissionOfficer assignedVisaOfficer assignmentHistory",
       )
       .populate({
         path: "selectedCourse",
@@ -317,17 +319,20 @@ export const getStudentList = async (req, res) => {
         select: "name country",
       })
       .populate({
-        path: "assignedAgent",
-        select: "name",
+        path: "assignedAdmissionOfficer",
+        select: "name systemRole",
+      })
+      .populate({
+        path: "assignedVisaOfficer",
+        select: "name systemRole",
+      })
+      .populate({
+        path: "assignmentHistory.agent",
+        select: "name systemRole",
       })
       .lean();
 
-    console.log(studentList);
-    // Finding the count of student
-    const studentCount = studentList.length;
-
-    // Creating the custom map of object
-    const student = studentList.map((s) => ({
+    const students = studentList.map((s) => ({
       student: {
         id: s._id,
         name: s.name,
@@ -341,17 +346,28 @@ export const getStudentList = async (req, res) => {
         name: s.selectedUniversity?.name,
         country: s.selectedUniversity?.country,
       },
-      agent: {
-        id: s.assignedAgent?._id,
-        name: s.assignedAgent?.name,
-      },
-      statusHistory: s.statusHistory,
+      admissionOfficer: s.assignedAdmissionOfficer
+        ? {
+            id: s.assignedAdmissionOfficer._id,
+            name: s.assignedAdmissionOfficer.name,
+            role: s.assignedAdmissionOfficer.systemRole,
+          }
+        : null,
+      visaOfficer: s.assignedVisaOfficer
+        ? {
+            id: s.assignedVisaOfficer._id,
+            name: s.assignedVisaOfficer.name,
+            role: s.assignedVisaOfficer.systemRole,
+          }
+        : null,
+      status: s.status,
+      assignmentHistory: s.assignmentHistory || [],
     }));
 
     return res.status(200).json({
       message: "Success",
-      students: student,
-      studentCount: studentCount,
+      students,
+      studentCount: students.length,
     });
   } catch (e) {
     console.log(e);

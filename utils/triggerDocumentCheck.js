@@ -1,4 +1,7 @@
 import Document from "../models/document.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const triggerFraudCheckWorkflow = async ({
   documentId,

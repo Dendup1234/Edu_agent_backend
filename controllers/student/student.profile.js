@@ -50,6 +50,7 @@ export const updateProfile = async (req, res) => {
       profile: updatedStudent,
     });
   } catch (e) {
+    console.log(e);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -87,7 +88,7 @@ async function createAutoMessage(agencyId, studentId, organizationName) {
       receiver: studentId,
       receiverModel: "Student",
       content: welcomeContent,
-      status: "sent"
+      status: "sent",
     });
 
     // Update conversation with last message
@@ -95,7 +96,9 @@ async function createAutoMessage(agencyId, studentId, organizationName) {
     conversation.updatedAt = new Date();
     await conversation.save();
 
-    console.log(`Welcome message sent to student ${studentId} from agency ${agencyId}`);
+    console.log(
+      `Welcome message sent to student ${studentId} from agency ${agencyId}`,
+    );
   } catch (error) {
     console.error("Error creating welcome message:", error);
   }
@@ -106,19 +109,19 @@ export const selectAgency = async (req, res) => {
   try {
     const userId = req.user.sub;
     const { agencyId } = req.body;
-    
+
     if (!agencyId) {
       return res.status(400).json({ message: "agencyId is required" });
     }
     if (!mongoose.Types.ObjectId.isValid(agencyId)) {
       return res.status(400).json({ message: "Enter the valid agency id" });
     }
-    
+
     const agency = await Agency.findById(agencyId);
     if (!agency) {
       return res.status(404).json({ message: "No agency found" });
     }
-    
+
     const student = await Student.findByIdAndUpdate(
       userId,
       {
@@ -131,7 +134,7 @@ export const selectAgency = async (req, res) => {
           },
         },
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     // Create welcome message conversation

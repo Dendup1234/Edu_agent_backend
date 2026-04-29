@@ -51,6 +51,13 @@ export const authorizeRoles = (...roles) => {
 export const requirePermission = (permission) => {
   return async (req, res, next) => {
     try {
+      //for the visa and admission officer
+      if (req.user.systemRole == "visa_officer") {
+        return next();
+      }
+      if (req.user.systemRole == "admission_officer") {
+        return next();
+      }
       // for the agency without any restriction
       if (req.user.actor === "Agency") {
         return next();

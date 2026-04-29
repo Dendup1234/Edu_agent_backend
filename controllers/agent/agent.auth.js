@@ -38,6 +38,7 @@ export const login = async (req, res) => {
       email: user.email,
       isVerified: user.isVerified,
       actor: "Agent",
+      systemRole: user.systemRole,
     });
     // unauthorized
     if (!user.isActive) {

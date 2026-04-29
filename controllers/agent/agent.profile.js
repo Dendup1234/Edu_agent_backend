@@ -48,6 +48,7 @@ export const updateProfile = async (req, res) => {
       profile: updatedAgency,
     });
   } catch (e) {
+    console.log(e);
     return res.status(500).json({ message: "Server error" });
   }
 };

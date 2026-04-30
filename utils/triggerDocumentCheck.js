@@ -11,7 +11,7 @@ export const triggerFraudCheckWorkflow = async ({
     if (!process.env.N8N_FRAUD_DETECTION_WEBHOOK_URL) {
       throw new Error("N8N webhook URL is missing in .env");
     }
-
+    console.log(process.env.N8N_FRAUD_DETECTION_WEBHOOK_URL);
     // Set status to processing
     await Document.findByIdAndUpdate(documentId, {
       "documentAnalysis.status": "processing",

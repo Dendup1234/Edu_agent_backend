@@ -175,9 +175,11 @@ export const getDocumentsByStudent = async (req, res) => {
 
     const documents = await Document.find({
       belongsTo: studentId,
-      documentCategory: { $ne: null }
-    })
-    return res.status(200).json({ data1: StudentUploadedDocuments, data2: documents });
+      documentCategory: { $ne: null },
+    });
+    return res
+      .status(200)
+      .json({ data1: StudentUploadedDocuments, data2: documents });
   } catch (err) {
     console.error("getDocumentsByStudent:", err);
     return res.status(500).json({ message: err.message });
@@ -278,10 +280,57 @@ export const getStudentChecklist = async (req, res) => {
 
     const checklist = await StudentRequiredDocument.find(filter)
       .populate("requiredDocument", "name description stage")
-      .populate("document", "fileName fileType fileURL fileSize")
+      .populate(
+        "document",
+        "fileName fileType fileURL fileSize isResubmitted documentAnalysis",
+      )
       .lean();
 
-    return res.status(200).json({ data: checklist });
+    const formattedChecklist = checklist.map((item) => ({
+      id: item._id,
+      stage: item.stage,
+      reviewStatus: item.reviewStatus,
+      remarks: item.remarks,
+
+      requiredDocument: item.requiredDocument
+        ? {
+            id: item.requiredDocument._id,
+            name: item.requiredDocument.name,
+            description: item.requiredDocument.description,
+            stage: item.requiredDocument.stage,
+          }
+        : null,
+
+      document: item.document
+        ? {
+            id: item.document._id,
+            fileName: item.document.fileName,
+            fileType: item.document.fileType,
+            fileURL: item.document.fileURL,
+            fileSize: item.document.fileSize,
+            isResubmitted: item.document.isResubmitted,
+
+            analysis: {
+              status: item.document.documentAnalysis?.status,
+              expectedDocumentType:
+                item.document.documentAnalysis?.expectedDocumentType,
+              detectedDocumentType:
+                item.document.documentAnalysis?.detectedDocumentType,
+              documentMatchesRequirement:
+                item.document.documentAnalysis?.documentMatchesRequirement,
+              fraudPercentage: item.document.documentAnalysis?.fraudPercentage,
+              riskLevel: item.document.documentAnalysis?.riskLevel,
+              reasons: item.document.documentAnalysis?.reasons || [],
+              recommendedAction:
+                item.document.documentAnalysis?.recommendedAction,
+              checkedBy: item.document.documentAnalysis?.checkedBy,
+              checkedAt: item.document.documentAnalysis?.checkedAt,
+            },
+          }
+        : null,
+    }));
+
+    return res.status(200).json({ data: formattedChecklist });
   } catch (err) {
     console.error("getStudentChecklist:", err);
     return res.status(500).json({ message: err.message });

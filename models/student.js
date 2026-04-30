@@ -37,6 +37,11 @@ const StudentSchema = new Schema(
       ref: "Agency",
       index: true,
     },
+    // assignedAgent
+    assignedAgent: {
+      type: Types.ObjectId,
+      ref: "Agent",
+    },
 
     status: {
       type: String,

@@ -223,6 +223,7 @@ export const saveAssignmentFromWorkflow = async (req, res) => {
     }
 
     student[config.studentField] = agent._id;
+    student.assignedAgent = agent._id;
     student.status = config.status;
 
     student.assignmentHistory.push({

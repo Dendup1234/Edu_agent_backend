@@ -60,8 +60,13 @@ export const getStudentList = async (req, res) => {
     if (!userId) {
       return res.status(401).json({ message: "token not found" });
     }
+    console.log(userId);
     const studentList = await Student.find({
-      assignedAgent: userId,
+      $or: [
+        { assignedAgent: userId },
+        { assignedAdmissionOfficer: userId },
+        { assignedVisaOfficer: userId },
+      ],
       isValid: true,
       selectedCourse: { $ne: null },
       selectedUniversity: { $ne: null },

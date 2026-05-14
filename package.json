@@ -41,7 +41,9 @@
 		"pdf-parse": "^2.4.5",
 		"socket.io": "^4.8.3",
 		"socket.io-client": "^4.8.3",
-		"uuid": "^13.0.0"
+		"swagger-ui-express": "^5.0.1",
+		"uuid": "^13.0.0",
+		"yamljs": "^0.3.0"
 	},
 	"devDependencies": {
 		"chai": "^6.2.2",

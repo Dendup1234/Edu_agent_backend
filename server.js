@@ -18,6 +18,8 @@ import rateLimit from "express-rate-limit";
 import admin from "./models/admin.js";
 import chatRoutes from "./routes/chat.js";
 import { initCollection } from "./rag/vector.js";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
 
 // activating the vector DB
 initCollection();
@@ -32,7 +34,7 @@ dotenv.config();
 //});
 // Express app command
 const app = express();
-
+const swaggerDocument = YAML.load("./docs/openapi.yaml");
 // rate limiting
 //app.use(limiter);
 //helmet config
@@ -48,6 +50,9 @@ app.use("/api/v1/agent", agentRoute);
 app.use("/api/v1/mentor", mentorRoute);
 app.use(oAuthRoute);
 app.use("/api/v1/openai", chatRoutes);
+
+// api docs routes
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Server setups
 const PORT = process.env.PORT || 8000;

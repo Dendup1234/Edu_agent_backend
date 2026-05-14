@@ -1,0 +1,2062 @@
+openapi: 3.0.3
+info:
+  title: Edu Agent Backend API
+  version: 1.0.0
+  description: Swagger/OpenAPI reference for the Edu Agent backend routes mounted in server.js.
+servers:
+  - url: http://localhost:8000
+    description: Local development
+tags:
+  - name: Health
+  - name: OAuth
+  - name: Chat
+  - name: Student Auth
+  - name: Student
+  - name: Mentor Auth
+  - name: Mentor
+  - name: Agent Auth
+  - name: Agent
+  - name: Admin Auth
+  - name: Admin
+  - name: Agency Auth
+  - name: Agency
+  - name: Agency Universities
+  - name: Agency Courses
+  - name: Agency Events
+  - name: Agency Scholarships
+  - name: Agency Employees
+  - name: Internal Automation
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      responses:
+        "200":
+          description: Service is available.
+
+  /google-signin-agency:
+    post:
+      tags: [OAuth]
+      summary: Sign in an agency user with Google ID token
+      requestBody:
+        $ref: "#/components/requestBodies/GoogleAuth"
+      responses:
+        "200": { description: Signed in successfully. }
+  /google-signin-student:
+    post:
+      tags: [OAuth]
+      summary: Sign in a student with Google ID token
+      requestBody:
+        $ref: "#/components/requestBodies/GoogleAuth"
+      responses:
+        "200": { description: Signed in successfully. }
+
+  /api/v1/openai/chatbot:
+    post:
+      tags: [Chat]
+      summary: Send a message to the chatbot stream
+      requestBody:
+        $ref: "#/components/requestBodies/Chat"
+      responses:
+        "200": { description: Chat response stream or payload. }
+
+  /api/v1/students/send-otp:
+    post:
+      tags: [Student Auth]
+      summary: Start student registration and send OTP
+      requestBody:
+        $ref: "#/components/requestBodies/StudentSignup"
+      responses:
+        "200": { description: OTP sent. }
+  /api/v1/students/resend-otp:
+    post:
+      tags: [Student Auth]
+      summary: Resend student registration OTP
+      requestBody:
+        $ref: "#/components/requestBodies/Email"
+      responses:
+        "200": { description: OTP resent. }
+  /api/v1/students/verify-otp:
+    post:
+      tags: [Student Auth]
+      summary: Verify student registration OTP
+      requestBody:
+        $ref: "#/components/requestBodies/EmailOtp"
+      responses:
+        "200": { description: Student registered. }
+  /api/v1/students/login:
+    post:
+      tags: [Student Auth]
+      summary: Student login
+      requestBody:
+        $ref: "#/components/requestBodies/Login"
+      responses:
+        "200": { description: Login token and user data. }
+  /api/v1/students/password-reset/send-otp:
+    post:
+      tags: [Student Auth]
+      summary: Send student password reset OTP
+      requestBody:
+        $ref: "#/components/requestBodies/Email"
+      responses:
+        "200": { description: Reset OTP sent. }
+  /api/v1/students/password-reset/verify-otp:
+    post:
+      tags: [Student Auth]
+      summary: Verify student password reset OTP
+      requestBody:
+        $ref: "#/components/requestBodies/EmailOtp"
+      responses:
+        "200": { description: Reset token returned. }
+  /api/v1/students/password-reset/set-new:
+    post:
+      tags: [Student Auth]
+      summary: Set student password after reset verification
+      requestBody:
+        $ref: "#/components/requestBodies/NewPassword"
+      responses:
+        "200": { description: Password updated. }
+
+  /api/v1/students/profile:
+    get:
+      tags: [Student]
+      summary: Get current student profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Student profile. }
+    patch:
+      tags: [Student]
+      summary: Update current student profile
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: Profile updated. }
+  /api/v1/students/profile/{studentId}:
+    delete:
+      tags: [Student]
+      summary: Deactivate a student profile
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/studentId"
+      responses:
+        "200": { description: Student deactivated. }
+  /api/v1/students/students/update-push-token:
+    patch:
+      tags: [Student]
+      summary: Update current student's push notification token
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/PushToken"
+      responses:
+        "200": { description: Push token updated. }
+  /api/v1/students/students/notification/test:
+    post:
+      tags: [Student]
+      summary: Send a test push notification to a student
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/TestNotification"
+      responses:
+        "200": { description: Notification sent. }
+  /api/v1/students/students/notification/count:
+    get:
+      tags: [Student]
+      summary: Get unread notification count
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Notification count. }
+  /api/v1/students/students/notification/history:
+    get:
+      tags: [Student]
+      summary: Get notification history
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/cursorCreatedAt"
+        - $ref: "#/components/parameters/cursorId"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200": { description: Notification page. }
+  /api/v1/students/select-agency:
+    post:
+      tags: [Student]
+      summary: Select an agency for the current student
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/AgencySelection"
+      responses:
+        "200": { description: Agency selected. }
+  /api/v1/students/uploads/sas:
+    post:
+      tags: [Student]
+      summary: Generate Azure Blob SAS upload details
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/SasRequest"
+      responses:
+        "200": { description: SAS upload details. }
+  /api/v1/students/uploads/confirm:
+    post:
+      tags: [Student]
+      summary: Confirm a student upload
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/StudentUploadConfirm"
+      responses:
+        "200": { description: Upload confirmed. }
+  /api/v1/students/courses:
+    get:
+      tags: [Student]
+      summary: List courses for the student's selected agency
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Course list. }
+  /api/v1/students/courses/search:
+    get:
+      tags: [Student]
+      summary: Search courses by name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching courses. }
+  /api/v1/students/courses/select/{courseId}:
+    patch:
+      tags: [Student]
+      summary: Select a course
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/courseId"
+      responses:
+        "200": { description: Course selected. }
+  /api/v1/students/universities/query/{agencyId}/search:
+    get:
+      tags: [Student]
+      summary: Search universities by agency
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/agencyId"
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching universities. }
+  /api/v1/students/scholarships/query/{agencyId}/search:
+    get:
+      tags: [Student]
+      summary: Search scholarships by agency
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/agencyId"
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching scholarships. }
+  /api/v1/students/events/registration/{eventId}:
+    post:
+      tags: [Student]
+      summary: Register for an event
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/eventId"
+      requestBody:
+        $ref: "#/components/requestBodies/EventRegistration"
+      responses:
+        "200": { description: Registration completed. }
+  /api/v1/students/mentors/{agencyId}:
+    get:
+      tags: [Student]
+      summary: List mentors for an agency
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/agencyId"
+      responses:
+        "200": { description: Mentor list. }
+  /api/v1/students/mentors/connect/{mentorId}:
+    post:
+      tags: [Student]
+      summary: Request connection with a mentor
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/mentorId"
+      responses:
+        "200": { description: Mentor connection requested. }
+  /api/v1/students/documents/status:
+    get:
+      tags: [Student]
+      summary: Get document completion status
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/stage"
+      responses:
+        "200": { description: Document status. }
+  /api/v1/students/documents:
+    get:
+      tags: [Student]
+      summary: Get required documents for current student
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/stage"
+      responses:
+        "200": { description: Student document list. }
+
+  /api/v1/mentor/login:
+    post:
+      tags: [Mentor Auth]
+      summary: Mentor login
+      requestBody:
+        $ref: "#/components/requestBodies/Login"
+      responses:
+        "200": { description: Login token and mentor data. }
+  /api/v1/mentor/password-reset/send-otp:
+    post:
+      tags: [Mentor Auth]
+      summary: Send mentor password reset OTP
+      requestBody:
+        $ref: "#/components/requestBodies/Email"
+      responses:
+        "200": { description: Reset OTP sent. }
+  /api/v1/mentor/password-reset/verify-otp:
+    post:
+      tags: [Mentor Auth]
+      summary: Verify mentor password reset OTP
+      requestBody:
+        $ref: "#/components/requestBodies/EmailOtp"
+      responses:
+        "200": { description: Reset token returned. }
+  /api/v1/mentor/password-reset/set-new:
+    post:
+      tags: [Mentor Auth]
+      summary: Set mentor password after reset verification
+      requestBody:
+        $ref: "#/components/requestBodies/NewPassword"
+      responses:
+        "200": { description: Password updated. }
+  /api/v1/mentor/profile:
+    get:
+      tags: [Mentor]
+      summary: Get mentor profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Mentor profile. }
+    patch:
+      tags: [Mentor]
+      summary: Update mentor profile
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: Profile updated. }
+  /api/v1/mentor/mentees/confirmed:
+    get:
+      tags: [Mentor]
+      summary: List confirmed mentees
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Confirmed mentees. }
+  /api/v1/mentor/mentees/pending:
+    get:
+      tags: [Mentor]
+      summary: List pending mentee requests
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Pending mentees. }
+  /api/v1/mentor/mentees/{studentId}/confirmed:
+    patch:
+      tags: [Mentor]
+      summary: Confirm a mentee request
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/studentId"
+      responses:
+        "200": { description: Mentee confirmed. }
+  /api/v1/mentor/mentees/{studentId}/cancelled:
+    patch:
+      tags: [Mentor]
+      summary: Cancel a mentee request
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/studentId"
+      responses:
+        "200": { description: Mentee cancelled. }
+  /api/v1/mentor/appointments:
+    post:
+      tags: [Mentor]
+      summary: Create a mentor appointment
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/Appointment"
+      responses:
+        "201": { description: Appointment created. }
+    get:
+      tags: [Mentor]
+      summary: List mentor appointments
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Appointment list. }
+  /api/v1/mentor/appointments/{appointmentId}/update:
+    patch:
+      tags: [Mentor]
+      summary: Update a mentor appointment
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/appointmentId"
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: Appointment updated. }
+  /api/v1/mentor/appointments/{appointmentId}/cancel:
+    patch:
+      tags: [Mentor]
+      summary: Cancel a mentor appointment
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/appointmentId"
+      responses:
+        "200": { description: Appointment cancelled. }
+  /api/v1/mentor/appointments/{appointmentId}/complete:
+    patch:
+      tags: [Mentor]
+      summary: Mark a mentor appointment complete
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/appointmentId"
+      responses:
+        "200": { description: Appointment completed. }
+  /api/v1/mentor/appointments/search:
+    get:
+      tags: [Mentor]
+      summary: Search mentor appointments by student name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/name"
+      responses:
+        "200": { description: Matching appointments. }
+  /api/v1/mentor/students/{studentId}:
+    get:
+      tags: [Mentor]
+      summary: Get a student's profile for a mentor
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/studentId"
+      responses:
+        "200": { description: Student profile. }
+  /api/v1/mentor/uploads/sas:
+    post:
+      tags: [Mentor]
+      summary: Generate mentor upload SAS details
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/SasRequest"
+      responses:
+        "200": { description: SAS upload details. }
+  /api/v1/mentor/uploads/confirm:
+    post:
+      tags: [Mentor]
+      summary: Confirm mentor profile upload
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/BlobConfirm"
+      responses:
+        "200": { description: Upload confirmed. }
+
+  /api/v1/agent/login:
+    post:
+      tags: [Agent Auth]
+      summary: Agent login
+      requestBody:
+        $ref: "#/components/requestBodies/Login"
+      responses:
+        "200": { description: Login token and agent data. }
+  /api/v1/agent/password-reset/send-otp:
+    post:
+      tags: [Agent Auth]
+      summary: Send agent password reset OTP
+      requestBody:
+        $ref: "#/components/requestBodies/Email"
+      responses:
+        "200": { description: Reset OTP sent. }
+  /api/v1/agent/password-reset/verify-otp:
+    post:
+      tags: [Agent Auth]
+      summary: Verify agent password reset OTP
+      requestBody:
+        $ref: "#/components/requestBodies/EmailOtp"
+      responses:
+        "200": { description: Reset token returned. }
+  /api/v1/agent/password-reset/set-new:
+    post:
+      tags: [Agent Auth]
+      summary: Set agent password after reset verification
+      requestBody:
+        $ref: "#/components/requestBodies/NewPassword"
+      responses:
+        "200": { description: Password updated. }
+  /api/v1/agent/profile/me:
+    get:
+      tags: [Agent]
+      summary: Get current agent profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Agent profile. }
+  /api/v1/agent/profile/update:
+    patch:
+      tags: [Agent]
+      summary: Update current agent profile
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: Profile updated. }
+  /api/v1/agent/students:
+    get:
+      tags: [Agent]
+      summary: List students assigned to the current agent
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Student list. }
+  /api/v1/agent/documents/required:
+    post:
+      tags: [Agent]
+      summary: Create a required document definition
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/RequiredDocument"
+      responses:
+        "201": { description: Required document created. }
+    get:
+      tags: [Agent]
+      summary: List required document definitions
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/stage"
+      responses:
+        "200": { description: Required document list. }
+  /api/v1/agent/documents/required/{id}:
+    patch:
+      tags: [Agent]
+      summary: Update a required document definition
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/id"
+      requestBody:
+        $ref: "#/components/requestBodies/RequiredDocumentUpdate"
+      responses:
+        "200": { description: Required document updated. }
+    delete:
+      tags: [Agent]
+      summary: Delete a required document definition
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200": { description: Required document deleted. }
+  /api/v1/agent/documents/student/{studentId}:
+    get:
+      tags: [Agent]
+      summary: Get documents uploaded by a student
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/studentId"
+      responses:
+        "200": { description: Student documents. }
+  /api/v1/agent/documents/checklist/{checklistTargetId}:
+    post:
+      tags: [Agent]
+      summary: Create a student's required-document checklist
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/checklistTargetId"
+      requestBody:
+        $ref: "#/components/requestBodies/ChecklistCreate"
+      responses:
+        "201": { description: Checklist created. }
+    get:
+      tags: [Agent]
+      summary: Get a student's document checklist
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/checklistTargetId"
+        - $ref: "#/components/parameters/stage"
+      responses:
+        "200": { description: Checklist. }
+    delete:
+      tags: [Agent]
+      summary: Remove one document from a student's checklist
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/checklistTargetId"
+      responses:
+        "200": { description: Checklist item removed. }
+  /api/v1/agent/documents/review/{studentRequiredDocumentId}:
+    patch:
+      tags: [Agent]
+      summary: Update document review status
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/studentRequiredDocumentId"
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentReview"
+      responses:
+        "200": { description: Review status updated. }
+  /api/v1/agent/uploads/sas:
+    post:
+      tags: [Agent]
+      summary: Generate agent upload SAS details
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/SasRequest"
+      responses:
+        "200": { description: SAS upload details. }
+  /api/v1/agent/uploads/confirm:
+    post:
+      tags: [Agent]
+      summary: Confirm agent upload
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/AgentUploadConfirm"
+      responses:
+        "200": { description: Upload confirmed. }
+  /api/v1/agent/appointments:
+    post:
+      tags: [Agent]
+      summary: Create an agent appointment
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/Appointment"
+      responses:
+        "201": { description: Appointment created. }
+    get:
+      tags: [Agent]
+      summary: List agent appointments
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Appointment list. }
+  /api/v1/agent/appointments/{appointmentId}/update:
+    patch:
+      tags: [Agent]
+      summary: Update an agent appointment
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/appointmentId"
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: Appointment updated. }
+  /api/v1/agent/appointments/{appointmentId}/cancel:
+    patch:
+      tags: [Agent]
+      summary: Cancel an agent appointment
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/appointmentId"
+      responses:
+        "200": { description: Appointment cancelled. }
+  /api/v1/agent/appointments/{appointmentId}/complete:
+    patch:
+      tags: [Agent]
+      summary: Mark an agent appointment complete
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/appointmentId"
+      responses:
+        "200": { description: Appointment completed. }
+  /api/v1/agent/appointments/search:
+    get:
+      tags: [Agent]
+      summary: Search agent appointments by student name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/name"
+      responses:
+        "200": { description: Matching appointments. }
+  /api/v1/agent/agent-list:
+    get:
+      tags: [Agent]
+      summary: List visa agents
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Visa agent list. }
+  /api/v1/agent/studentcount:
+    get:
+      tags: [Agent]
+      summary: Get assigned student count for current agent
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Student count. }
+  /api/v1/agent/student-required-documents/{studentRequiredDocumentId}/fraud-context:
+    get:
+      tags: [Internal Automation]
+      summary: Get document fraud-check context
+      security: [{ internalToken: [] }]
+      parameters:
+        - $ref: "#/components/parameters/studentRequiredDocumentId"
+      responses:
+        "200": { description: Fraud-check context. }
+  /api/v1/agent/student-required-documents/{studentRequiredDocumentId}/fraud-result:
+    patch:
+      tags: [Internal Automation]
+      summary: Save document fraud-check result
+      security: [{ internalToken: [] }]
+      parameters:
+        - $ref: "#/components/parameters/studentRequiredDocumentId"
+      requestBody:
+        $ref: "#/components/requestBodies/FraudResult"
+      responses:
+        "200": { description: Fraud result saved. }
+
+  /api/v1/admin/login:
+    post:
+      tags: [Admin Auth]
+      summary: Admin login
+      requestBody:
+        $ref: "#/components/requestBodies/Login"
+      responses:
+        "200": { description: Login token and admin data. }
+  /api/v1/admin/password-reset/send-otp:
+    post:
+      tags: [Admin Auth]
+      summary: Send admin password reset OTP
+      requestBody:
+        $ref: "#/components/requestBodies/Email"
+      responses:
+        "200": { description: Reset OTP sent. }
+  /api/v1/admin/password-reset/verify-otp:
+    post:
+      tags: [Admin Auth]
+      summary: Verify admin password reset OTP
+      requestBody:
+        $ref: "#/components/requestBodies/EmailOtp"
+      responses:
+        "200": { description: Reset token returned. }
+  /api/v1/admin/password-reset/set-new:
+    post:
+      tags: [Admin Auth]
+      summary: Set admin password after reset verification
+      requestBody:
+        $ref: "#/components/requestBodies/NewPassword"
+      responses:
+        "200": { description: Password updated. }
+  /api/v1/admin/admins:
+    get:
+      tags: [Admin]
+      summary: List admins
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Admin list. }
+    post:
+      tags: [Admin]
+      summary: Create an admin
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/AdminCreate"
+      responses:
+        "201": { description: Admin created. }
+  /api/v1/admin/agency:
+    get:
+      tags: [Admin]
+      summary: List agencies
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Agency list. }
+  /api/v1/admin/agency/dashboard:
+    get:
+      tags: [Admin]
+      summary: Get agency status counts
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Agency dashboard counts. }
+  /api/v1/admin/agency/{agencyId}:
+    delete:
+      tags: [Admin]
+      summary: Deactivate an agency
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/agencyId"
+      responses:
+        "200": { description: Agency deactivated. }
+  /api/v1/admin/agency/search:
+    get:
+      tags: [Admin]
+      summary: Search agencies by organization name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching agencies. }
+  /api/v1/admin/leads/dashboard:
+    get:
+      tags: [Admin]
+      summary: Get lead dashboard metrics
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Lead dashboard. }
+  /api/v1/admin/leads:
+    get:
+      tags: [Admin]
+      summary: List student leads
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Lead list. }
+  /api/v1/admin/leads/search:
+    get:
+      tags: [Admin]
+      summary: Search leads by name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching leads. }
+  /api/v1/admin/students:
+    get:
+      tags: [Admin]
+      summary: List students
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Student list. }
+  /api/v1/admin/students/search:
+    get:
+      tags: [Admin]
+      summary: Search students by name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/name"
+      responses:
+        "200": { description: Matching students. }
+  /api/v1/admin/mentors:
+    get:
+      tags: [Admin]
+      summary: List mentors
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Mentor list. }
+  /api/v1/admin/mentors/dashboard:
+    get:
+      tags: [Admin]
+      summary: Get mentor dashboard metrics
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Mentor dashboard. }
+  /api/v1/admin/mentors/search:
+    get:
+      tags: [Admin]
+      summary: Search mentors by name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/name"
+      responses:
+        "200": { description: Matching mentors. }
+  /api/v1/admin/mentors/students:
+    get:
+      tags: [Admin]
+      summary: List student-mentor matches
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Student mentor matches. }
+  /api/v1/admin/mentors/students/search:
+    get:
+      tags: [Admin]
+      summary: Search student-mentor matches
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching student-mentor records. }
+  /api/v1/admin/events:
+    get:
+      tags: [Admin]
+      summary: List events
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Event list. }
+  /api/v1/admin/events/search:
+    get:
+      tags: [Admin]
+      summary: Search events by name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching events. }
+  /api/v1/admin/events/dashboard:
+    get:
+      tags: [Admin]
+      summary: Get event dashboard metrics
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Event dashboard. }
+  /api/v1/admin/uni:
+    get:
+      tags: [Admin]
+      summary: List universities
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: University list. }
+  /api/v1/admin/uni/dashboard:
+    get:
+      tags: [Admin]
+      summary: Get university dashboard metrics
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: University dashboard. }
+  /api/v1/admin/uni/search:
+    get:
+      tags: [Admin]
+      summary: Search universities
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching universities. }
+
+  /api/v1/agency/send-otp:
+    post:
+      tags: [Agency Auth]
+      summary: Start agency registration and send OTP
+      requestBody:
+        $ref: "#/components/requestBodies/AgencySignup"
+      responses:
+        "200": { description: OTP sent. }
+  /api/v1/agency/resend-otp:
+    post:
+      tags: [Agency Auth]
+      summary: Resend agency registration OTP
+      requestBody:
+        $ref: "#/components/requestBodies/Email"
+      responses:
+        "200": { description: OTP resent. }
+  /api/v1/agency/verify-otp:
+    post:
+      tags: [Agency Auth]
+      summary: Verify agency registration OTP
+      requestBody:
+        $ref: "#/components/requestBodies/EmailOtp"
+      responses:
+        "200": { description: Agency registered. }
+  /api/v1/agency/login:
+    post:
+      tags: [Agency Auth]
+      summary: Agency login
+      requestBody:
+        $ref: "#/components/requestBodies/Login"
+      responses:
+        "200": { description: Login token and agency data. }
+  /api/v1/agency/password-reset/send-otp:
+    post:
+      tags: [Agency Auth]
+      summary: Send agency password reset OTP
+      requestBody:
+        $ref: "#/components/requestBodies/Email"
+      responses:
+        "200": { description: Reset OTP sent. }
+  /api/v1/agency/password-reset/verify-otp:
+    post:
+      tags: [Agency Auth]
+      summary: Verify agency password reset OTP
+      requestBody:
+        $ref: "#/components/requestBodies/EmailOtp"
+      responses:
+        "200": { description: Reset token returned. }
+  /api/v1/agency/password-reset/set-new:
+    post:
+      tags: [Agency Auth]
+      summary: Set agency password after reset verification
+      requestBody:
+        $ref: "#/components/requestBodies/NewPassword"
+      responses:
+        "200": { description: Password updated. }
+
+  /api/v1/agency/profile:
+    get:
+      tags: [Agency]
+      summary: Get current agency profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Agency profile. }
+    patch:
+      tags: [Agency]
+      summary: Update current agency profile
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: Profile updated. }
+  /api/v1/agency/profile/{agencyId}:
+    get:
+      tags: [Agency]
+      summary: Get agency by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/agencyId"
+      responses:
+        "200": { description: Agency profile. }
+  /api/v1/agency/student:
+    get:
+      tags: [Agency]
+      summary: Get agency details for a student context
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Agency details. }
+  /api/v1/agency/profile/dashboard/leads:
+    get:
+      tags: [Agency]
+      summary: Get agency lead dashboard
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Lead dashboard. }
+  /api/v1/agency/profile/students/leads:
+    get:
+      tags: [Agency]
+      summary: List agency student leads
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Lead list. }
+  /api/v1/agency/profile/students/leads/{studentId}:
+    get:
+      tags: [Agency]
+      summary: Get one student's application status
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/studentId"
+      responses:
+        "200": { description: Application status. }
+  /api/v1/agency/profile/students/leads/query/search:
+    get:
+      tags: [Agency]
+      summary: Search agency leads by name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching leads. }
+  /api/v1/agency/profile/students/studentlist:
+    get:
+      tags: [Agency]
+      summary: List agency students
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Student list. }
+  /api/v1/agency/profile/students/card:
+    get:
+      tags: [Agency]
+      summary: Get agency profile card metrics
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Agency card data. }
+  /api/v1/agency/profile/assign/{studentId}:
+    patch:
+      tags: [Agency]
+      summary: Assign an admission officer to a student
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/studentId"
+      requestBody:
+        $ref: "#/components/requestBodies/AgentAssignment"
+      responses:
+        "200": { description: Agent assigned. }
+  /api/v1/agency/profile/assign/change/{studentId}:
+    patch:
+      tags: [Agency]
+      summary: Change assigned agent for a student
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/studentId"
+      requestBody:
+        $ref: "#/components/requestBodies/AgentAssignment"
+      responses:
+        "200": { description: Agent assignment changed. }
+
+  /api/v1/agency/universities:
+    post:
+      tags: [Agency Universities]
+      summary: Create a university
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/University"
+      responses:
+        "201": { description: University created. }
+    get:
+      tags: [Agency Universities]
+      summary: List universities for current agency
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: University list. }
+  /api/v1/agency/universities/{universityId}:
+    patch:
+      tags: [Agency Universities]
+      summary: Update a university
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/universityId"
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: University updated. }
+    delete:
+      tags: [Agency Universities]
+      summary: Deactivate a university
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/universityId"
+      responses:
+        "200": { description: University deactivated. }
+    get:
+      tags: [Agency Universities]
+      summary: Get university by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/universityId"
+      responses:
+        "200": { description: University details. }
+  /api/v1/agency/universities/agency/{agencyId}:
+    get:
+      tags: [Agency Universities]
+      summary: List universities visible to students for an agency
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/agencyId"
+      responses:
+        "200": { description: University list. }
+  /api/v1/agency/universities/query/search:
+    get:
+      tags: [Agency Universities]
+      summary: Search universities
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching universities. }
+  /api/v1/agency/universities/dashboard/unipage:
+    get:
+      tags: [Agency Universities]
+      summary: Get university dashboard metrics
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: University dashboard. }
+
+  /api/v1/agency/universities/{universityId}/courses:
+    post:
+      tags: [Agency Courses]
+      summary: Create a course under a university
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/universityId"
+      requestBody:
+        $ref: "#/components/requestBodies/Course"
+      responses:
+        "201": { description: Course created. }
+    get:
+      tags: [Agency Courses]
+      summary: List courses under a university
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/universityId"
+      responses:
+        "200": { description: Course list. }
+  /api/v1/agency/universities/{universityId}/courses/{courseId}:
+    patch:
+      tags: [Agency Courses]
+      summary: Update a course
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/universityId"
+        - $ref: "#/components/parameters/courseId"
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: Course updated. }
+    delete:
+      tags: [Agency Courses]
+      summary: Deactivate a course
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/universityId"
+        - $ref: "#/components/parameters/courseId"
+      responses:
+        "200": { description: Course deactivated. }
+  /api/v1/agency/courses/{courseId}:
+    get:
+      tags: [Agency Courses]
+      summary: Get course by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/courseId"
+      responses:
+        "200": { description: Course details. }
+
+  /api/v1/agency:
+    get:
+      tags: [Agency]
+      summary: List all agencies
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Agency list. }
+  /api/v1/agency/uploads/sas:
+    post:
+      tags: [Agency]
+      summary: Generate agency upload SAS details
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/SasRequest"
+      responses:
+        "200": { description: SAS upload details. }
+  /api/v1/agency/uploads/confirm:
+    post:
+      tags: [Agency]
+      summary: Confirm agency upload
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/AgencyUploadConfirm"
+      responses:
+        "200": { description: Upload confirmed. }
+
+  /api/v1/agency/events:
+    post:
+      tags: [Agency Events]
+      summary: Create an event
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/Event"
+      responses:
+        "201": { description: Event created. }
+    get:
+      tags: [Agency Events]
+      summary: List agency events
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Event list. }
+  /api/v1/agency/events/profile/{eventId}:
+    get:
+      tags: [Agency Events]
+      summary: Get event by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/eventId"
+      responses:
+        "200": { description: Event details. }
+    patch:
+      tags: [Agency Events]
+      summary: Update event
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/eventId"
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: Event updated. }
+    delete:
+      tags: [Agency Events]
+      summary: Delete event
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/eventId"
+      responses:
+        "200": { description: Event deleted. }
+  /api/v1/agency/events/student:
+    get:
+      tags: [Agency Events]
+      summary: List events visible to students
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Event list. }
+  /api/v1/agency/events/profile/query/search:
+    get:
+      tags: [Agency Events]
+      summary: Search events by name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching events. }
+  /api/v1/agency/events/profile/{eventId}/seats:
+    post:
+      tags: [Agency Events]
+      summary: Assign seat types for an event
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/eventId"
+      requestBody:
+        $ref: "#/components/requestBodies/EventSeats"
+      responses:
+        "200": { description: Seats assigned. }
+  /api/v1/agency/events/profile/{eventId}/seats/{seatId}/update:
+    patch:
+      tags: [Agency Events]
+      summary: Update an event seat type
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/eventId"
+        - $ref: "#/components/parameters/seatId"
+      requestBody:
+        $ref: "#/components/requestBodies/SeatUpdate"
+      responses:
+        "200": { description: Seat updated. }
+  /api/v1/agency/events/profile/{eventId}/tickets:
+    post:
+      tags: [Agency Events]
+      summary: Create an event ticket type
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/eventId"
+      requestBody:
+        $ref: "#/components/requestBodies/TicketType"
+      responses:
+        "201": { description: Ticket type created. }
+    get:
+      tags: [Agency Events]
+      summary: List ticket types for an event
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/eventId"
+      responses:
+        "200": { description: Ticket type list. }
+  /api/v1/agency/events/profile/{eventId}/tickets/{ticketId}:
+    patch:
+      tags: [Agency Events]
+      summary: Update an event ticket type
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/eventId"
+        - $ref: "#/components/parameters/ticketId"
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: Ticket type updated. }
+  /api/v1/agency/events/profile/{seatId}/seats/info:
+    get:
+      tags: [Agency Events]
+      summary: Get seat information
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/seatId"
+      responses:
+        "200": { description: Seat information. }
+  /api/v1/agency/events/tickets:
+    get:
+      tags: [Agency Events]
+      summary: List sold or issued tickets
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Ticket list. }
+  /api/v1/agency/events/tickets/search:
+    get:
+      tags: [Agency Events]
+      summary: Search tickets by event name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: eventName
+          in: query
+          schema: { type: string }
+      responses:
+        "200": { description: Matching tickets. }
+
+  /api/v1/agency/scholarships:
+    post:
+      tags: [Agency Scholarships]
+      summary: Create a scholarship
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/Scholarship"
+      responses:
+        "201": { description: Scholarship created. }
+    get:
+      tags: [Agency Scholarships]
+      summary: List agency scholarships
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Scholarship list. }
+  /api/v1/agency/scholarships/{scholarshipId}:
+    get:
+      tags: [Agency Scholarships]
+      summary: Get scholarship by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/scholarshipId"
+      responses:
+        "200": { description: Scholarship details. }
+    patch:
+      tags: [Agency Scholarships]
+      summary: Update scholarship
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/scholarshipId"
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: Scholarship updated. }
+    delete:
+      tags: [Agency Scholarships]
+      summary: Deactivate scholarship
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/scholarshipId"
+      responses:
+        "200": { description: Scholarship deactivated. }
+  /api/v1/agency/scholarships/agency/{agencyId}:
+    get:
+      tags: [Agency Scholarships]
+      summary: List scholarships visible to students for an agency
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/agencyId"
+      responses:
+        "200": { description: Scholarship list. }
+  /api/v1/agency/scholarships/landing/scholarships:
+    get:
+      tags: [Agency Scholarships]
+      summary: Public landing-page scholarship list
+      responses:
+        "200": { description: Public scholarship list. }
+  /api/v1/agency/scholarships/query/search:
+    get:
+      tags: [Agency Scholarships]
+      summary: Search scholarships
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching scholarships. }
+  /api/v1/agency/scholarships/dashboard/scholarships:
+    get:
+      tags: [Agency Scholarships]
+      summary: Get scholarship dashboard metrics
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Scholarship dashboard. }
+
+  /api/v1/agency/profile/employee/agents:
+    post:
+      tags: [Agency Employees]
+      summary: Create an agency agent employee
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/AgentCreate"
+      responses:
+        "201": { description: Agent created. }
+    get:
+      tags: [Agency Employees]
+      summary: List agency agents
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Agent list. }
+  /api/v1/agency/profile/employee/agents/{agentId}/agents:
+    get:
+      tags: [Agency Employees]
+      summary: Get agency agent by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/agentId"
+      responses:
+        "200": { description: Agent details. }
+    patch:
+      tags: [Agency Employees]
+      summary: Update agency agent
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/agentId"
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: Agent updated. }
+    delete:
+      tags: [Agency Employees]
+      summary: Deactivate agency agent
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/agentId"
+      responses:
+        "200": { description: Agent deactivated. }
+  /api/v1/agency/profile/role/agents:
+    post:
+      tags: [Agency Employees]
+      summary: Create an agency role
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/Role"
+      responses:
+        "201": { description: Role created. }
+    get:
+      tags: [Agency Employees]
+      summary: List agency roles
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Role list. }
+  /api/v1/agency/profile/role/agents/{roleId}:
+    patch:
+      tags: [Agency Employees]
+      summary: Update an agency role
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/roleId"
+      requestBody:
+        $ref: "#/components/requestBodies/AnyObject"
+      responses:
+        "200": { description: Role updated. }
+    delete:
+      tags: [Agency Employees]
+      summary: Deactivate an agency role
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/roleId"
+      responses:
+        "200": { description: Role deactivated. }
+  /api/v1/agency/profile/role/search:
+    get:
+      tags: [Agency Employees]
+      summary: Search roles by name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/name"
+      responses:
+        "200": { description: Matching roles. }
+  /api/v1/agency/profile/employee/agents/search:
+    get:
+      tags: [Agency Employees]
+      summary: Search agency employees
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/q"
+      responses:
+        "200": { description: Matching employees. }
+  /api/v1/agency/profile/employee/admission-officers:
+    get:
+      tags: [Agency Employees]
+      summary: List admission officers
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Admission officer list. }
+  /api/v1/agency/profile/employee/mentors:
+    post:
+      tags: [Agency Employees]
+      summary: Create a mentor employee
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/MentorCreate"
+      responses:
+        "201": { description: Mentor created. }
+  /api/v1/agency/mentors:
+    get:
+      tags: [Agency Employees]
+      summary: List agency mentors
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Mentor list. }
+  /api/v1/agency/mentors/{mentorId}:
+    get:
+      tags: [Agency Employees]
+      summary: Get agency mentor by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/mentorId"
+      responses:
+        "200": { description: Mentor details. }
+    delete:
+      tags: [Agency Employees]
+      summary: Deactivate agency mentor
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/mentorId"
+      responses:
+        "200": { description: Mentor deactivated. }
+  /api/v1/agency/mentors/search/query:
+    get:
+      tags: [Agency Employees]
+      summary: Search agency mentors by name
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/name"
+      responses:
+        "200": { description: Matching mentors. }
+  /api/v1/agency/mentors/dashboard/stats:
+    get:
+      tags: [Agency Employees]
+      summary: Get agency mentor dashboard metrics
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Mentor dashboard. }
+  /api/v1/agency/documents/{studentId}:
+    get:
+      tags: [Agency]
+      summary: Get documents for a student
+      parameters:
+        - $ref: "#/components/parameters/studentId"
+      responses:
+        "200": { description: Student documents. }
+
+  /api/v1/agency/students/{studentId}/assignment/auto-trigger:
+    post:
+      tags: [Internal Automation]
+      summary: Trigger auto-assignment workflow for a student
+      parameters:
+        - $ref: "#/components/parameters/studentId"
+      requestBody:
+        $ref: "#/components/requestBodies/AutoAssignmentTrigger"
+      responses:
+        "200": { description: Workflow triggered. }
+  /api/v1/agency/internal/assignment/student/{studentId}:
+    get:
+      tags: [Internal Automation]
+      summary: Get student context for assignment automation
+      security: [{ internalToken: [] }]
+      parameters:
+        - $ref: "#/components/parameters/studentId"
+      responses:
+        "200": { description: Student assignment context. }
+  /api/v1/agency/internal/assignment/candidates:
+    get:
+      tags: [Internal Automation]
+      summary: Get candidate agents for assignment automation
+      security: [{ internalToken: [] }]
+      parameters:
+        - $ref: "#/components/parameters/agencyIdQuery"
+        - name: role
+          in: query
+          schema: { type: string }
+      responses:
+        "200": { description: Candidate agents. }
+  /api/v1/agency/internal/assignment/assign:
+    post:
+      tags: [Internal Automation]
+      summary: Save an assignment selected by automation
+      security: [{ internalToken: [] }]
+      requestBody:
+        $ref: "#/components/requestBodies/AutoAssignmentSave"
+      responses:
+        "200": { description: Assignment saved. }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    internalToken:
+      type: apiKey
+      in: header
+      name: x-internal-token
+  parameters:
+    id: { name: id, in: path, required: true, schema: { type: string } }
+    agencyId: { name: agencyId, in: path, required: true, schema: { type: string } }
+    agencyIdQuery: { name: agencyId, in: query, schema: { type: string } }
+    agentId: { name: agentId, in: path, required: true, schema: { type: string } }
+    appointmentId: { name: appointmentId, in: path, required: true, schema: { type: string } }
+    checklistTargetId:
+      name: checklistTargetId
+      in: path
+      required: true
+      description: Student ID for POST/GET checklist operations; studentRequiredDocumentId for DELETE.
+      schema: { type: string }
+    courseId: { name: courseId, in: path, required: true, schema: { type: string } }
+    eventId: { name: eventId, in: path, required: true, schema: { type: string } }
+    mentorId: { name: mentorId, in: path, required: true, schema: { type: string } }
+    roleId: { name: roleId, in: path, required: true, schema: { type: string } }
+    scholarshipId: { name: scholarshipId, in: path, required: true, schema: { type: string } }
+    seatId: { name: seatId, in: path, required: true, schema: { type: string } }
+    studentId: { name: studentId, in: path, required: true, schema: { type: string } }
+    studentRequiredDocumentId: { name: studentRequiredDocumentId, in: path, required: true, schema: { type: string } }
+    ticketId: { name: ticketId, in: path, required: true, schema: { type: string } }
+    universityId: { name: universityId, in: path, required: true, schema: { type: string } }
+    q: { name: q, in: query, schema: { type: string } }
+    name: { name: name, in: query, schema: { type: string } }
+    stage: { name: stage, in: query, schema: { type: string } }
+    cursorCreatedAt: { name: cursorCreatedAt, in: query, schema: { type: string, format: date-time } }
+    cursorId: { name: cursorId, in: query, schema: { type: string } }
+    limit: { name: limit, in: query, schema: { type: integer, default: 10 } }
+  requestBodies:
+    AnyObject:
+      required: false
+      content:
+        application/json:
+          schema: { type: object, additionalProperties: true }
+    Email:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [email]
+            properties:
+              email: { type: string, format: email }
+    EmailOtp:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [email, otp]
+            properties:
+              email: { type: string, format: email }
+              otp: { type: string, example: "1234" }
+    Login:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [email, password]
+            properties:
+              email: { type: string, format: email }
+              password: { type: string, format: password }
+    NewPassword:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [resetToken, newPassword]
+            properties:
+              resetToken: { type: string }
+              newPassword: { type: string, format: password }
+    GoogleAuth:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [id_token]
+            properties:
+              id_token: { type: string }
+    Chat:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [message]
+            properties:
+              message: { type: string }
+              mode: { type: string }
+    StudentSignup:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name, email, password]
+            properties:
+              name: { type: string }
+              phone: { type: string }
+              email: { type: string, format: email }
+              password: { type: string, format: password }
+    AgencySignup:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name, organizationName, email, password]
+            properties:
+              name: { type: string }
+              phone: { type: string }
+              organizationName: { type: string }
+              email: { type: string, format: email }
+              password: { type: string, format: password }
+    AdminCreate:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name, email, phone]
+            properties:
+              name: { type: string }
+              email: { type: string, format: email }
+              phone: { type: string }
+    AgencySelection:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [agencyId]
+            properties:
+              agencyId: { type: string }
+    PushToken:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [pushToken]
+            properties:
+              pushToken: { type: string }
+    TestNotification:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              studentId: { type: string }
+              triggerId: { type: string }
+              title: { type: string }
+              body: { type: string }
+    SasRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [mimeType, size]
+            properties:
+              mimeType: { type: string, example: image/png }
+              size: { type: integer, description: File size in bytes. }
+    BlobConfirm:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              blobName: { type: string }
+              imageType: { type: string }
+    StudentUploadConfirm:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              blobName: { type: string }
+              imageType: { type: string }
+              documentId: { type: string }
+              requiredDocumentId: { type: string }
+    AgentUploadConfirm:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+            properties:
+              blobName: { type: string }
+              imageType: { type: string }
+    AgencyUploadConfirm:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              blobName: { type: string }
+              universityId: { type: string }
+              eventId: { type: string }
+              imageType: { type: string }
+    EventRegistration:
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              seatIds:
+                type: array
+                items: { type: string }
+    Appointment:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [studentId, time, date]
+            properties:
+              studentId: { type: string }
+              time: { type: string }
+              date: { type: string, format: date }
+              meeting: { type: string }
+              purpose: { type: string }
+    RequiredDocument:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name, stage]
+            properties:
+              name: { type: string }
+              description: { type: string }
+              stage: { type: string }
+    RequiredDocumentUpdate:
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name: { type: string }
+              description: { type: string }
+    ChecklistCreate:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [requiredDocumentIds]
+            properties:
+              requiredDocumentIds:
+                type: array
+                items: { type: string }
+    DocumentReview:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [status]
+            properties:
+              status: { type: string }
+              reviewComment: { type: string }
+    FraudResult:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+            properties:
+              fraudStatus: { type: string }
+              confidence: { type: number }
+              reason: { type: string }
+    University:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+            properties:
+              name: { type: string }
+              country: { type: string }
+              city: { type: string }
+              description: { type: string }
+    Course:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+            properties:
+              name: { type: string }
+              duration: { type: string }
+              tuitionFee: { type: number }
+              description: { type: string }
+    Event:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+            properties:
+              name: { type: string }
+              description: { type: string }
+              date: { type: string, format: date }
+              location: { type: string }
+    TicketType:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name, price]
+            properties:
+              name: { type: string }
+              description: { type: string }
+              price: { type: number }
+    EventSeats:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [seats]
+            properties:
+              seats:
+                type: array
+                items: { type: object, additionalProperties: true }
+    SeatUpdate:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ticketTypeId]
+            properties:
+              ticketTypeId: { type: string }
+    Scholarship:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+            properties:
+              name: { type: string }
+              description: { type: string }
+              amount: { type: number }
+              eligibility: { type: string }
+    AgentCreate:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name, email, phone, systemRole]
+            properties:
+              name: { type: string }
+              email: { type: string, format: email }
+              phone: { type: string }
+              systemRole: { type: string }
+              roleId: { type: string }
+    MentorCreate:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name, email, phone]
+            properties:
+              name: { type: string }
+              email: { type: string, format: email }
+              phone: { type: string }
+    Role:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name, permissions]
+            properties:
+              name: { type: string }
+              permissions:
+                type: array
+                items: { type: string }
+    AgentAssignment:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [agentId]
+            properties:
+              agentId: { type: string }
+    AutoAssignmentTrigger:
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              role: { type: string }
+    AutoAssignmentSave:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [studentId, agentId, role]
+            properties:
+              studentId: { type: string }
+              agentId: { type: string }
+              role: { type: string }
+              reason: { type: string }

@@ -7,4 +7,6 @@ router.post('/google-signin-agency', authController.handleWebAuth);
 
 router.post('/google-signin-student', authController.handleMobileAuth);
 
+router.post('/google-signin-agent', authController.handleAgentAuth);
+
 export default router;

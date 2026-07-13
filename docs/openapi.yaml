@@ -53,6 +53,16 @@ paths:
       responses:
         "200": { description: Signed in successfully. }
 
+  /google-signin-agent:
+    post:
+      tags: [OAuth]
+      summary: Sign in an existing agent with Google ID token
+      requestBody:
+        $ref: "#/components/requestBodies/GoogleAuth"
+      responses:
+        "200": { description: Signed in successfully. }
+        "404": { description: Agent not found for this email. }
+
   /api/v1/openai/chatbot:
     post:
       tags: [Chat]

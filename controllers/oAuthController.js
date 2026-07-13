@@ -1,5 +1,6 @@
 import Student from "../models/student.js";
 import Agency from "../models/agency.js";
+import Agent from "../models/agent.js";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -107,6 +108,88 @@ export const authController = {
       console.error("Mobile auth error:", error);
 
       if (error.message.includes("Token used too late")) {
+        return res.status(401).json({
+          error: "Token expired",
+        });
+      }
+
+      return res.status(500).json({
+        error: "Authentication failed",
+      });
+    }
+  },
+
+  handleAgentAuth: async (req, res) => {
+    try {
+      const { id_token } = req.body;
+
+      if (!id_token) {
+        return res.status(400).json({
+          error: "Missing id_token",
+        });
+      }
+
+      const ticket = await client.verifyIdToken({
+        idToken: id_token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+
+      const payload = ticket.getPayload();
+
+      if (!payload) {
+        return res.status(401).json({
+          error: "Invalid token",
+        });
+      }
+
+      let user = await Agent.findOne({
+        $or: [{ googleId: payload.sub }, { email: payload.email }],
+      }).select("agency systemRole roleId isVerified isActive name email googleId");
+
+      if (!user) {
+        return res.status(404).json({
+          error: "Agent not found. Please ask your agency to add you first.",
+        });
+      }
+
+      if (!user.isActive) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      if (!user.googleId) {
+        user.googleId = payload.sub;
+        await user.save();
+      }
+
+      const jwtToken = jwt.sign(
+        {
+          id: user._id.toString(),
+          agencyId: user.agency.toString(),
+          email: user.email,
+          isVerified: user.isVerified,
+          actor: "Agent",
+          systemRole: user.systemRole,
+        },
+        process.env.JWT_SECRET,
+      );
+
+      return res.status(200).json({
+        message: "Authentication successful",
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          systemRole: user.systemRole,
+          roleId: user.roleId,
+          isVerified: user.isVerified,
+          isActive: user.isActive,
+        },
+        accessToken: jwtToken,
+      });
+    } catch (error) {
+      console.error("Agent Google auth error:", error);
+
+      if (error.message?.includes("Token used too late")) {
         return res.status(401).json({
           error: "Token expired",
         });

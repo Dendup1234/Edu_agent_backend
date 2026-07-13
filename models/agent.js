@@ -25,6 +25,10 @@ const agentSchema = new Schema(
       type: String,
     },
 
+    googleId: {
+      type: String,
+    },
+
     isVerified: {
       type: Boolean,
       default: false,

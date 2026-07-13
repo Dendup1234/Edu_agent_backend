@@ -20,30 +20,39 @@ import chatRoutes from "./routes/chat.js";
 import { initCollection } from "./rag/vector.js";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Config must run before using environment variables
+dotenv.config();
 
 // activating the vector DB
 initCollection();
-// Config
-dotenv.config();
 
-// rate limitings
-
-//const limiter = rateLimit({
-//windowMs: 15 * 60 * 1000, // 15 minutes
-//max: 100,
-//});
-// Express app command
 const app = express();
-const swaggerDocument = YAML.load("./docs/openapi.yaml");
-// rate limiting
-//app.use(limiter);
-//helmet config
-app.use(helmet());
 
+// Safe Swagger file loading
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const openApiPath = path.join(__dirname, "docs", "openapi.yaml");
+
+if (fs.existsSync(openApiPath)) {
+  const swaggerDocument = YAML.load(openApiPath);
+
+  app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocument)
+  );
+} else {
+  console.warn("Swagger file not found:", openApiPath);
+}
+
+app.use(helmet());
 app.use(express.json());
 app.use(cors());
 
-// REST routes git pushed
 app.use("/api/v1/agency", agencyRoute);
 app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1/agent", agentRoute);
@@ -51,28 +60,24 @@ app.use("/api/v1/mentor", mentorRoute);
 app.use(oAuthRoute);
 app.use("/api/v1/openai", chatRoutes);
 
-// api docs routes
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
-// Server setups
 const PORT = process.env.PORT || 8000;
 
-// Create HTTP server from Express
 const server = http.createServer(app);
 
-// Initialize Socket.IO
-const io = initializeWebSocket(server);
+// Socket.IO and server.listen only outside Vercel
+if (!process.env.VERCEL) {
+  initializeWebSocket(server);
+}
 
-// health check route
 app.use(healthRoute);
-
 app.use("/api/v1/students", studentRoute);
 
 await connectDB();
 
-// seed the super admin after the db connect
-//await seedSuperAdmin();
-// Start server
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  server.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
